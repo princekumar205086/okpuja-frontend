@@ -3,13 +3,32 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* OKPUJA Gradient Themes */
+  --gradient-devotional-glow-from: #D62828;
+  --gradient-devotional-glow-to: #F77F00;
+
+  --gradient-divine-flame-from: #F94144;
+  --gradient-divine-flame-to: #FFB703;
+
+  --gradient-puja-serenity-from: #E63946;
+  --gradient-puja-serenity-to: #F4A261;
+
+  --gradient-astro-night-from: #F77F00;
+  --gradient-astro-night-to: #6A040F;
 }
 
-@theme inline {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* You can use these as CSS custom props in Tailwind components */
+  --gradient-devotional-glow: linear-gradient(to right, var(--gradient-devotional-glow-from), var(--gradient-devotional-glow-to));
+  --gradient-divine-flame: linear-gradient(to right, var(--gradient-divine-flame-from), var(--gradient-divine-flame-to));
+  --gradient-puja-serenity: linear-gradient(to right, var(--gradient-puja-serenity-from), var(--gradient-puja-serenity-to));
+  --gradient-astro-night: linear-gradient(to right, var(--gradient-astro-night-from), var(--gradient-astro-night-to));
 }
 
 @media (prefers-color-scheme: dark) {
