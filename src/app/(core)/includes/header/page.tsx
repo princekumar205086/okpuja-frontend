@@ -43,10 +43,10 @@ const Header = () => {
     }
 
     // Close menu when route changes
-    const closeMenuOnRouteChange = () => {
-      setIsMenuOpen(false);
-      setShowDropdown(false);
-    };
+    // const closeMenuOnRouteChange = () => {
+    //   setIsMenuOpen(false);
+    //   setShowDropdown(false);
+    // };
 
     // Event listeners
     window.addEventListener("scroll", handleScroll);
