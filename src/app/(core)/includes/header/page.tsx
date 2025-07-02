@@ -23,7 +23,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
-  const cartItems: Number[] = [];
+  const cartItems: number[] = [];
   const cartCount = cartItems.length;
   const router = useRouter();
   const pathname = usePathname();

@@ -3,7 +3,6 @@ import React from "react";
 import Image from "next/image";
 import {
   FaFacebook,
-  FaTwitter,
   FaInstagram,
   FaLinkedin,
   FaWhatsapp,
@@ -15,7 +14,7 @@ import {
   FaUniversity,
 } from "react-icons/fa";
 import Link from "next/link";
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 
 const Footer = () => {
   // Sample data for Puja list
