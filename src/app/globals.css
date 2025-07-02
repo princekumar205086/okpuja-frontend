@@ -1,45 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-
-  /* OKPUJA Gradient Themes */
-  --gradient-devotional-glow-from: #D62828;
-  --gradient-devotional-glow-to: #F77F00;
-
-  --gradient-divine-flame-from: #F94144;
-  --gradient-divine-flame-to: #FFB703;
-
-  --gradient-puja-serenity-from: #E63946;
-  --gradient-puja-serenity-to: #F4A261;
-
-  --gradient-astro-night-from: #F77F00;
-  --gradient-astro-night-to: #6A040F;
-}
-
-:root {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  /* You can use these as CSS custom props in Tailwind components */
-  --gradient-devotional-glow: linear-gradient(to right, var(--gradient-devotional-glow-from), var(--gradient-devotional-glow-to));
-  --gradient-divine-flame: linear-gradient(to right, var(--gradient-divine-flame-from), var(--gradient-divine-flame-to));
-  --gradient-puja-serenity: linear-gradient(to right, var(--gradient-puja-serenity-from), var(--gradient-puja-serenity-to));
-  --gradient-astro-night: linear-gradient(to right, var(--gradient-astro-night-from), var(--gradient-astro-night-to));
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+.bg-cream{
+  background-color: #F8EFBA;
+}
+.bg-redOrange{
+  background-color: #ff4500;
+}
+/* .content-wrapper {
+  padding-top: 85px;
+} */
+.bg-trans{
+  background-color: #000000ee;
+}
+
+.text-orangeRed {
+  color: #ff4500 !important; 
+}
+
+.text-cream{
+  color:#F8EFBA;
 }
