@@ -1,0 +1,96 @@
+.featurespuja-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border: 1px solid rgba(0,0,0,.125);
+  border-radius: .25rem;
+  height: 360px;
+  width: 300px;
+  margin: 5px !important;
+}
+
+.featurespuja-card-img-top {
+  width: 100%;
+  border-top-left-radius: calc(.25rem - 1px);
+  border-top-right-radius: calc(.25rem - 1px);
+  height: 300px;
+}
+
+.featurespuja-card-body {
+  flex: 1 1 auto;
+  min-height: 1px;
+  padding: 1.25rem;
+}
+
+.featurespuja-card-title {
+  margin-bottom: .75rem;
+}
+
+.featurespuja-card-text:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1200px) {
+  .featurespuja-card {
+    width: 250px;
+    height: 310px;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 992px) {
+  .featurespuja-card {
+    width: 200px;
+    height: 260px;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .featurespuja-card {
+    width: 150px;
+    height: 210px;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 576px) {
+  .featurespuja-card {
+    width: 100%;
+    height: auto;
+    margin: 5px;
+  }
+}
+
+h2 {
+  font-size: 3.5em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  color: white;
+}
+
+.card-btn {
+  display: block;
+  width: 350px;
+  height: 50px;
+  margin: 20px auto;
+  background-color: #F8EFBA;
+  text-align: center;
+  border-radius: 30px;
+  color: #ff7f50;
+  font-weight: bold;
+  line-height: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease 0s;
+}
+
+.card-btn:hover {
+  background-color: #ff7f50;
+  color: #fff;
+  text-decoration: none;
+}

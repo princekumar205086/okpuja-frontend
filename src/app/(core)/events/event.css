@@ -1,0 +1,21 @@
+.slider-item {
+  margin: 0 10px; /* Adjust the horizontal margin as needed */
+}
+
+.slider-item .max-w-sm {
+  height: 100%; /* Ensure the height covers the entire slider item */
+}
+.slick-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px; /* Adjust the font size as needed */
+}
+
+.next-arrow {
+  right: 0;
+}
+
+.prev-arrow {
+  left: 0;
+}

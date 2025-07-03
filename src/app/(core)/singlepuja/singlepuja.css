@@ -1,0 +1,9 @@
+/* adding image background with 100 vh height 100% width and attached */
+.bg-single-service{
+    background-image: url('https://www.pexels.com/photo/white-and-black-abstract-painting-3408749/');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    width: 100%;
+    padding-top: 80px;
+}
