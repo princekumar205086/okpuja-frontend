@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./(core)/blog/blog.css";
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -91,4 +92,66 @@ html {
 
 .scrollbar-hide::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 480px) {
+  .xs\:hidden {
+    display: none;
+  }
+  
+  .xs\:inline {
+    display: inline;
+  }
+  
+  .xs\:block {
+    display: block;
+  }
+  
+  .xs\:flex {
+    display: flex;
+  }
+  
+  .xs\:grid {
+    display: grid;
+  }
+}
+
+/* Blog specific responsive improvements */
+.blog-card-image {
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.blog-hero-pattern {
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+}
+
+/* Mobile touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  .hover\:scale-105:hover {
+    transform: none;
+  }
+  
+  .group:hover .group-hover\:scale-110 {
+    transform: none;
+  }
+  
+  /* Increase touch targets for mobile */
+  button, a {
+    min-height: 44px;
+  }
+}
+
+/* Better mobile spacing */
+@media (max-width: 640px) {
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .mobile-spacing > * + * {
+    margin-top: 1rem;
+  }
 }
