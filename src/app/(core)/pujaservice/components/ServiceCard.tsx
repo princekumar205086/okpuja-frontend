@@ -55,12 +55,35 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
               {service.title}
             </h3>
             
-            <p className="text-gray-600 text-sm leading-relaxed flex-1 line-clamp-3">
+            <p className="text-gray-600 text-sm leading-relaxed flex-1 line-clamp-3 mb-4">
               {service.description}
             </p>
             
+            {/* Available Packages */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500 font-medium">Available Packages:</span>
+                <span className="text-orange-600 font-semibold">{service.packages.length} options</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {service.packages.slice(0, 2).map((pkg, idx) => (
+                  <span 
+                    key={idx}
+                    className="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md font-medium"
+                  >
+                    ₹{pkg.price}
+                  </span>
+                ))}
+                {service.packages.length > 2 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                    +{service.packages.length - 2} more
+                  </span>
+                )}
+              </div>
+            </div>
+            
             {/* Action indicator */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="pt-4 border-t border-gray-100">
               <motion.div 
                 className="flex items-center justify-between text-orange-600 font-medium"
                 whileHover={{ x: 5 }}
