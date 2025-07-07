@@ -23,6 +23,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const cartItems: number[] = [];
   const cartCount = cartItems.length;
   const router = useRouter();
@@ -30,6 +31,9 @@ const Header = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Set mounted to true after component mounts
+    setMounted(true);
+    
     // Handle scrolling
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -37,10 +41,8 @@ const Header = () => {
     };
 
     // Get auth token
-    if (typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("token");
-      setToken(storedToken);
-    }
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
 
     // Close menu when route changes
     // const closeMenuOnRouteChange = () => {
@@ -150,48 +152,54 @@ const Header = () => {
               ))}
 
               {/* Dashboard/Login Link */}
-              {token ? (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={toggleDropdown}
-                    className="flex items-center px-3 py-1 rounded-md text-orangeRed hover:bg-orange-100 transition-all duration-200"
-                  >
-                    Dashboard <FaChevronDown className="ml-1 text-xs" />
-                  </button>
-
-                  {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-cream rounded-md shadow-lg py-1 z-50 border border-orange-200">
-                      <Link href="/dashboard">
-                        <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
-                          My Dashboard
-                        </span>
-                      </Link>
-                      <Link href="/profile">
-                        <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
-                          Profile Settings
-                        </span>
-                      </Link>
-                      <Link href="/mybooking">
-                        <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
-                          My Bookings
-                        </span>
-                      </Link>
-                      <hr className="my-1 border-orange-200" />
+              {mounted ? (
+                <>
+                  {token ? (
+                    <div className="relative" ref={dropdownRef}>
                       <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        onClick={toggleDropdown}
+                        className="flex items-center px-3 py-1 rounded-md text-orangeRed hover:bg-orange-100 transition-all duration-200"
                       >
-                        Logout
+                        Dashboard <FaChevronDown className="ml-1 text-xs" />
                       </button>
+
+                      {showDropdown && (
+                        <div className="absolute right-0 mt-2 w-48 bg-cream rounded-md shadow-lg py-1 z-50 border border-orange-200">
+                          <Link href="/dashboard">
+                            <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
+                              My Dashboard
+                            </span>
+                          </Link>
+                          <Link href="/profile">
+                            <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
+                              Profile Settings
+                            </span>
+                          </Link>
+                          <Link href="/mybooking">
+                            <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
+                              My Bookings
+                            </span>
+                          </Link>
+                          <hr className="my-1 border-orange-200" />
+                          <button
+                            onClick={handleLogout}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      )}
                     </div>
+                  ) : (
+                    <Link href="/register">
+                      <span className="px-4 py-1.5 bg-redOrange text-cream rounded-full hover:bg-orange-600 transition-colors duration-300 flex items-center">
+                        SignUp/SignIn
+                      </span>
+                    </Link>
                   )}
-                </div>
+                </>
               ) : (
-                <Link href="/register">
-                  <span className="px-4 py-1.5 bg-redOrange text-cream rounded-full hover:bg-orange-600 transition-colors duration-300 flex items-center">
-                    SignUp/SignIn
-                  </span>
-                </Link>
+                <div className="px-4 py-1.5 w-24 h-8 bg-gray-200 rounded-full animate-pulse"></div>
               )}
             </div>
 
@@ -219,20 +227,26 @@ const Header = () => {
                 </div>
               </Link>
 
-              {token ? (
-                <button
-                  onClick={handleLogout}
-                  aria-label="Logout"
-                  className="p-1.5 lg:p-2 bg-red-600 text-cream rounded-full hover:bg-red-700 transition-all duration-300 transform hover:scale-110"
-                >
-                  <FaSignOutAlt className="text-lg lg:text-xl" />
-                </button>
+              {mounted ? (
+                <>
+                  {token ? (
+                    <button
+                      onClick={handleLogout}
+                      aria-label="Logout"
+                      className="p-1.5 lg:p-2 bg-red-600 text-cream rounded-full hover:bg-red-700 transition-all duration-300 transform hover:scale-110"
+                    >
+                      <FaSignOutAlt className="text-lg lg:text-xl" />
+                    </button>
+                  ) : (
+                    <Link href="/login" aria-label="Login to account">
+                      <div className="p-1.5 lg:p-2 bg-redOrange text-cream rounded-full hover:bg-orange-600 transition-all duration-300 transform hover:scale-110">
+                        <FaUserCircle className="text-lg lg:text-xl" />
+                      </div>
+                    </Link>
+                  )}
+                </>
               ) : (
-                <Link href="/login" aria-label="Login to account">
-                  <div className="p-1.5 lg:p-2 bg-redOrange text-cream rounded-full hover:bg-orange-600 transition-all duration-300 transform hover:scale-110">
-                    <FaUserCircle className="text-lg lg:text-xl" />
-                  </div>
-                </Link>
+                <div className="p-1.5 lg:p-2 w-8 h-8 lg:w-10 lg:h-10 bg-gray-200 rounded-full animate-pulse"></div>
               )}
             </div>
 
@@ -315,31 +329,37 @@ const Header = () => {
             ))}
 
             <div className="pt-4 border-t border-orange-200 mt-4">
-              {token ? (
+              {mounted ? (
                 <>
-                  <Link href="/dashboard" onClick={toggleMenu}>
-                    <div className="p-3 rounded-lg flex items-center text-orangeRed hover:bg-orange-100">
-                      <FaUserCircle className="mr-2" />
-                      My Dashboard
-                    </div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      toggleMenu();
-                    }}
-                    className="w-full mt-2 p-3 rounded-lg flex items-center text-red-600 hover:bg-red-50"
-                  >
-                    <FaSignOutAlt className="mr-2" />
-                    Logout
-                  </button>
+                  {token ? (
+                    <>
+                      <Link href="/dashboard" onClick={toggleMenu}>
+                        <div className="p-3 rounded-lg flex items-center text-orangeRed hover:bg-orange-100">
+                          <FaUserCircle className="mr-2" />
+                          My Dashboard
+                        </div>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          toggleMenu();
+                        }}
+                        className="w-full mt-2 p-3 rounded-lg flex items-center text-red-600 hover:bg-red-50"
+                      >
+                        <FaSignOutAlt className="mr-2" />
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <Link href="/register" onClick={toggleMenu}>
+                      <div className="p-3 rounded-lg flex items-center justify-center bg-redOrange text-cream hover:bg-orange-600">
+                        SignUp/SignIn
+                      </div>
+                    </Link>
+                  )}
                 </>
               ) : (
-                <Link href="/register" onClick={toggleMenu}>
-                  <div className="p-3 rounded-lg flex items-center justify-center bg-redOrange text-cream hover:bg-orange-600">
-                    SignUp/SignIn
-                  </div>
-                </Link>
+                <div className="p-3 w-full bg-gray-200 rounded-lg animate-pulse h-12"></div>
               )}
             </div>
           </div>
@@ -366,7 +386,7 @@ const Header = () => {
                   )}
                 </div>
               </Link>
-              {!token && (
+              {mounted && !token && (
                 <Link href="/login" aria-label="Login">
                   <div className="p-2 bg-redOrange text-cream rounded-full hover:bg-orange-600">
                     <FaUserCircle className="text-lg" />
