@@ -98,7 +98,7 @@ const UserDashboard = () => {
           Welcome back, {user?.full_name || 'User'}! 🙏
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Here's your spiritual journey overview
+          Here&apos;s your spiritual journey overview
         </Typography>
       </Box>
 
@@ -221,7 +221,7 @@ const UserDashboard = () => {
               Spiritual Progress
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              You've completed 8 out of 12 planned pujas this year
+              You&apos;ve completed 8 out of 12 planned pujas this year
             </Typography>
             <LinearProgress
               variant="determinate"
