@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/app/stores/authStore';
-import { CircularProgress, Box } from '@mui/material';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -22,14 +21,20 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
 
   useEffect(() => {
     if (!loading) {
-      if (!user) {
-        router.push('/auth/login');
+      if (!user || user.account_status !== 'ACTIVE') {
+        router.push('/login');
         return;
       }
 
       if (requiredRole && user.role !== requiredRole) {
         // Redirect to appropriate dashboard based on user role
-        router.push(`/${user.role}/dashboard`);
+        if (user.role === 'ADMIN') {
+          router.push('/admin/dashboard');
+        } else if (user.role === 'EMPLOYEE') {
+          router.push('/employee/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
         return;
       }
     }
@@ -37,20 +42,16 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <p className="text-gray-600 text-sm">Loading...</p>
+        </div>
+      </div>
     );
   }
 
-  if (!user || (requiredRole && user.role !== requiredRole)) {
+  if (!user || user.account_status !== 'ACTIVE' || (requiredRole && user.role !== requiredRole)) {
     return null;
   }
 

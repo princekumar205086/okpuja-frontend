@@ -73,7 +73,7 @@ export default function AppBar({
   const handleLogout = async () => {
     handleMenuClose();
     await logout();
-    router.push("/auth/login");
+    router.push("/login");
   };
 
   const handleProfileNavigation = () => {

@@ -111,14 +111,14 @@ const UserDashboard = () => {
               className="h-full bg-gradient-to-br from-orange-100/50 to-orange-200/30 border border-orange-300/40 rounded-lg"
             >
               <div className="p-6">
-            <div className="flex items-center mb-4">
-              <span className="">{stat.icon}</span>
-              <div className="ml-4">
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <div className="text-sm text-gray-500">{stat.title}</div>
-              </div>
-            </div>
-            <div className="text-xs text-orange-600 font-medium">{stat.change}</div>
+                <div className="flex items-center mb-4">
+                  <span className="">{stat.icon}</span>
+                  <div className="ml-4">
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <div className="text-sm text-gray-500">{stat.title}</div>
+                  </div>
+                </div>
+                <div className="text-xs text-orange-600 font-medium">{stat.change}</div>
               </div>
             </div>
           ))}
@@ -131,49 +131,49 @@ const UserDashboard = () => {
           <Card>
             <CardContent>
               <div className="flex justify-between items-center mb-3">
-            <Typography variant="h6" fontWeight="bold">
-              Upcoming Bookings
-            </Typography>
-            <Button variant="outlined" size="small">
-              View All
-            </Button>
+                <Typography variant="h6" fontWeight="bold">
+                  Upcoming Bookings
+                </Typography>
+                <Button variant="outlined" size="small">
+                  View All
+                </Button>
               </div>
               <List>
-            {upcomingBookings.map((booking, index) => (
-              <ListItem
-                key={booking.id}
-                sx={{
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  borderRadius: 2,
-                  mb: 1,
-                  '&:last-child': { mb: 0 },
-                }}
-              >
-                <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: '#ff6b35' }}>
-                <PujaIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={booking.title}
-                  secondary={
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {booking.date}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Priest: {booking.priest}
-                  </Typography>
-                </Box>
-                  }
-                />
-                <Chip
-                  label={booking.status}
-                  color={getStatusColor(booking.status) as any}
-                  size="small"
-                />
-              </ListItem>
-            ))}
+                {upcomingBookings.map((booking, index) => (
+                  <ListItem
+                    key={booking.id}
+                    sx={{
+                      border: '1px solid rgba(0,0,0,0.1)',
+                      borderRadius: 2,
+                      mb: 1,
+                      '&:last-child': { mb: 0 },
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ bgcolor: '#ff6b35' }}>
+                        <PujaIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={booking.title}
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" component="span">
+                            {booking.date}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" component="span">
+                            Priest: {booking.priest}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <Chip
+                      label={booking.status}
+                      color={getStatusColor(booking.status) as any}
+                      size="small"
+                    />
+                  </ListItem>
+                ))}
               </List>
             </CardContent>
           </Card>
@@ -184,60 +184,60 @@ const UserDashboard = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
-            Quick Actions
+                Quick Actions
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Button
-              variant="contained"
-              startIcon={<PujaIcon />}
-              sx={{
-                background: 'linear-gradient(to right, #ff6b35, #f7931e)',
-                '&:hover': {
-                  background: 'linear-gradient(to right, #e55a2e, #df7f1c)',
-                },
-              }}
-              fullWidth
-            >
-              Book a Puja
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<AstrologyIcon />}
-              fullWidth
-            >
-              Astrology Consultation
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<CalendarIcon />}
-              fullWidth
-            >
-              View Calendar
-            </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<PujaIcon />}
+                  sx={{
+                    background: 'linear-gradient(to right, #ff6b35, #f7931e)',
+                    '&:hover': {
+                      background: 'linear-gradient(to right, #e55a2e, #df7f1c)',
+                    },
+                  }}
+                  fullWidth
+                >
+                  Book a Puja
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<AstrologyIcon />}
+                  fullWidth
+                >
+                  Astrology Consultation
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<CalendarIcon />}
+                  fullWidth
+                >
+                  View Calendar
+                </Button>
               </Box>
 
               <Box sx={{ mt: 4 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Spiritual Progress
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              You&apos;ve completed 8 out of 12 planned pujas this year
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={67}
-              sx={{
-                mt: 1,
-                height: 8,
-                borderRadius: 4,
-                '& .MuiLinearProgress-bar': {
-                  background: 'linear-gradient(to right, #ff6b35, #f7931e)',
-                },
-              }}
-            />
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              67% Complete
-            </Typography>
+                <Typography variant="subtitle2" gutterBottom>
+                  Spiritual Progress
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  You&apos;ve completed 8 out of 12 planned pujas this year
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={67}
+                  sx={{
+                    mt: 1,
+                    height: 8,
+                    borderRadius: 4,
+                    '& .MuiLinearProgress-bar': {
+                      background: 'linear-gradient(to right, #ff6b35, #f7931e)',
+                    },
+                  }}
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  67% Complete
+                </Typography>
               </Box>
             </CardContent>
           </Card>

@@ -39,7 +39,7 @@ export default function Sidebar({ open, toggleDrawer, userType }: SidebarProps) 
 
   const handleLogout = async () => {
     await logout()
-    router.push('/auth/login')
+    router.push('/login')
   }
 
   // Generate avatar text based on user role or name
