@@ -18,10 +18,10 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
 
     // Base paths we support
     const pathSegments = pathname.split('/').filter(Boolean);
-    
+
     // Always start with home
     const items = [];
-    
+
     // Add path segments as needed
     if (pathSegments.length >= 2) {
       // Add employee segment
@@ -34,7 +34,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
             href: `/${pathSegments[0]}/${pathSegments[1]}`,
             isCurrent: pathSegments.length === 2
           });
-          
+
           // If there are additional segments (like item details, etc.)
           if (pathSegments.length > 2) {
             const detailLabel = pathSegments[2].charAt(0).toUpperCase() + pathSegments[2].slice(1);
@@ -47,24 +47,24 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
         }
       }
     }
-    
+
     return items;
   };
-  
+
   const breadcrumbItems = generateBreadcrumbItems();
 
   return (
-    // <RequireAuth requiredRole="employee">
+    <RequireAuth requiredRole="employee">
       <PanelLayout>
         {/* Breadcrumb with minimal padding */}
         <Box sx={{ pb: { xs: 0.5, sm: 1 } }}>
           <Breadcrumb items={breadcrumbItems} showHomeIcon={true} />
         </Box>
-        
+
         {/* Content wrapper with minimal top padding */}
-        <Box 
+        <Box
           component="main"
-          sx={{ 
+          sx={{
             pt: { xs: 0.5, sm: 1 },
             pb: { xs: 3, sm: 4 },
           }}
@@ -72,6 +72,6 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
           {children}
         </Box>
       </PanelLayout>
-    // </RequireAuth>
+    </RequireAuth>
   );
 }
