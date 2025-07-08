@@ -54,7 +54,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   const breadcrumbItems = generateBreadcrumbItems();
 
   return (
-    // <RequireAuth requiredRole="user">
+    <RequireAuth requiredRole="user">
       <PanelLayout>
         {/* Breadcrumb with minimal padding */}
         <Box sx={{ pb: { xs: 0.5, sm: 1 } }}>
@@ -72,6 +72,6 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           {children}
         </Box>
       </PanelLayout>
-    // </RequireAuth>
+    </RequireAuth>
   );
 }

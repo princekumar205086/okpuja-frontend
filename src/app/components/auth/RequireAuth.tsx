@@ -33,7 +33,7 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
         } else if (user.role === 'EMPLOYEE') {
           router.push('/employee/dashboard');
         } else {
-          router.push('/dashboard');
+          router.push('/user/dashboard');
         }
         return;
       }

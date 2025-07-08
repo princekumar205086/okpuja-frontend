@@ -17,6 +17,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuthStore } from "@/app/stores/authStore";
+
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,6 +31,9 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get auth store
+  const { user, logout } = useAuthStore();
 
   useEffect(() => {
     // Set mounted to true after component mounts
@@ -71,12 +76,9 @@ const Header = () => {
   };
 
   // Logout function
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("username");
-    toast.success("Successfully logged out");
-    setToken(null);
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Logged out successfully");
     router.push("/login");
   };
 
@@ -165,12 +167,12 @@ const Header = () => {
 
                       {showDropdown && (
                         <div className="absolute right-0 mt-2 w-48 bg-cream rounded-md shadow-lg py-1 z-50 border border-orange-200">
-                          <Link href="/dashboard">
+                          <Link href="user/dashboard">
                             <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
                               My Dashboard
                             </span>
                           </Link>
-                          <Link href="/profile">
+                          <Link href="user/profile">
                             <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
                               Profile Settings
                             </span>
@@ -333,7 +335,7 @@ const Header = () => {
                 <>
                   {token ? (
                     <>
-                      <Link href="/dashboard" onClick={toggleMenu}>
+                      <Link href="user/dashboard" onClick={toggleMenu}>
                         <div className="p-3 rounded-lg flex items-center text-orangeRed hover:bg-orange-100">
                           <FaUserCircle className="mr-2" />
                           My Dashboard

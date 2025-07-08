@@ -58,7 +58,7 @@ export default function LoginForm() {
       } else if (user.role === "EMPLOYEE") {
         router.push("/employee/dashboard");
       } else {
-        router.push("/dashboard");
+        router.push("/user/dashboard");
       }
     }
   }, [user, router]);
