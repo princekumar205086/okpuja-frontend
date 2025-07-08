@@ -84,7 +84,7 @@ export const getSidebarItems = (userType: "admin" | "employee" | "user") => {
     case "user":
       return userItems;
     default:
-      return [];
+      return userItems; // Default to user items for safety
   }
 };
 

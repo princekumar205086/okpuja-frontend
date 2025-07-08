@@ -54,16 +54,24 @@ export default function SidebarItem({ item, open, onClick }: SidebarItemProps) {
     color: mode === 'dark' ? 'rgba(255,255,255,0.85)' : undefined,
     "&:hover": {
       background: isActive
-        ? "linear-gradient(to right, #4338ca, #0284c7)"
+        ? mode === 'dark'
+          ? "linear-gradient(to right, #fbbf24, #f59e0b)"
+          : "linear-gradient(to right, #fcd34d, #f59e0b)"
         : mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
       transform: "translateY(-1px)",
-      boxShadow: isActive ? "0 4px 8px rgba(79, 70, 229, 0.2)" : "none",
+      boxShadow: isActive 
+        ? mode === 'dark'
+          ? "0 4px 8px rgba(251, 191, 36, 0.3)"
+          : "0 4px 8px rgba(252, 211, 77, 0.4)"
+        : "none",
     },
     ...(isActive && {
-      background: "linear-gradient(to right, #4f46e5, #0ea5e9)",
-      color: "white",
+      background: mode === 'dark'
+        ? "linear-gradient(to right, #fbbf24, #f59e0b)"
+        : "linear-gradient(to right, #fcd34d, #f59e0b)",
+      color: mode === 'dark' ? "white" : "#1f2937",
       "& .MuiListItemIcon-root": {
-        color: "white",
+        color: mode === 'dark' ? "white" : "#1f2937",
       },
     }),
     "&:active": {
@@ -81,7 +89,9 @@ export default function SidebarItem({ item, open, onClick }: SidebarItemProps) {
     justifyContent: 'center',
     fontSize: { xs: 22, sm: 20 },
     transition: 'all 0.2s ease',
-    color: isActive ? "white" : mode === 'dark' ? 'rgba(255,255,255,0.7)' : undefined,
+    color: isActive 
+      ? (mode === 'dark' ? "white" : "#1f2937")
+      : mode === 'dark' ? 'rgba(255,255,255,0.7)' : undefined,
   };
 
   // Text styles with responsive adjustments
@@ -93,7 +103,9 @@ export default function SidebarItem({ item, open, onClick }: SidebarItemProps) {
       fontWeight: isActive ? 500 : 400,
       fontSize: { xs: "0.95rem", sm: "0.875rem" },
       whiteSpace: "nowrap",
-      color: isActive ? "white" : mode === 'dark' ? 'rgba(255,255,255,0.85)' : undefined,
+      color: isActive 
+        ? (mode === 'dark' ? "white" : "#1f2937") 
+        : mode === 'dark' ? 'rgba(255,255,255,0.85)' : undefined,
     },
   };
 

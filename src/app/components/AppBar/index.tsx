@@ -78,11 +78,13 @@ export default function AppBar({
 
   const handleProfileNavigation = () => {
     handleMenuClose();
-    router.push(`/${user?.role}/profile`);
+    const userRole = user?.role?.toLowerCase() || 'user';
+    router.push(`/${userRole}/profile`);
   };
 
   const getAppBarContent = () => {
-    switch (user?.role) {
+    const userRole = user?.role?.toLowerCase();
+    switch (userRole) {
       case "admin":
         return {
           title: "OKPUJA Admin",
@@ -142,9 +144,13 @@ export default function AppBar({
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          background: "linear-gradient(to right, #ff6b35, #f7931e)", // OKPUJA brand gradient
-          boxShadow:
-            "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+          background: mode === 'dark' 
+            ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #d97706 50%, #92400e 100%)" // Dark mode: warmer yellow gradient
+            : "linear-gradient(135deg, #fef3c7 0%, #fcd34d 25%, #f59e0b 75%, #f3f4f6 100%)", // Light mode: yellow to off-white
+          boxShadow: mode === 'dark'
+            ? "0 4px 20px rgba(251, 191, 36, 0.3), 0 2px 10px rgba(0, 0, 0, 0.2)"
+            : "0 4px 15px rgba(252, 211, 77, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+          color: mode === 'dark' ? '#ffffff' : '#1f2937',
         }}
       >
         <Toolbar
@@ -152,6 +158,7 @@ export default function AppBar({
             justifyContent: "space-between",
             minHeight: { xs: 56, sm: 64 },
             px: { xs: 1, sm: 2 },
+            gap: { xs: 0.5, sm: 1 },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -159,7 +166,16 @@ export default function AppBar({
               edge="start"
               color="inherit"
               onClick={() => setOpen(!open)}
-              sx={{ mr: { xs: 1, sm: 2 } }}
+              sx={{ 
+                mr: { xs: 1, sm: 2 },
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.1)',
+                },
+                '&:active': {
+                  transform: 'scale(0.95)',
+                }
+              }}
               aria-label="menu"
             >
               <MenuIcon />
@@ -168,9 +184,12 @@ export default function AppBar({
               variant="h6"
               component="div"
               sx={{
-                display: { xs: isMobile ? "none" : "block", sm: "block" },
+                display: { xs: "none", sm: "block" },
                 fontSize: { xs: "1rem", sm: "1.25rem" },
                 fontWeight: 'bold',
+                textShadow: mode === 'dark' 
+                  ? '0 1px 2px rgba(0,0,0,0.3)' 
+                  : '0 1px 2px rgba(255,255,255,0.8)',
               }}
             >
               {title}
@@ -180,12 +199,16 @@ export default function AppBar({
                 variant="h6"
                 component="div"
                 sx={{
+                  display: { xs: "block", sm: "none" },
                   fontSize: "1rem",
                   maxWidth: "120px",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   fontWeight: 'bold',
+                  textShadow: mode === 'dark' 
+                    ? '0 1px 2px rgba(0,0,0,0.3)' 
+                    : '0 1px 2px rgba(255,255,255,0.8)',
                 }}
               >
                 {title}
@@ -243,11 +266,17 @@ export default function AppBar({
             >
               <Avatar
                 sx={{
-                  bgcolor: "rgba(255, 255, 255, 0.2)",
-                  color: "white",
+                  bgcolor: mode === 'dark' 
+                    ? "rgba(0, 0, 0, 0.3)" 
+                    : "rgba(255, 255, 255, 0.4)",
+                  color: mode === 'dark' ? "#fbbf24" : "#1f2937",
+                  border: mode === 'dark' 
+                    ? "2px solid rgba(251, 191, 36, 0.5)" 
+                    : "2px solid rgba(31, 41, 55, 0.2)",
                   width: { xs: 32, sm: 40 },
                   height: { xs: 32, sm: 40 },
                   fontWeight: "bold",
+                  backdropFilter: "blur(10px)",
                 }}
               >
                 {avatarText}
@@ -311,7 +340,8 @@ export default function AppBar({
                   sx={{ cursor: 'pointer' }}
                   onClick={() => {
                     handleNotificationsClose();
-                    router.push(`/${user?.role}/notifications`);
+                    const userRole = user?.role?.toLowerCase() || 'user';
+                    router.push(`/${userRole}/notifications`);
                   }}
                 >
                   View all notifications
@@ -370,10 +400,15 @@ export default function AppBar({
               width: 60,
               height: 60,
               margin: "0 auto 12px",
-              background: "linear-gradient(to right, #ff6b35, #f7931e)",
-              color: "white",
+              background: mode === 'dark' 
+                ? "linear-gradient(135deg, #fbbf24, #f59e0b)" 
+                : "linear-gradient(135deg, #fcd34d, #f59e0b)",
+              color: mode === 'dark' ? "#ffffff" : "#1f2937",
               fontSize: "1.5rem",
               fontWeight: "bold",
+              border: mode === 'dark' 
+                ? "3px solid rgba(251, 191, 36, 0.3)" 
+                : "3px solid rgba(31, 41, 55, 0.1)",
             }}
           >
             {avatarText}
@@ -413,7 +448,8 @@ export default function AppBar({
               <ListItemButton 
                 onClick={() => {
                   handleMenuClose();
-                  router.push(`/${user?.role}/notifications`);
+                  const userRole = user?.role?.toLowerCase() || 'user';
+                  router.push(`/${userRole}/notifications`);
                 }}
                 sx={{
                   '&:hover': {

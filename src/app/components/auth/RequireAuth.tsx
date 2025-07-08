@@ -45,9 +45,9 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
         <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
           <p className="text-gray-600 text-sm">Loading...</p>
         </div>
       </div>
@@ -62,9 +62,9 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({
   ) {
     // Show a spinner or message while redirecting
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-100">
         <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
           <p className="text-gray-600 text-sm">Redirecting...</p>
         </div>
       </div>

@@ -13,10 +13,13 @@ export default function PanelLayout({ children }: { children: ReactNode }) {
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-    // Close sidebar by default on mobile
+    // Close sidebar by default on mobile and manage initial state
     useEffect(() => {
         if (isMobile) {
             setOpen(false)
+        } else {
+            // On larger screens, keep it open by default
+            setOpen(true)
         }
     }, [isMobile])
 
@@ -37,7 +40,7 @@ export default function PanelLayout({ children }: { children: ReactNode }) {
             <Sidebar
                 open={open}
                 toggleDrawer={toggleDrawer}
-                userType={user?.role as 'admin' | 'employee' | 'user'}
+                userType={user?.role?.toLowerCase() as 'admin' | 'employee' | 'user'}
             />
             <Box
                 component="main"
@@ -51,7 +54,9 @@ export default function PanelLayout({ children }: { children: ReactNode }) {
                     width: '100%',
                     overflowX: 'hidden',
                     backgroundColor: theme.palette.background.default,
-                    color: theme.palette.text.primary
+                    color: theme.palette.text.primary,
+                    minHeight: '100vh',
+                    position: 'relative',
                 }}
             >
                 {children}

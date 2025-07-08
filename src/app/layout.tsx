@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ToasterClient from "./ToasterClient";
 import EmotionProvider from "./EmotionProvider";
 import { LoadingProvider } from "./context/LoadingContext";
+import ThemeInitializer from "./components/ThemeInitializer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,8 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="dark">
+    <html lang="en">
+      <body>
+        <ThemeInitializer />
         <EmotionProvider>
           <LoadingProvider>
             {children}
