@@ -126,12 +126,9 @@ const AdminDashboard = () => {
       </Box>
 
       {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <div className="w-full mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="w-full sm:w-1/2 md:w-1/4 px-2 mb-4"
-          >
+          <div key={index} className="w-full">
             <Card
               sx={{
                 height: '100%',
@@ -158,140 +155,142 @@ const AdminDashboard = () => {
             </Card>
           </div>
         ))}
-      </Grid>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-3">
         {/* Recent Bookings Table */}
-        <div className="w-full lg:w-2/3 mb-6 lg:mb-0">
+        <div className="col-span-12 lg:col-span-8">
           <Card>
             <CardContent>
-              <div className="flex justify-between items-center mb-3">
-            <Typography variant="h6" fontWeight="bold">
-              Recent Bookings
-            </Typography>
-            <Button variant="outlined" size="small">
-              View All
-            </Button>
-              </div>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" fontWeight="bold">
+                  Recent Bookings
+                </Typography>
+                <Button variant="outlined" size="small">
+                  View All
+                </Button>
+              </Box>
               <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Booking ID</TableCell>
-                  <TableCell>User</TableCell>
-                  <TableCell>Service</TableCell>
-                  <TableCell>Priest</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {recentBookings.map((booking) => (
-                  <TableRow key={booking.id} hover>
-                <TableCell>{booking.id}</TableCell>
-                <TableCell>{booking.user}</TableCell>
-                <TableCell>{booking.service}</TableCell>
-                <TableCell>{booking.priest}</TableCell>
-                <TableCell>{booking.date}</TableCell>
-                <TableCell>{booking.amount}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={booking.status}
-                    color={getStatusColor(booking.status) as any}
-                    size="small"
-                  />
-                </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Booking ID</TableCell>
+                      <TableCell>User</TableCell>
+                      <TableCell>Service</TableCell>
+                      <TableCell>Priest</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell>Amount</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {recentBookings.map((booking) => (
+                      <TableRow key={booking.id} hover>
+                        <TableCell>{booking.id}</TableCell>
+                        <TableCell>{booking.user}</TableCell>
+                        <TableCell>{booking.service}</TableCell>
+                        <TableCell>{booking.priest}</TableCell>
+                        <TableCell>{booking.date}</TableCell>
+                        <TableCell>{booking.amount}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={booking.status}
+                            color={getStatusColor(booking.status) as any}
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </TableContainer>
             </CardContent>
           </Card>
         </div>
 
         {/* Quick Actions & Analytics */}
-        <div className="w-full lg:w-1/3 flex flex-col gap-6">
-          {/* Quick Actions */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
-            Quick Actions
-              </Typography>
-              <div className="flex flex-col gap-2">
-            <Button
-              variant="contained"
-              startIcon={<UsersIcon />}
-              sx={{
-                background: 'linear-gradient(to right, #4f46e5, #0ea5e9)',
-                '&:hover': {
-                  background: 'linear-gradient(to right, #4338ca, #0284c7)',
-                },
-              }}
-              fullWidth
-            >
-              Manage Users
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<PujaIcon />}
-              fullWidth
-            >
-              Add New Service
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<StarIcon />}
-              fullWidth
-            >
-              Manage Priests
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<PaymentIcon />}
-              fullWidth
-            >
-              Payment Reports
-            </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="col-span-12 lg:col-span-4">
+          <div className="flex flex-col gap-3">
+            {/* Quick Actions */}
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                  Quick Actions
+                </Typography>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="contained"
+                    startIcon={<UsersIcon />}
+                    sx={{
+                      background: 'linear-gradient(to right, #4f46e5, #0ea5e9)',
+                      '&:hover': {
+                        background: 'linear-gradient(to right, #4338ca, #0284c7)',
+                      },
+                    }}
+                    fullWidth
+                  >
+                    Manage Users
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PujaIcon />}
+                    fullWidth
+                  >
+                    Add New Service
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<StarIcon />}
+                    fullWidth
+                  >
+                    Manage Priests
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PaymentIcon />}
+                    fullWidth
+                  >
+                    Payment Reports
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Platform Health */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
-            Platform Health
-              </Typography>
-              <div className="flex flex-col gap-2">
-            <div>
-              <Typography variant="body2" color="text.secondary">
-                Active Users (Last 24h)
-              </Typography>
-              <Typography variant="h6" color="success.main">
-                456 Users
-              </Typography>
-            </div>
-            <div>
-              <Typography variant="body2" color="text.secondary">
-                Pending Approvals
-              </Typography>
-              <Typography variant="h6" color="warning.main">
-                12 Priests
-              </Typography>
-            </div>
-            <div>
-              <Typography variant="body2" color="text.secondary">
-                System Status
-              </Typography>
-              <Chip label="All Systems Operational" color="success" size="small" />
-            </div>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Platform Health */}
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                  Platform Health
+                </Typography>
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <Typography variant="body2" color="text.secondary">
+                      Active Users (Last 24h)
+                    </Typography>
+                    <Typography variant="h6" color="success.main">
+                      456 Users
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography variant="body2" color="text.secondary">
+                      Pending Approvals
+                    </Typography>
+                    <Typography variant="h6" color="warning.main">
+                      12 Priests
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography variant="body2" color="text.secondary">
+                      System Status
+                    </Typography>
+                    <Chip label="All Systems Operational" color="success" size="small" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </Grid>
+      </div>
     </Box>
   );
 };

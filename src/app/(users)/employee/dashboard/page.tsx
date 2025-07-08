@@ -209,6 +209,8 @@ const EmployeeDashboard = () => {
                   </div>
                 </div>
                   }
+                  primaryTypographyProps={{ component: "div" }}
+                  secondaryTypographyProps={{ component: "div" }}
                 />
               </ListItem>
             ))}

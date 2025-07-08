@@ -156,13 +156,11 @@ export const useAuthStore = create<AuthState>()(
           return true;
 
         } catch (err: any) {
-          console.error("Login error:", err);
+          console.error("Login error:", err, err.response?.data);
           let errorMessage = "Login failed. Please try again.";
           
-          if (err.response?.status === 401) {
+          if (err.response?.status === 401 || err.response?.status === 400) {
             errorMessage = "Invalid email or password.";
-          } else if (err.response?.status === 400) {
-            errorMessage = err.response.data?.detail || err.response.data?.message || "Invalid credentials.";
           } else if (err.response?.status >= 500) {
             errorMessage = "Server error. Please try again later.";
           } else if (err.code === 'NETWORK_ERROR' || !err.response) {
@@ -211,6 +209,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           if (refresh) {
             await apiClient.post('/auth/logout/', { refresh });
+            toast.success("Logged out successfully from server");
           }
         } catch (err) {
           console.error("Logout error:", err);

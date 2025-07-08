@@ -166,6 +166,7 @@ const UserDashboard = () => {
                           </Typography>
                         </Box>
                       }
+                      secondaryTypographyProps={{ component: "div" }}
                     />
                     <Chip
                       label={booking.status}
