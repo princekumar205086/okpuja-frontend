@@ -70,7 +70,7 @@ const AboutPage = () => {
 
   const profiles = [
     {
-      name: "Shri Rohan",
+      name: "Shri Rohan Shree",
       title: "Founder & CEO",
       image: "/image/rohan.jpg",
       bio: "With over 15 years of experience in traditional Hindu rituals and ceremonies, Shri Rohan brings exceptional knowledge and leadership to our organization.",
@@ -81,7 +81,7 @@ const AboutPage = () => {
       },
     },
     {
-      name: "Pandit Shree Suraj Bhardwaj",
+      name: "Pandit Suraj Bhardwaj",
       title: "Managing Director",
       image: "/image/suraj.jpg",
       bio: "Pandit Suraj is a 5th generation priest with deep expertise in Vedic traditions and modern management principles, ensuring authentic service delivery.",
