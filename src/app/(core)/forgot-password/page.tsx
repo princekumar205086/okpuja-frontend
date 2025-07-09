@@ -1,458 +1,634 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast, Toaster } from "react-hot-toast";
 import {
   FaEnvelope,
   FaLock,
-  FaArrowRight,
+  FaArrowLeft,
   FaSpinner,
-  FaCheck,
-  FaTimesCircle,
+  FaCheckCircle,
+  FaShieldAlt,
+  FaRedo,
+  FaEye,
+  FaEyeSlash,
+  FaKey
 } from "react-icons/fa";
-import Link from "next/link";
+import apiClient from "../../apiService/globalApiconfig";
+
+type Step = 'email' | 'otp' | 'password';
+
+interface FormState {
+  email: string;
+  otp: string[];
+  newPassword: string;
+  confirmPassword: string;
+}
 
 export default function ForgotPassword() {
-  // Form states
-  const [email, setEmail] = useState("");
-  const [step, setStep] = useState(1); // 1: Email entry, 2: OTP verification, 3: New password
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState<Step>('email');
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Handle email submission
-  const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [formState, setFormState] = useState<FormState>({
+    email: "",
+    otp: new Array(6).fill(''),
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Timer for resend OTP
+  React.useEffect(() => {
+    if (resendTimer > 0 && currentStep === 'otp') {
+      const timer = setTimeout(() => {
+        setResendTimer(resendTimer - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (resendTimer === 0) {
+      setCanResend(true);
+    }
+  }, [resendTimer, currentStep]);
+
+  // Step 1: Send reset email
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    if (!email.trim()) {
-      setError("Please enter your email address");
+    
+    if (!formState.email.trim()) {
+      toast.error("Please enter your email address");
       return;
     }
 
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+    if (!/\S+@\S+\.\S+/.test(formState.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
 
-      // Move to OTP verification
-      setSuccess("A verification code has been sent to your email");
-      setStep(2);
-    } catch (err) {
-      setError("Failed to send verification code. Please try again.");
+    setLoading(true);
+    try {
+      await apiClient.post('/auth/password/reset/', {
+        email: formState.email,
+      });
+
+      toast.success("Reset code sent to your email!");
+      setCurrentStep('otp');
+      setResendTimer(60);
+      setCanResend(false);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 
+                          error.response?.data?.message || 
+                          "Failed to send reset code. Please try again.";
+      toast.error(errorMessage);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Handle OTP input change
+  // Handle OTP input
   const handleOtpChange = (index: number, value: string) => {
-    // Allow only numbers
+    if (value.length > 1) return;
     if (value && !/^\d+$/.test(value)) return;
 
-    const newOtp = [...otp];
+    const newOtp = [...formState.otp];
     newOtp[index] = value;
-    setOtp(newOtp);
+    setFormState(prev => ({ ...prev, otp: newOtp }));
 
-    // Move to next input if value is entered
+    // Move to next input
     if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      if (nextInput) nextInput.focus();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // Handle OTP verification
-  const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !formState.otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
 
-    const otpValue = otp.join("");
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    const pastedNumbers = pastedData.replace(/\D/g, '').slice(0, 6);
+    
+    if (pastedNumbers.length === 6) {
+      const newOtp = pastedNumbers.split('');
+      setFormState(prev => ({ ...prev, otp: newOtp }));
+      inputRefs.current[5]?.focus();
+    }
+  };
+
+  // Step 2: Just validate OTP locally and move to password step (don't consume OTP)
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const otpValue = formState.otp.join('');
     if (otpValue.length !== 6) {
-      setError("Please enter the complete verification code");
+      toast.error('Please enter the complete 6-digit code');
       return;
     }
 
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Move to password reset
-      setSuccess("Verification successful");
-      setStep(3);
-    } catch (err) {
-      setError("Invalid verification code. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    toast.success('Code entered! Now set your new password.');
+    setCurrentStep('password');
   };
 
-  // Handle password reset
-  const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
+  // Step 3: Reset password (OTP verification happens here)
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    if (!newPassword) {
-      setError("Please enter a new password");
+    
+    if (!formState.newPassword) {
+      toast.error("Please enter a new password");
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters long");
+    if (formState.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters long");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+    if (formState.newPassword !== formState.confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
 
+    setLoading(true);
     try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await apiClient.post('/auth/password/reset/confirm/', {
+        email: formState.email,
+        otp: formState.otp.join(''),
+        new_password: formState.newPassword,
+      });
 
-      // Password reset successful
-      setSuccess("Your password has been reset successfully");
-    } catch (err) {
-      setError("Failed to reset password. Please try again.");
+      toast.success('Password reset successful! You can now login with your new password.');
+      
+      setTimeout(() => {
+        router.push('/login?reset=success');
+      }, 2000);
+    } catch (error: any) {
+      let errorMessage = 'Failed to reset password. Please try again.';
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (detail.toLowerCase().includes('invalid') || detail.toLowerCase().includes('expired')) {
+          errorMessage = 'The verification code is invalid or expired. Please request a new code.';
+          // Go back to OTP step
+          setCurrentStep('otp');
+          // Reset OTP fields
+          setFormState(prev => ({ ...prev, otp: new Array(6).fill('') }));
+          // Enable resend immediately
+          setCanResend(true);
+          setResendTimer(0);
+        } else {
+          errorMessage = detail;
+        }
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Reset the process
-  const handleRestart = () => {
-    setEmail("");
-    setOtp(["", "", "", "", "", ""]);
-    setNewPassword("");
-    setConfirmPassword("");
-    setError("");
-    setSuccess("");
-    setStep(1);
+  // Resend OTP for password reset
+  const handleResendOTP = async () => {
+    if (!canResend) return;
+    
+    setResendLoading(true);
+    try {
+      // Use the password reset endpoint to resend the OTP
+      await apiClient.post('/auth/password/reset/', {
+        email: formState.email,
+      });
+      
+      toast.success('New reset code sent to your email');
+      setResendTimer(60);
+      setCanResend(false);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 
+                          error.response?.data?.message || 
+                          'Failed to resend code. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setResendLoading(false);
+    }
   };
+
+  const renderEmailStep = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          Reset Your Password
+        </h2>
+        <p className="text-gray-600">
+          Enter your email address and we&apos;ll send you a verification code
+        </p>
+      </div>
+
+      <form onSubmit={handleEmailSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
+          </label>
+          <div className="relative">
+            <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="email"
+              value={formState.email}
+              onChange={(e) => setFormState(prev => ({ ...prev, email: e.target.value }))}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+              placeholder="Enter your email address"
+              autoComplete="email"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+        >
+          {loading ? (
+            <>
+              <FaSpinner className="animate-spin mr-2" />
+              Sending Code...
+            </>
+          ) : (
+            <>
+              Send Reset Code
+              <FaEnvelope className="ml-2" />
+            </>
+          )}
+        </button>
+      </form>
+    </motion.div>
+  );
+
+  const renderOtpStep = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          Enter Verification Code
+        </h2>
+        <p className="text-gray-600 mb-2">
+          We sent a 6-digit code to
+        </p>
+        <p className="text-orange-600 font-medium flex items-center justify-center">
+          <FaEnvelope className="mr-2 text-sm" />
+          {formState.email}
+        </p>
+      </div>
+
+      <form onSubmit={handleOtpSubmit} className="space-y-6">
+        <div className="flex justify-center space-x-3">
+          {formState.otp.map((digit, index) => (
+            <input
+              key={index}
+              ref={(el) => { inputRefs.current[index] = el; }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleOtpChange(index, e.target.value)}
+              onKeyDown={(e) => handleOtpKeyDown(index, e)}
+              onPaste={index === 0 ? handleOtpPaste : undefined}
+              className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 outline-none"
+            />
+          ))}
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || formState.otp.join('').length !== 6}
+          className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+        >
+          {loading ? (
+            <>
+              <FaSpinner className="animate-spin mr-2" />
+              Verifying...
+            </>
+          ) : (
+            <>
+              Verify Code
+              <FaCheckCircle className="ml-2" />
+            </>
+          )}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <p className="text-gray-600 mb-2">Didn&apos;t receive the code?</p>
+        {canResend ? (
+          <button
+            onClick={handleResendOTP}
+            disabled={resendLoading}
+            className="text-orange-600 hover:text-orange-700 font-medium inline-flex items-center disabled:opacity-50"
+          >
+            {resendLoading ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <FaRedo className="mr-2" />
+                Resend Code
+              </>
+            )}
+          </button>
+        ) : (
+          <p className="text-gray-500">
+            Resend code in {resendTimer}s
+          </p>
+        )}
+      </div>
+    </motion.div>
+  );
+
+  const renderPasswordStep = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-3">
+          Set New Password
+        </h2>
+        <p className="text-gray-600">
+          Create a strong password for your account
+        </p>
+      </div>
+
+      <form onSubmit={handlePasswordSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            New Password
+          </label>
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type={showPassword ? "text" : "password"}
+              value={formState.newPassword}
+              onChange={(e) => setFormState(prev => ({ ...prev, newPassword: e.target.value }))}
+              className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+              placeholder="Enter new password"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Confirm New Password
+          </label>
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              value={formState.confirmPassword}
+              onChange={(e) => setFormState(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+              placeholder="Confirm new password"
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-orange-600 to-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+        >
+          {loading ? (
+            <>
+              <FaSpinner className="animate-spin mr-2" />
+              Resetting Password...
+            </>
+          ) : (
+            <>
+              Reset Password
+              <FaKey className="ml-2" />
+            </>
+          )}
+        </button>
+      </form>
+    </motion.div>
+  );
+
+  const getStepContent = () => {
+    switch (currentStep) {
+      case 'email':
+        return renderEmailStep();
+      case 'otp':
+        return renderOtpStep();
+      case 'password':
+        return renderPasswordStep();
+      default:
+        return renderEmailStep();
+    }
+  };
+
+  const getLeftSideContent = () => {
+    switch (currentStep) {
+      case 'email':
+        return {
+          icon: <FaEnvelope className="text-6xl mb-6 text-white/90" />,
+          title: "Reset Your Password",
+          description: "Don't worry, it happens to the best of us. Enter your email address and we'll help you reset your password securely."
+        };
+      case 'otp':
+        return {
+          icon: <FaShieldAlt className="text-6xl mb-6 text-white/90" />,
+          title: "Verify Your Identity",
+          description: "We've sent a secure verification code to your email. This extra step ensures your account stays protected."
+        };
+      case 'password':
+        return {
+          icon: <FaKey className="text-6xl mb-6 text-white/90" />,
+          title: "Create New Password",
+          description: "Choose a strong password that you'll remember. Your account security is our top priority."
+        };
+      default:
+        return {
+          icon: <FaEnvelope className="text-6xl mb-6 text-white/90" />,
+          title: "Reset Your Password",
+          description: "Don't worry, it happens to the best of us. Enter your email address and we'll help you reset your password securely."
+        };
+    }
+  };
+
+  const leftContent = getLeftSideContent();
 
   return (
     <>
-      <div className="bg-gray-50 py-10 md:py-16">
-        <div className="container mx-auto px-4 max-w-md">
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            {/* Progress Indicator */}
-            <div className="flex justify-between items-center mb-8 px-4">
-              {[1, 2, 3].map((stepNumber) => (
-                <div key={stepNumber} className="flex flex-col items-center">
-                  <div
-                    className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                      step === stepNumber
-                        ? "bg-orange-500 text-white"
-                        : step > stepNumber
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-500"
-                    }`}
-                  >
-                    {step > stepNumber ? <FaCheck /> : stepNumber}
-                  </div>
-                  <p
-                    className={`text-xs mt-1 text-center ${
-                      step === stepNumber
-                        ? "text-orange-500 font-medium"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {stepNumber === 1
-                      ? "Email"
-                      : stepNumber === 2
-                      ? "Verification"
-                      : "New Password"}
-                  </p>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          className: '',
+          style: {
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            fontSize: '14px',
+            fontWeight: '500',
+          },
+          success: {
+            style: {
+              border: '1px solid #10b981',
+              background: '#f0fdf4',
+            },
+          },
+          error: {
+            style: {
+              border: '1px solid #ef4444',
+              background: '#fef2f2',
+            },
+          },
+        }}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 flex">
+        {/* Left Side - Brand Section */}
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500">
+          {/* Geometric Pattern Background */}
+          <div className="absolute inset-0 opacity-20">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="geometric" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                  <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+                  <circle cx="75" cy="75" r="20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
+                  <polygon points="50,10 90,50 50,90 10,50" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#geometric)"/>
+            </svg>
+          </div>
+          
+          {/* Floating Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-32 right-20 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-bounce"></div>
+          </div>
+          
+          <div className="relative z-10 flex flex-col justify-center items-start p-16 text-white">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="mb-8">
+                {leftContent.icon}
+                <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                  {leftContent.title}
+                </h1>
+                <p className="text-xl text-white/90 leading-relaxed mb-8">
+                  {leftContent.description}
+                </p>
+              </div>
+              
+              <div className="space-y-4 text-white/80">
+                <div className="flex items-center space-x-3">
+                  <FaCheckCircle className="text-lg" />
+                  <span>Secure password recovery</span>
                 </div>
-              ))}
+                <div className="flex items-center space-x-3">
+                  <FaCheckCircle className="text-lg" />
+                  <span>Email verification required</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <FaCheckCircle className="text-lg" />
+                  <span>Account protection guaranteed</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
 
-              {/* Connecting lines */}
-              <div className="h-1 bg-gray-200 absolute left-1/2 transform -translate-x-1/2 top-12 w-[65%] z-0">
-                <div
-                  className={`h-full bg-orange-500 transition-all duration-500 ${
-                    step === 1 ? "w-0" : step === 2 ? "w-1/2" : "w-full"
-                  }`}
-                ></div>
+        {/* Right Side - Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            {/* Back Button */}
+            <Link
+              href="/login"
+              className="inline-flex items-center text-gray-600 hover:text-orange-600 transition-colors duration-200 mb-8 group"
+            >
+              <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+              Back to Login
+            </Link>
+
+            {/* Progress Indicator */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep === 'email' ? 'bg-orange-600 text-white' : 
+                  currentStep === 'otp' || currentStep === 'password' ? 'bg-green-500 text-white' : 
+                  'bg-gray-200 text-gray-600'
+                }`}>
+                  1
+                </div>
+                <div className={`flex-1 h-2 mx-2 rounded ${
+                  currentStep === 'otp' || currentStep === 'password' ? 'bg-green-500' : 'bg-gray-200'
+                }`}></div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep === 'otp' ? 'bg-orange-600 text-white' : 
+                  currentStep === 'password' ? 'bg-green-500 text-white' : 
+                  'bg-gray-200 text-gray-600'
+                }`}>
+                  2
+                </div>
+                <div className={`flex-1 h-2 mx-2 rounded ${
+                  currentStep === 'password' ? 'bg-green-500' : 'bg-gray-200'
+                }`}></div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep === 'password' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-600'
+                }`}>
+                  3
+                </div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Email</span>
+                <span>Verify</span>
+                <span>Reset</span>
               </div>
             </div>
 
-            {/* Error and Success Messages */}
-            {error && (
-              <div className="mb-6 bg-red-50 border border-red-100 text-red-600 rounded-md p-3 flex items-start">
-                <FaTimesCircle className="mt-1 mr-2 flex-shrink-0" />
-                <p>{error}</p>
-              </div>
-            )}
-
-            {success && !error && (
-              <div className="mb-6 bg-green-50 border border-green-100 text-green-600 rounded-md p-3 flex items-start">
-                <FaCheck className="mt-1 mr-2 flex-shrink-0" />
-                <p>{success}</p>
-              </div>
-            )}
-
-            {/* Step 1: Email Entry */}
-            {step === 1 && (
-              <form onSubmit={handleEmailSubmit}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Forgot Your Password?
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Enter your email address and we&apos;ll send you a verification
-                  code to reset your password.
-                </p>
-
-                <div className="mb-5">
-                  <label
-                    htmlFor="email"
-                    className="block text-gray-700 font-medium mb-2"
-                  >
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaEnvelope className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center"
-                >
-                  {isLoading ? (
-                    <FaSpinner className="animate-spin h-5 w-5" />
-                  ) : (
-                    <>
-                      Send Verification Code
-                      <FaArrowRight className="ml-2" />
-                    </>
-                  )}
-                </button>
-
-                <div className="mt-6 text-center">
-                  <p className="text-gray-600">
-                    Remember your password?{" "}
-                    <Link
-                      href="/login"
-                      className="text-orange-600 hover:underline"
-                    >
-                      Log in
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            )}
-
-            {/* Step 2: OTP Verification */}
-            {step === 2 && (
-              <form onSubmit={handleOtpSubmit}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Enter Verification Code
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  We&apos;ve sent a 6-digit verification code to{" "}
-                  <span className="font-medium">{email}</span>. The code will
-                  expire in 10 minutes.
-                </p>
-
-                <div className="mb-6">
-                  <label className="block text-gray-700 font-medium mb-3">
-                    Verification Code
-                  </label>
-                  <div className="flex justify-between gap-2">
-                    {otp.map((digit, index) => (
-                      <input
-                        key={index}
-                        id={`otp-${index}`}
-                        type="text"
-                        maxLength={1}
-                        value={digit}
-                        onChange={(e) => handleOtpChange(index, e.target.value)}
-                        className="w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center"
-                >
-                  {isLoading ? (
-                    <FaSpinner className="animate-spin h-5 w-5" />
-                  ) : (
-                    <>
-                      Verify Code
-                      <FaArrowRight className="ml-2" />
-                    </>
-                  )}
-                </button>
-
-                <div className="mt-6 text-center">
-                  <p className="text-gray-600">
-                    Didn&apos;t receive the code?{" "}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setError("");
-                        setIsLoading(true);
-                        // Simulate API call for resend
-                        await new Promise((resolve) => setTimeout(resolve, 1500));
-                        setIsLoading(false);
-                        setSuccess("A verification code has been resent to your email");
-                      }}
-                      className="text-orange-600 hover:underline"
-                    >
-                      Resend
-                    </button>
-                  </p>
-                </div>
-
-                <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    onClick={handleRestart}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Use a different email address
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Step 3: New Password */}
-            {step === 3 && (
-              <form onSubmit={handlePasswordReset}>
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Create New Password
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Your identity has been verified. Set your new password below.
-                </p>
-
-                <div className="mb-5">
-                  <label
-                    htmlFor="newPassword"
-                    className="block text-gray-700 font-medium mb-2"
-                  >
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="password"
-                      id="newPassword"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="Enter new password"
-                      minLength={8}
-                      required
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Password must be at least 8 characters long
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <label
-                    htmlFor="confirmPassword"
-                    className="block text-gray-700 font-medium mb-2"
-                  >
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="Confirm new password"
-                      minLength={8}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || !!success}
-                  className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center"
-                >
-                  {isLoading ? (
-                    <FaSpinner className="animate-spin h-5 w-5" />
-                  ) : success ? (
-                    <>
-                      <FaCheck className="mr-2" />
-                      Password Reset Successfully
-                    </>
-                  ) : (
-                    "Reset Password"
-                  )}
-                </button>
-
-                {success && (
-                  <div className="mt-6 text-center">
-                    <Link
-                      href="/login"
-                      className="text-white bg-green-600 py-2 px-6 rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      Go to Login
-                    </Link>
-                  </div>
-                )}
-              </form>
-            )}
-          </div>
-
-          {/* Security Info */}
-          <div className="mt-8 bg-white rounded-xl shadow-lg p-5 md:p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">
-              Security Tips
-            </h3>
-            <ul className="text-gray-600 space-y-2">
-              <li className="flex items-start">
-                <span className="text-orange-500 mr-2">•</span>
-                Never share your password or OTP with anyone, including OKPUJA
-                support.
-              </li>
-              <li className="flex items-start">
-                <span className="text-orange-500 mr-2">•</span>
-                Create a strong password using a mix of letters, numbers and
-                symbols.
-              </li>
-              <li className="flex items-start">
-                <span className="text-orange-500 mr-2">•</span>
-                Use a unique password that you don&apos;t use for other accounts.
-              </li>
-            </ul>
-          </div>
-
-          <div className="mt-6 text-center text-gray-500 text-sm">
-            © {new Date().getFullYear()} OKPUJA. All rights reserved.
+            {/* Form Content */}
+            {getStepContent()}
           </div>
         </div>
       </div>

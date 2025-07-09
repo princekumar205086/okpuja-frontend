@@ -162,16 +162,13 @@ export default function RegisterForm() {
 
       const response = await apiClient.post('/auth/register/', payload);
       
-      // Store password temporarily for auto-login after OTP verification
-      localStorage.setItem('temp_password', formState.password);
-      
       toast.success("Registration successful! Please check your email for verification.", {
         duration: 5000,
       });
       
-      // Redirect to OTP verification page
+      // Redirect to login after successful registration
       setTimeout(() => {
-        router.push(`/verify-otp?email=${encodeURIComponent(formState.email)}`);
+        router.push("/login");
       }, 2000);
       
     } catch (err: any) {
@@ -282,24 +279,8 @@ export default function RegisterForm() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 flex">
         {/* Left Side - Brand Section */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500">
-          {/* Geometric Pattern Background */}
-          <div className="absolute inset-0 opacity-20">
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="geometric-reg" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
-                  <rect x="10" y="10" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-                  <rect x="50" y="50" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-                  <rect x="90" y="90" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1"/>
-                  <circle cx="30" cy="90" r="15" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
-                  <circle cx="90" cy="30" r="15" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1"/>
-                  <path d="M0,60 Q30,30 60,60 T120,60" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#geometric-reg)"/>
-            </svg>
-          </div>
-          
-          {/* Floating Elements */}
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute inset-0">
             <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
             <div className="absolute bottom-32 right-20 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -312,35 +293,24 @@ export default function RegisterForm() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="mb-8">
-                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                  <div className="w-8 h-8 bg-white rounded-lg"></div>
-                </div>
-              </div>
-              <h1 className="text-6xl font-bold mb-6 leading-tight">
-                Start Your<br />
-                <span className="text-amber-200">Journey</span>
+              <h1 className="text-5xl font-bold mb-6 leading-tight">
+                Join the<br />
+                <span className="text-amber-200">OkPuja Family</span>
               </h1>
               <p className="text-xl text-orange-100 mb-8 leading-relaxed max-w-md">
-                Join thousands of users who trust our platform for spiritual guidance and enlightenment.
+                Create your account and embark on a spiritual journey with thousands of satisfied users worldwide.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-4 text-orange-100">
-                  <div className="w-8 h-8 bg-amber-200/20 rounded-lg flex items-center justify-center">
-                    <FaCheckCircle className="text-amber-200 text-lg" />
-                  </div>
+                  <FaCheckCircle className="text-amber-200 text-xl" />
                   <span className="text-lg font-medium">Expert Spiritual Guidance</span>
                 </div>
                 <div className="flex items-center gap-4 text-orange-100">
-                  <div className="w-8 h-8 bg-amber-200/20 rounded-lg flex items-center justify-center">
-                    <FaCheckCircle className="text-amber-200 text-lg" />
-                  </div>
+                  <FaCheckCircle className="text-amber-200 text-xl" />
                   <span className="text-lg font-medium">Personalized Consultations</span>
                 </div>
                 <div className="flex items-center gap-4 text-orange-100">
-                  <div className="w-8 h-8 bg-amber-200/20 rounded-lg flex items-center justify-center">
-                    <FaCheckCircle className="text-amber-200 text-lg" />
-                  </div>
+                  <FaCheckCircle className="text-amber-200 text-xl" />
                   <span className="text-lg font-medium">24/7 Support Available</span>
                 </div>
               </div>

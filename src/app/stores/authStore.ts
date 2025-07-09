@@ -49,6 +49,8 @@ type AuthState = {
   initAuth: () => void;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: RegistrationData) => Promise<void>;
+  verifyOTP: (email: string, otp: string) => Promise<boolean>;
+  resendOTP: (email: string) => Promise<boolean>;
   logout: () => Promise<void>;
   clearError: () => void;
   refreshToken: () => Promise<boolean>;
@@ -199,6 +201,79 @@ export const useAuthStore = create<AuthState>()(
 
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
+        }
+      },
+
+      verifyOTP: async (email: string, otp: string): Promise<boolean> => {
+        set({ loading: true, error: null });
+        
+        try {
+          const response = await apiClient.post('/auth/verify-otp/', {
+            email,
+            otp,
+          });
+
+          const { access, refresh } = response.data;
+
+          // Update localStorage
+          localStorage.setItem("access", access);
+          localStorage.setItem("refresh", refresh);
+
+          // Update store
+          set({
+            access,
+            refresh,
+            loading: false,
+            error: null,
+          });
+
+          toast.success("OTP verified successfully!");
+          return true;
+
+        } catch (err: any) {
+          console.error("OTP verification error:", err);
+          let errorMessage = "OTP verification failed. Please try again.";
+          
+          if (err.response?.status === 400) {
+            errorMessage = "Invalid OTP. Please check the code and try again.";
+          } else if (err.response?.status === 404) {
+            errorMessage = "Email not found. Please register first.";
+          } else if (err.response?.status >= 500) {
+            errorMessage = "Server error. Please try again later.";
+          } else if (err.code === 'NETWORK_ERROR' || !err.response) {
+            errorMessage = "Network error. Please check your connection.";
+          }
+
+          set({ error: errorMessage, loading: false });
+          toast.error(errorMessage);
+          return false;
+        }
+      },
+
+      resendOTP: async (email: string): Promise<boolean> => {
+        set({ loading: true, error: null });
+        
+        try {
+          await apiClient.post('/auth/resend-otp/', { email });
+          set({ loading: false });
+          toast.success("OTP resent successfully! Please check your email.");
+          return true;
+
+        } catch (err: any) {
+          console.error("Resend OTP error:", err);
+          let errorMessage = "Failed to resend OTP. Please try again.";
+          
+          if (err.response?.status === 404) {
+            errorMessage = "Email not found. Please register first.";
+          } else if (err.response?.status >= 500) {
+            errorMessage = "Server error. Please try again later.";
+          } else if (err.code === 'NETWORK_ERROR' || !err.response) {
+            errorMessage = "Network error. Please check your connection.";
+          }
+
+          set({ error: errorMessage, loading: false });
+          toast.error(errorMessage);
+          return false;
         }
       },
 
