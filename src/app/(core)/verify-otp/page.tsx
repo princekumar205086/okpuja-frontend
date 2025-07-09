@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { Suspense, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,7 +17,8 @@ import {
 import apiClient from "../../apiService/globalApiconfig";
 import { useAuthStore } from "../../stores/authStore";
 
-export default function VerifyOTP() {
+function VerifyOTPClient() {
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
@@ -355,5 +357,13 @@ export default function VerifyOTP() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense>
+      <VerifyOTPClient />
+    </Suspense>
   );
 }
