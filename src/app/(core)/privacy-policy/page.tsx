@@ -396,7 +396,7 @@ const PrivacyPolicy = () => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">No matches found</h3>
                   <p className="text-gray-600 max-w-md">
-                    Try adjusting your search terms to find what you're looking for.
+                    Try adjusting your search terms to find what you&apos;re looking for.
                   </p>
                 </motion.div>
               )}
@@ -557,7 +557,7 @@ const PrivacyPolicy = () => {
                   <h3 className="text-2xl font-bold mb-4">Privacy Questions?</h3>
                   <p className="text-emerald-100 mb-6 max-w-2xl mx-auto text-lg">
                     If you have any questions about our privacy practices or how we handle your data, 
-                    we're here to help.
+                    we&apos;re here to help.
                   </p>
                   <a
                     href="mailto:support@okpuja.com"

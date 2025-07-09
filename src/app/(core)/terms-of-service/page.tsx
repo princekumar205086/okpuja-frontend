@@ -550,7 +550,7 @@ const TermsOfService = () => {
                   <FaInfoCircle className="text-6xl text-gray-300 mb-4" />
                   <h3 className="text-2xl font-bold text-gray-700 mb-2">No matches found</h3>
                   <p className="text-gray-500 text-lg">
-                    Try adjusting your search or filter to find what you're looking for.
+                    Try adjusting your search or filter to find what you&apos;re looking for.
                   </p>
                 </motion.div>
               )}

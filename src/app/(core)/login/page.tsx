@@ -285,7 +285,7 @@ export default function LoginForm() {
                   <FaQuoteLeft className="text-amber-200 text-xl mt-1 flex-shrink-0" />
                   <div>
                     <p className="text-orange-100 italic mb-3 leading-relaxed">
-                      "OKPUJA transformed my spiritual journey. The guidance I received was incredibly insightful and life-changing."
+                      &quot;OKPUJA transformed my spiritual journey. The guidance I received was incredibly insightful and life-changing.&quot;
                     </p>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-amber-200 rounded-full flex items-center justify-center">

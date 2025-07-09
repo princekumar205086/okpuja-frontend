@@ -364,7 +364,7 @@ const CancellationRefundPolicy = () => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">No matches found</h3>
                   <p className="text-gray-600 max-w-md">
-                    Try adjusting your search terms to find what you're looking for.
+                    Try adjusting your search terms to find what you&apos;re looking for.
                   </p>
                 </motion.div>
               )}
