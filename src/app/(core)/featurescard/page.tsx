@@ -188,7 +188,7 @@ const FeaturedPujas: React.FC = () => {
       scale: 1,
       rotateX: 0,
       transition: {
-        type: "spring" as "spring",
+        type: "spring" as const,
         damping: 20,
         stiffness: 100,
         duration: 0.8
@@ -317,7 +317,7 @@ const FeaturedPujas: React.FC = () => {
             transition={{ delay: 0.8, duration: 0.6 }}
           >
             Immerse yourself in our most revered spiritual ceremonies, meticulously crafted to 
-            channel divine blessings, prosperity, and inner peace into your life's journey
+            channel divine blessings, prosperity, and inner peace into your life&apos;s journey
           </motion.p>
         </motion.div>
 
