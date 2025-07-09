@@ -211,14 +211,14 @@ export default function ServiceCard() {
             </span>
           </motion.div>
           
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-6">
             <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-              Transforming Lives
+              Transforming lives
             </span>
             <span className="bg-gradient-to-r from-orange-500  to-yellow-600 bg-clip-text text-transparent">
-              Through Devotion
+              &nbsp;through devotion
             </span>
-          </h1>
+          </h2>
           
           <motion.div 
             className="flex justify-center mb-8"

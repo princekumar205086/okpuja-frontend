@@ -1,96 +1,275 @@
+/* Enhanced Puja Cards Styling */
+.puja-slider-container {
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.puja-slider-container .slick-track {
+  display: flex;
+  align-items: stretch;
+}
+
+.puja-slider-container .slick-slide {
+  height: auto;
+  padding: 0 8px;
+}
+
+.puja-slider-container .slick-slide > div {
+  height: 100%;
+}
+
+/* Enhanced card hover effects */
 .featurespuja-card {
   position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
   word-wrap: break-word;
-  background-color: #fff;
-  background-clip: border-box;
-  border: 1px solid rgba(0,0,0,.125);
-  border-radius: .25rem;
-  height: 360px;
-  width: 300px;
-  margin: 5px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 24px;
+  height: auto;
+  min-height: 500px;
+  margin: 8px;
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.featurespuja-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 25px 60px rgba(139, 69, 197, 0.25);
+  border: 1px solid rgba(139, 69, 197, 0.2);
 }
 
 .featurespuja-card-img-top {
   width: 100%;
-  border-top-left-radius: calc(.25rem - 1px);
-  border-top-right-radius: calc(.25rem - 1px);
-  height: 300px;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  height: 280px;
+  object-fit: cover;
+  transition: all 0.8s ease;
+}
+
+.featurespuja-card:hover .featurespuja-card-img-top {
+  transform: scale(1.08);
+  filter: brightness(1.1) contrast(1.05);
 }
 
 .featurespuja-card-body {
   flex: 1 1 auto;
   min-height: 1px;
-  padding: 1.25rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .featurespuja-card-title {
-  margin-bottom: .75rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
+  transition: color 0.3s ease;
 }
 
-.featurespuja-card-text:last-child {
+.featurespuja-card:hover .featurespuja-card-title {
+  color: #8b5cf6;
+}
+
+.featurespuja-card-text {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 500;
   margin-bottom: 0;
 }
 
-@media (max-width: 1200px) {
+/* Enhanced responsive design */
+@media (max-width: 1536px) {
   .featurespuja-card {
-    width: 250px;
-    height: 310px;
-    margin: 5px;
+    min-height: 480px;
+    margin: 6px;
+  }
+  .featurespuja-card-img-top {
+    height: 260px;
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1280px) {
   .featurespuja-card {
-    width: 200px;
-    height: 260px;
-    margin: 5px;
+    min-height: 460px;
+    margin: 6px;
+  }
+  .featurespuja-card-img-top {
+    height: 240px;
+  }
+  .featurespuja-card-body {
+    padding: 1.75rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .featurespuja-card {
+    min-height: 440px;
+    margin: 4px;
+  }
+  .featurespuja-card-img-top {
+    height: 220px;
+  }
+  .featurespuja-card-body {
+    padding: 1.5rem;
+  }
+  .featurespuja-card-title {
+    font-size: 1.375rem;
   }
 }
 
 @media (max-width: 768px) {
   .featurespuja-card {
-    width: 150px;
-    height: 210px;
-    margin: 5px;
+    min-height: 420px;
+    margin: 4px;
+    border-radius: 20px;
+  }
+  .featurespuja-card-img-top {
+    height: 200px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+  .featurespuja-card-body {
+    padding: 1.25rem;
+  }
+  .featurespuja-card-title {
+    font-size: 1.25rem;
+  }
+  .featurespuja-card-text {
+    font-size: 0.95rem;
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
   .featurespuja-card {
     width: 100%;
-    height: auto;
-    margin: 5px;
+    min-height: auto;
+    margin: 8px 4px;
+    border-radius: 18px;
+  }
+  .featurespuja-card-img-top {
+    height: 240px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+  }
+  .featurespuja-card-body {
+    padding: 1.5rem;
+  }
+  .featurespuja-card-title {
+    font-size: 1.375rem;
+  }
+  .featurespuja-card-text {
+    font-size: 1rem;
   }
 }
 
-h2 {
-  font-size: 3.5em;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-  color: white;
+@media (max-width: 480px) {
+  .featurespuja-card {
+    margin: 6px 2px;
+    border-radius: 16px;
+  }
+  .featurespuja-card-img-top {
+    height: 220px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+  .featurespuja-card-body {
+    padding: 1.25rem;
+  }
+  .featurespuja-card-title {
+    font-size: 1.25rem;
+  }
 }
 
-.card-btn {
-  display: block;
-  width: 350px;
-  height: 50px;
-  margin: 20px auto;
-  background-color: #F8EFBA;
+/* Enhanced typography */
+h2 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 900;
+  color: #1f2937;
   text-align: center;
-  border-radius: 30px;
-  color: #ff7f50;
-  font-weight: bold;
-  line-height: 50px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Enhanced button styling */
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 280px;
+  height: 56px;
+  margin: 1.5rem auto 0;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  text-align: center;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1rem;
   text-decoration: none;
-  transition: all 0.3s ease 0s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+  border: none;
+  cursor: pointer;
 }
 
 .card-btn:hover {
-  background-color: #ff7f50;
-  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
   text-decoration: none;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+}
+
+.card-btn:active {
+  transform: translateY(-1px) scale(1.01);
+}
+
+@media (max-width: 640px) {
+  .card-btn {
+    height: 52px;
+    font-size: 0.95rem;
+    border-radius: 14px;
+  }
+}
+
+/* Enhanced slider dots */
+.slick-dots {
+  z-index: 10;
+}
+
+.slick-dots li {
+  margin: 0 4px;
+}
+
+/* Smooth loading animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.featurespuja-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Enhanced focus states for accessibility */
+.card-btn:focus,
+.custom-dot:focus {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
 }
