@@ -215,7 +215,6 @@ const VideoCarousel: React.FC = () => {
     setTouchStart(null);
     setTouchEnd(null);
 
-    // Hide swipe hint after user interacts
     if (showSwipeHint) {
       setShowSwipeHint(false);
     }
@@ -223,7 +222,7 @@ const VideoCarousel: React.FC = () => {
 
   return (
     <div
-      className="relative w-full h-[480px] overflow-hidden bg-gray-900"
+      className="relative w-full h-[420px] xs:h-[440px] sm:h-[480px] overflow-hidden bg-gray-900"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -328,47 +327,80 @@ const VideoCarousel: React.FC = () => {
         ))}
       </div>
 
-      {/* Control buttons */}
-      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 flex space-x-3 z-20">
+      {/* Control buttons for mobile: left and right of swipe hint; for desktop: top of right */}
+      {/* Mobile: absolute left and right, Desktop: as before */}
+      <>
+        {/* Mobile pause button (left of center) */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="rounded-full bg-black/30 backdrop-blur-sm p-2.5 text-cream transition-all hover:bg-black/50 active:scale-95"
+          className="block sm:hidden absolute bottom-10 left-8 z-50 rounded-full bg-black/60 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/80 active:scale-95 shadow-md border border-redOrange/40"
           aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+          style={{transform: 'translateY(50%)'}}
         >
-          {isPlaying ? <FaPause size={16} /> : <FaPlay size={16} />}
+          {isPlaying ? <FaPause size={20} /> : <FaPlay size={20} />}
         </button>
+        {/* Mobile volume button (right of center) */}
         <button
           onClick={() => setIsMuted(!isMuted)}
-          className="rounded-full bg-black/30 backdrop-blur-sm p-2.5 text-cream transition-all hover:bg-black/50 active:scale-95"
+          className="block sm:hidden absolute bottom-10 right-8 z-50 rounded-full bg-black/60 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/80 active:scale-95 shadow-md border border-redOrange/40"
           aria-label={isMuted ? "Unmute video" : "Mute video"}
+          style={{transform: 'translateY(50%)'}}
         >
-          {isMuted ? <FaVolumeMute size={16} /> : <FaVolumeUp size={16} />}
+          {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
         </button>
-      </div>
+        {/* Desktop controls as before */}
+        <div
+          className="hidden sm:flex absolute bottom-6 right-8 space-x-3 z-20"
+        >
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 shadow-md border border-redOrange/40"
+            aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+          >
+            {isPlaying ? <FaPause size={18} /> : <FaPlay size={18} />}
+          </button>
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 shadow-md border border-redOrange/40"
+            aria-label={isMuted ? "Unmute video" : "Mute video"}
+          >
+            {isMuted ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
+          </button>
+        </div>
+      </>
 
       {/* Navigation arrows */}
       <div className="hidden sm:block">
         <button
           onClick={handlePrevSlide}
-          className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 rounded-full bg-black/30 backdrop-blur-sm p-3 text-cream transition-all hover:bg-black/50 active:scale-95 z-20"
+          className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 z-20 border border-redOrange/40 shadow-md"
           aria-label="Previous slide"
         >
-          <BsChevronLeft size={24} />
+          <BsChevronLeft size={26} />
         </button>
         <button
           onClick={handleNextSlide}
-          className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 rounded-full bg-black/30 backdrop-blur-sm p-3 text-cream transition-all hover:bg-black/50 active:scale-95 z-20"
+          className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 z-20 border border-redOrange/40 shadow-md"
           aria-label="Next slide"
         >
-          <BsChevronRight size={24} />
+          <BsChevronRight size={26} />
         </button>
       </div>
 
       {/* Mobile swipe hint */}
       {showSwipeHint && (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 sm:hidden z-30 pointer-events-none animate-pulse">
-          <div className="bg-black/60 backdrop-blur-sm text-cream/90 rounded-full px-4 py-2 text-xs flex items-center shadow-lg">
-            <MdSwipe className="mr-1.5" size={16} /> Swipe to navigate
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 sm:hidden z-40 pointer-events-none animate-pulse w-full flex justify-center">
+          <div
+            className="bg-gradient-to-r from-redOrange/90 via-black/90 to-redOrange/90 backdrop-blur-md text-cream font-semibold rounded-full px-6 py-2 text-base flex items-center shadow-2xl border-2 border-redOrange drop-shadow-lg"
+            style={{
+              textShadow: '0 2px 8px #000, 0 0px 2px #d97706',
+              letterSpacing: '0.02em',
+              maxWidth: '90vw',
+              justifyContent: 'center',
+            }}
+          >
+            <MdSwipe className="mr-2 text-xl" size={20} />
+            <span className="whitespace-nowrap">Swipe to navigate</span>
           </div>
         </div>
       )}
