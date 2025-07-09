@@ -570,7 +570,7 @@ export default function ServiceDetailPage() {
           className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mt-12"
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">What Our Customers Say</h2>
+            <h2 className="text-3xl font-bold  mb-2"><span className="text-gray-900">What Our Customers Say</span></h2>
             <p className="text-gray-600">Trusted by thousands of satisfied devotees</p>
             <div className="flex items-center justify-center mt-4">
               <div className="flex items-center">

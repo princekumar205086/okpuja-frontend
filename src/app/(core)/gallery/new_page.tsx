@@ -16,7 +16,7 @@ import {
   FaImage,
   FaPlay,
   FaStar,
-  FaTh,
+  FaThLarge,
   FaList,
 } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
@@ -136,7 +136,7 @@ const GalleryPage = () => {
       return matchesCategory && matchesSearch;
     });
 
-    const sorted = [...filtered].sort((a, b) => {
+    filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
           return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -153,7 +153,7 @@ const GalleryPage = () => {
       }
     });
 
-    return sorted;
+    return filtered;
   }, [selectedCategory, searchTerm, sortBy]);
 
   const openModal = (item: GalleryItem, index: number) => {
@@ -234,7 +234,7 @@ const GalleryPage = () => {
                     viewMode === "grid" ? "bg-white shadow-sm text-orange-500" : "text-gray-500"
                   }`}
                 >
-                  <FaTh />
+                  <FaThLarge />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}

@@ -5,7 +5,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BsChevronLeft, BsChevronRight, BsCalendar3 } from "react-icons/bs";
+import { BsChevronLeft, BsChevronRight, BsCalendar3, BsClock } from "react-icons/bs";
+import { FaRegCalendarAlt } from "react-icons/fa";
 
 export default function Events() {
   // Reference to the slider to control it with custom navigation
@@ -14,11 +15,11 @@ export default function Events() {
   const settings = {
     dots: true,
     infinite: true,
-    speed: 500,
+    speed: 600,
     slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 4000,
+    autoplaySpeed: 5000,
     pauseOnHover: true,
     arrows: false,
     responsive: [
@@ -26,28 +27,39 @@ export default function Events() {
         breakpoint: 1280,
         settings: {
           slidesToShow: 3,
+          slidesToScroll: 1,
         },
       },
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          centerMode: true,
+          centerPadding: "40px",
         },
       },
       {
         breakpoint: 640,
         settings: {
           slidesToShow: 1,
-          centerMode: true,
-          centerPadding: "20px",
+          slidesToScroll: 1,
+          centerMode: false,
+          centerPadding: "0px",
         },
       },
     ],
-    // Custom dots rendering
     customPaging: () => (
-      <div className="custom-dot w-2.5 h-2.5 bg-orange-300 rounded-full mt-8"></div>
+      <div className="w-3 h-3 bg-orange-200 rounded-full mt-8 transition-all duration-300 hover:bg-orange-400"></div>
     ),
-    dotsClass: "slick-dots custom-dots",
+    dotsClass: "slick-dots custom-dots flex justify-center space-x-2",
   };
 
   const data = [
@@ -110,105 +122,121 @@ export default function Events() {
   ];
 
   return (
-    <section className="py-12 sm:py-16 bg-gradient-to-b from-cream to-cream/90">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-10 md:mb-12"
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center mb-12 lg:mb-16"
         >
-          <div className="flex items-center justify-center mb-3">
-            <BsCalendar3 className="text-redOrange text-2xl mr-3" />
-            <span className="text-redOrange text-sm uppercase font-semibold tracking-wider">
-              Religious Calendar
-            </span>
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-lg">
+              <BsCalendar3 className="text-white text-2xl" />
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
-            Upcoming Religious Events
+          <span className="inline-block px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 text-sm font-semibold uppercase tracking-wider rounded-full mb-4">
+            Religious Calendar
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-6">
+            <span className="text-gray-900">Upcoming Sacred Events</span>
           </h2>
-          <div className="w-20 h-1 bg-redOrange mx-auto mb-6 rounded-full"></div>
-          <p className="max-w-2xl mx-auto text-gray-600 text-base sm:text-lg">
-            Plan ahead for these important religious celebrations and book your
-            puja services in advance
+          <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-red-500 mx-auto mb-6 rounded-full"></div>
+          <p className="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed">
+            Discover and prepare for important religious celebrations. Book your puja services 
+            in advance to ensure spiritual guidance on these auspicious occasions.
           </p>
         </motion.div>
 
         {/* Custom Navigation */}
-        <div className="flex justify-center sm:justify-end mb-6">
+        <div className="flex justify-center sm:justify-end mb-8">
           <div className="flex space-x-3">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => sliderRef.current?.slickPrev()}
-              className="p-2 rounded-full bg-white shadow-md text-gray-700 hover:text-redOrange hover:shadow-lg transition-all duration-200"
+              className="p-3 rounded-full bg-white shadow-lg text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 transition-all duration-300 border border-orange-100"
               aria-label="Previous slide"
             >
               <BsChevronLeft size={20} />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => sliderRef.current?.slickNext()}
-              className="p-2 rounded-full bg-white shadow-md text-gray-700 hover:text-redOrange hover:shadow-lg transition-all duration-200"
+              className="p-3 rounded-full bg-white shadow-lg text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 transition-all duration-300 border border-orange-100"
               aria-label="Next slide"
             >
               <BsChevronRight size={20} />
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Slider */}
-        <div className="event-slider-container">
-          <Slider ref={sliderRef} {...settings} className="pb-14">
+        <div className="relative">
+          <Slider ref={sliderRef} {...settings} className="events-slider">
             {data.map((item, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="px-3 py-2"
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="px-3"
               >
-                <div className="bg-white rounded-xl overflow-hidden shadow-lg h-full flex flex-col transition-transform transform hover:shadow-xl hover:-translate-y-1 duration-300">
-                  {/* Date badge */}
-                  <div className="absolute top-4 left-4 bg-redOrange text-white text-center p-2 rounded-lg shadow-md z-10">
-                    <div className="text-2xl font-bold leading-none">
-                      {item.date.number}
+                <div className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full">
+                  {/* Date Badge */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-center p-3 rounded-xl shadow-lg">
+                      <div className="text-2xl font-bold leading-none mb-1">
+                        {item.date.number}
+                      </div>
+                      <div className="text-xs font-medium uppercase tracking-wide">
+                        {item.date.month.slice(0, 3)}
+                      </div>
                     </div>
-                    <div className="text-xs uppercase">{item.date.month}</div>
                   </div>
 
                   {/* Image */}
-                  <div className="relative h-48 w-full">
+                  <div className="relative h-56 overflow-hidden">
                     <Image
                       src={item.imagesrc}
                       alt={item.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                       sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 25vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
                   </div>
 
                   {/* Content */}
-                  <div className="p-5 flex flex-col flex-grow">
+                  <div className="p-6">
                     <div className="flex items-center mb-3">
-                      <span className="inline-block bg-orange-100 rounded-full px-2 py-1 text-xs font-medium text-redOrange">
-                        {item.date.day}
-                      </span>
+                      <div className="flex items-center px-3 py-1 bg-orange-100 rounded-full">
+                        <BsClock className="text-orange-600 text-sm mr-2" />
+                        <span className="text-orange-700 text-sm font-medium">
+                          {item.date.day}
+                        </span>
+                      </div>
                     </div>
 
-                    <h3 className="font-bold text-gray-800 text-xl mb-2">
+                    <h3 className="font-bold text-gray-800 text-xl mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
                       {item.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow">
+                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
                       {item.content}
                     </p>
 
-                    <button className="text-redOrange font-medium text-sm flex items-center hover:text-redOrange/80 mt-auto">
-                      View Details
+                    <motion.button 
+                      whileHover={{ x: 5 }}
+                      className="flex items-center text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors duration-300"
+                    >
+                      Learn More
                       <svg
-                        className="w-4 h-4 ml-1"
+                        className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -221,7 +249,7 @@ export default function Events() {
                           d="M9 5l7 7-7 7"
                         ></path>
                       </svg>
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>
@@ -231,19 +259,22 @@ export default function Events() {
 
         {/* Bottom CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="mt-10 text-center"
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mt-12 text-center"
         >
-          <a
+          <motion.a
             href="/calendar"
-            className="inline-flex items-center px-6 py-3 bg-redOrange text-white font-medium rounded-lg shadow-md hover:bg-redOrange/90 transition-colors duration-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            View Full Calendar
+            <FaRegCalendarAlt className="mr-3 text-lg" />
+            View Complete Calendar
             <svg
-              className="w-5 h-5 ml-2"
+              className="w-5 h-5 ml-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -256,49 +287,62 @@ export default function Events() {
                 d="M14 5l7 7m0 0l-7 7m7-7H3"
               ></path>
             </svg>
-          </a>
+          </motion.a>
         </motion.div>
       </div>
 
-      {/* Custom styles for slider */}
+      {/* Custom Styles */}
       <style jsx global>{`
-        .slick-list {
+        .events-slider .slick-list {
           margin: 0 -12px;
-          padding-bottom: 10px !important;
+          padding-bottom: 20px !important;
         }
 
-        .slick-slide > div {
+        .events-slider .slick-slide > div {
           height: 100%;
         }
 
-        .slick-track {
+        .events-slider .slick-track {
           display: flex !important;
+        }
+
+        .events-slider .slick-slide {
           height: auto !important;
         }
 
-        .slick-slide {
-          height: auto !important;
-        }
-
-        .slick-slide > div {
+        .events-slider .slick-slide > div > div {
           height: 100%;
         }
 
-        .slick-active .custom-dot {
-          background-color: #e25822;
-          width: 20px;
-          border-radius: 10px;
-        }
-
-        /* Mobile-friendly dots positioning */
         .custom-dots {
-          bottom: -5px;
+          bottom: -10px !important;
         }
 
-        @media (max-width: 640px) {
-          .event-slider-container .slick-dots {
-            bottom: 0px;
-          }
+        .custom-dots li {
+          margin: 0 4px !important;
+        }
+
+        .custom-dots li div {
+          transition: all 0.3s ease !important;
+        }
+
+        .custom-dots li.slick-active div {
+          background: linear-gradient(135deg, #f97316, #dc2626) !important;
+          transform: scale(1.3);
+        }
+
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
     </section>

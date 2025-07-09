@@ -11,6 +11,13 @@ import {
   FaStar,
   FaBlog,
   FaEnvelope,
+  FaPray,
+  FaMagic,
+  FaNewspaper,
+  FaPhoneAlt,
+  FaTachometerAlt,
+  FaCog,
+  FaHistory,
 } from "react-icons/fa";
 import { RiMenu3Line, RiCloseLine } from "react-icons/ri";
 import Link from "next/link";
@@ -92,44 +99,51 @@ const Header = () => {
   };
 
   const menuData = [
-    { name: "Home", link: "/", icon: <FaHome className="mr-2" /> },
+    { name: "Home", link: "/", icon: <FaHome className="mr-3 text-xl" /> },
     {
       name: "All Pujas",
       link: "/pujaservice",
-      icon: <FaStar className="mr-2" />,
+      icon: <FaPray className="mr-3 text-xl" />,
     },
     {
       name: "Astrology",
       link: "/astrology",
-      icon: <FaBookOpen className="mr-2" />,
+      icon: <FaMagic className="mr-3 text-xl" />,
     },
-    { name: "Blog", link: "/blog", icon: <FaBlog className="mr-2" /> },
+    { name: "Blog", link: "/blog", icon: <FaNewspaper className="mr-3 text-xl" /> },
     {
       name: "Contact",
       link: "/contactus",
-      icon: <FaEnvelope className="mr-2" />,
+      icon: <FaPhoneAlt className="mr-3 text-xl" />,
     },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled ? "bg-cream shadow-lg h-16" : "bg-trans h-20"
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
+          isScrolled 
+            ? "bg-white/98 backdrop-blur-md shadow-2xl border-b border-orange-100 h-14 sm:h-16" 
+            : "bg-trans bg-[#000000ee] backdrop-blur-none h-16 sm:h-18 md:h-20"
         }`}
+        style={{
+          background: isScrolled 
+            ? 'rgba(255, 255, 255, 0.98)' 
+            : 'linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)'
+        }}
       >
-        <div className="container mx-auto px-4 md:px-6 h-full">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 h-full">
           <div className="flex items-center justify-between h-full">
             {/* Logo Section */}
-            <div className="w-3/12 md:w-2/12 flex items-center h-full">
-              <Link href="/">
-                <div className="relative logo-wrapper h-full flex items-center">
+            <div className="flex items-center h-full flex-shrink-0">
+              <Link href="/" className="flex items-center">
+                <div className="relative flex items-center h-8 sm:h-10 md:h-12">
                   <Image
                     alt="OKPUJA Logo"
                     src="/image/okpuja logo.png"
-                    width={220}
-                    height={120}
-                    className="logo-image object-contain"
+                    width={isScrolled ? 140 : 180}
+                    height={isScrolled ? 40 : 60}
+                    className="object-contain transition-all duration-300"
                     priority
                   />
                 </div>
@@ -137,287 +151,401 @@ const Header = () => {
             </div>
 
             {/* Desktop Menu Links */}
-            <div className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-4 text-sm lg:text-md font-bold items-center h-full">
-              {menuData.map((item, index) => (
-                <Link key={index} href={item.link}>
-                  <span
-                    className={`px-3 py-1 rounded-md transition-all duration-300 ${
-                      pathname === item.link
-                        ? "bg-redOrange text-cream"
-                        : "text-orangeRed hover:bg-orange-100"
-                    } cursor-pointer relative group flex items-center`}
+            <div className="hidden lg:flex flex-1 justify-center items-center h-full max-w-2xl mx-8">
+              <div className="flex items-center space-x-1 xl:space-x-3">
+                {menuData.map((item, index) => (
+                  <Link key={index} href={item.link}>
+                    <span
+                      className={`px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-medium transition-all duration-300 whitespace-nowrap ${
+                        pathname === item.link
+                          ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg transform scale-105"
+                          : isScrolled 
+                            ? "text-gray-700 hover:bg-orange-50 hover:text-orange-600 hover:scale-105" 
+                            : "text-gray-800 hover:bg-white/20 hover:text-orange-600 hover:scale-105"
+                      } cursor-pointer relative group flex items-center`}
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                ))}
+
+                {/* Dashboard/Login Link */}
+                {mounted ? (
+                  <>
+                    {token ? (
+                      <div className="relative" ref={dropdownRef}>
+                        <button
+                          onClick={toggleDropdown}
+                          className="flex items-center px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all duration-300"
+                        >
+                          Dashboard <FaChevronDown className="ml-2 text-xs" />
+                        </button>
+
+                        {showDropdown && (
+                          <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100">
+                            <Link href="user/dashboard">
+                              <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                My Dashboard
+                              </span>
+                            </Link>
+                            <Link href="user/profile">
+                              <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                Profile Settings
+                              </span>
+                            </Link>
+                            <Link href="/mybooking">
+                              <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                                My Bookings
+                              </span>
+                            </Link>
+                            <hr className="my-2 border-gray-100" />
+                            <button
+                              onClick={handleLogout}
+                              className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              Logout
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Link href="/register">
+                        <span className="px-4 xl:px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-medium text-sm xl:text-base whitespace-nowrap shadow-lg">
+                          SignUp/SignIn
+                        </span>
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <div className="px-4 xl:px-6 py-2 w-28 h-9 bg-gray-200 rounded-full animate-pulse"></div>
+                )}
+              </div>
+            </div>
+
+            {/* Tablet Menu - Medium screens */}
+            <div className="hidden md:flex lg:hidden flex-1 justify-center items-center h-full">
+              <div className="flex items-center space-x-2">
+                {menuData.slice(0, 3).map((item, index) => (
+                  <Link key={index} href={item.link}>
+                    <span
+                      className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 ${
+                        pathname === item.link
+                          ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg transform scale-105"
+                          : isScrolled 
+                            ? "text-gray-700 hover:bg-orange-50 hover:text-orange-600 hover:scale-105" 
+                            : "text-gray-800 hover:bg-white/20 hover:text-orange-600 hover:scale-105"
+                      } cursor-pointer whitespace-nowrap`}
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                ))}
+                
+                {/* More menu for tablet */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={toggleDropdown}
+                    className="flex items-center px-2 py-1.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all duration-300"
                   >
-                    {item.name}
-                    <span className="block h-1 bg-orange-400 w-0 transition-all duration-300 group-hover:w-full absolute bottom-0 left-0" />
-                  </span>
-                </Link>
-              ))}
+                    More <FaChevronDown className="ml-1 text-xs" />
+                  </button>
 
-              {/* Dashboard/Login Link */}
-              {mounted ? (
-                <>
-                  {token ? (
-                    <div className="relative" ref={dropdownRef}>
-                      <button
-                        onClick={toggleDropdown}
-                        className="flex items-center px-3 py-1 rounded-md text-orangeRed hover:bg-orange-100 transition-all duration-200"
-                      >
-                        Dashboard <FaChevronDown className="ml-1 text-xs" />
-                      </button>
-
-                      {showDropdown && (
-                        <div className="absolute right-0 mt-2 w-48 bg-cream rounded-md shadow-lg py-1 z-50 border border-orange-200">
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100">
+                      {menuData.slice(3).map((item, index) => (
+                        <Link key={index} href={item.link}>
+                          <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                            {item.name}
+                          </span>
+                        </Link>
+                      ))}
+                      
+                      {token && (
+                        <>
+                          <hr className="my-2 border-gray-100" />
                           <Link href="user/dashboard">
-                            <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
-                              My Dashboard
+                            <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                              Dashboard
                             </span>
                           </Link>
-                          <Link href="user/profile">
-                            <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
-                              Profile Settings
-                            </span>
-                          </Link>
-                          <Link href="/mybooking">
-                            <span className="block px-4 py-2 text-sm text-orangeRed hover:bg-orange-100">
-                              My Bookings
-                            </span>
-                          </Link>
-                          <hr className="my-1 border-orange-200" />
-                          <button
-                            onClick={handleLogout}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                          >
-                            Logout
-                          </button>
-                        </div>
+                        </>
                       )}
                     </div>
-                  ) : (
-                    <Link href="/register">
-                      <span className="px-4 py-1.5 bg-redOrange text-cream rounded-full hover:bg-orange-600 transition-colors duration-300 flex items-center">
-                        SignUp/SignIn
-                      </span>
-                    </Link>
                   )}
-                </>
-              ) : (
-                <div className="px-4 py-1.5 w-24 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-              )}
+                </div>
+
+                {!token && mounted && (
+                  <Link href="/register">
+                    <span className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-medium text-sm whitespace-nowrap shadow-lg">
+                      SignUp
+                    </span>
+                  </Link>
+                )}
+              </div>
             </div>
 
-            {/* Social Media & Action Icons */}
-            <div className="hidden md:flex w-3/12 md:w-2/12 justify-end space-x-1 lg:space-x-4 items-center">
-              <Link
-                href="https://wa.me/+911234567890"
-                target="_blank"
-                aria-label="Contact on WhatsApp"
-              >
-                <div className="p-1.5 lg:p-2 bg-green-600 text-cream rounded-full hover:bg-green-700 transition-all duration-300 transform hover:scale-110">
-                  <FaWhatsappSquare className="text-lg lg:text-xl" />
-                </div>
-              </Link>
+            {/* Action Icons - Desktop & Mobile */}
+            <div className="flex items-center space-x-2 sm:space-x-3 h-full">
+              {/* WhatsApp - Desktop Only */}
+              <div className="hidden lg:block">
+                <Link
+                  href="https://wa.me/+911234567890"
+                  target="_blank"
+                  aria-label="Contact on WhatsApp"
+                >
+                  <div className="w-9 h-9 xl:w-10 xl:h-10 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                    <FaWhatsappSquare className="text-lg xl:text-xl" />
+                  </div>
+                </Link>
+              </div>
 
+              {/* Cart Icon */}
               <Link href="/cart" className="relative" aria-label="Go to cart">
-                <div className="p-1.5 lg:p-2 bg-redOrange text-cream rounded-full hover:bg-orange-800 transition-all duration-300 transform hover:scale-110">
-                  <FaCartPlus className="text-lg lg:text-xl" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                  <FaCartPlus className="text-base sm:text-lg" />
                   {/* Cart Count Badge */}
                   {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 text-xs bg-redOrange text-cream rounded-full w-5 h-5 flex items-center justify-center border-2 border-cream">
+                    <span className="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-white font-bold">
                       {cartCount > 9 ? "9+" : cartCount}
                     </span>
                   )}
                 </div>
               </Link>
 
-              {mounted ? (
-                <>
-                  {token ? (
-                    <button
-                      onClick={handleLogout}
-                      aria-label="Logout"
-                      className="p-1.5 lg:p-2 bg-red-600 text-cream rounded-full hover:bg-red-700 transition-all duration-300 transform hover:scale-110"
-                    >
-                      <FaSignOutAlt className="text-lg lg:text-xl" />
-                    </button>
-                  ) : (
-                    <Link href="/login" aria-label="Login to account">
-                      <div className="p-1.5 lg:p-2 bg-redOrange text-cream rounded-full hover:bg-orange-600 transition-all duration-300 transform hover:scale-110">
-                        <FaUserCircle className="text-lg lg:text-xl" />
-                      </div>
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <div className="p-1.5 lg:p-2 w-8 h-8 lg:w-10 lg:h-10 bg-gray-200 rounded-full animate-pulse"></div>
-              )}
-            </div>
-
-            {/* Mobile Menu & Actions */}
-            <div className="md:hidden flex items-center space-x-3 h-full">
-              {/* Mobile Cart Icon */}
-              <Link href="/cart" className="relative" aria-label="Go to cart">
-                <div className="p-1.5 bg-redOrange text-cream rounded-full">
-                  <FaCartPlus className="text-lg" />
-                  {/* Cart Count Badge for Mobile */}
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 text-xs bg-red-500 text-cream rounded-full w-5 h-5 flex items-center justify-center border-2 border-cream">
-                      {cartCount > 9 ? "9+" : cartCount}
-                    </span>
-                  )}
-                </div>
-              </Link>
-
-              {/* Menu Button */}
-              <button
-                onClick={toggleMenu}
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                className="p-1.5 bg-redOrange text-cream rounded-md focus:outline-none"
-              >
-                {isMenuOpen ? (
-                  <RiCloseLine className="h-5 w-5" />
+              {/* User/Logout - Desktop Only */}
+              <div className="hidden lg:block">
+                {mounted ? (
+                  <>
+                    {token ? (
+                      <button
+                        onClick={handleLogout}
+                        aria-label="Logout"
+                        className="w-9 h-9 xl:w-10 xl:h-10 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg"
+                      >
+                        <FaSignOutAlt className="text-base xl:text-lg" />
+                      </button>
+                    ) : (
+                      <Link href="/login" aria-label="Login to account">
+                        <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                          <FaUserCircle className="text-base xl:text-lg" />
+                        </div>
+                      </Link>
+                    )}
+                  </>
                 ) : (
-                  <RiMenu3Line className="h-5 w-5" />
+                  <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gray-200 rounded-full animate-pulse"></div>
                 )}
-              </button>
+              </div>
+
+              {/* User/Logout - Tablet Only */}
+              <div className="hidden md:block lg:hidden">
+                {mounted ? (
+                  <>
+                    {token ? (
+                      <button
+                        onClick={handleLogout}
+                        aria-label="Logout"
+                        className="w-9 h-9 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg"
+                      >
+                        <FaSignOutAlt className="text-base" />
+                      </button>
+                    ) : (
+                      <Link href="/login" aria-label="Login to account">
+                        <div className="w-9 h-9 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                          <FaUserCircle className="text-base" />
+                        </div>
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-9 h-9 bg-gray-200 rounded-full animate-pulse"></div>
+                )}
+              </div>
+
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
+                <button
+                  onClick={toggleMenu}
+                  aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                  className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-all duration-300 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                >
+                  {isMenuOpen ? (
+                    <RiCloseLine className="text-lg sm:text-xl" />
+                  ) : (
+                    <RiMenu3Line className="text-lg sm:text-xl" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Enhanced Mobile Menu with Overlay */}
         <div
-          className={`md:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 ${
-            isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          className={`md:hidden fixed inset-0 bg-black z-40 transition-all duration-500 ease-in-out ${
+            isMenuOpen 
+              ? "opacity-60 backdrop-blur-sm" 
+              : "opacity-0 pointer-events-none backdrop-blur-none"
           }`}
           onClick={toggleMenu}
         ></div>
 
         <div
-          className={`md:hidden fixed right-0 top-0 w-72 h-full transform transition-transform duration-300 ease-in-out z-50 ${
+          className={`md:hidden fixed right-0 top-0 w-full max-w-sm h-screen transform transition-all duration-500 ease-in-out z-50 ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
-          } bg-cream shadow-xl`}
+          } bg-white shadow-2xl border-l border-gray-100 flex flex-col`}
         >
-          <div className="flex justify-between items-center p-4 border-b border-orange-200">
-            <div className="relative w-32 h-12">
-              <Image
-                alt="OKPUJA Logo"
-                src="/image/okpuja logo.png"
-                fill
-                className="object-contain"
-              />
+          {/* Mobile Menu Header */}
+          <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-100 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+            
+            <div className="relative z-10 flex items-center">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3 backdrop-blur-sm">
+                <Image
+                  alt="OKPUJA"
+                  src="/image/okpuja logo.png"
+                  width={24}
+                  height={24}
+                  className="object-contain brightness-0 invert"
+                />
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-lg tracking-wide">OKPUJA</h2>
+                <p className="text-white/80 text-xs">Your Puja & Astrology</p>
+              </div>
             </div>
+            
             <button
               onClick={toggleMenu}
               aria-label="Close menu"
-              className="p-1.5 bg-redOrange text-cream rounded-md"
+              className="relative z-10 w-10 h-10 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all duration-300 flex items-center justify-center backdrop-blur-sm border border-white/20"
             >
-              <RiCloseLine className="h-5 w-5" />
+              <RiCloseLine className="text-xl" />
             </button>
           </div>
 
-          <div className="p-4 space-y-2">
-            {menuData.map((item, index) => (
-              <Link key={index} href={item.link} onClick={toggleMenu}>
-                <div
-                  className={`p-3 rounded-lg flex items-center ${
-                    pathname === item.link
-                      ? "bg-redOrange text-cream"
-                      : "text-orangeRed hover:bg-orange-100"
-                  }`}
-                >
-                  {item.icon}
-                  {item.name}
-                </div>
-              </Link>
-            ))}
+          {/* Mobile Menu Content */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Navigation Menu */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3">
+              <div className="mb-6">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</h3>
+                {menuData.map((item, index) => (
+                  <Link key={index} href={item.link} onClick={toggleMenu}>
+                    <div
+                      className={`p-4 rounded-2xl flex items-center text-base font-medium transition-all duration-300 transform hover:scale-[1.02] ${
+                        pathname === item.link
+                          ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200"
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 hover:text-orange-600"
+                      } relative overflow-hidden group`}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-100/0 to-red-100/0 group-hover:from-orange-100/50 group-hover:to-red-100/30 transition-all duration-300"></div>
+                      <div className="relative z-10 flex items-center w-full">
+                        {item.icon}
+                        <span className="flex-1">{item.name}</span>
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          pathname === item.link ? "bg-white" : "bg-transparent group-hover:bg-orange-400"
+                        }`}></div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
 
-            <div className="pt-4 border-t border-orange-200 mt-4">
-              {mounted ? (
-                <>
-                  {token ? (
-                    <>
-                      <Link href="user/dashboard" onClick={toggleMenu}>
-                        <div className="p-3 rounded-lg flex items-center text-orangeRed hover:bg-orange-100">
-                          <FaUserCircle className="mr-2" />
-                          My Dashboard
+              {/* Mobile Auth Section */}
+              <div className="border-t border-gray-100 pt-6">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h3>
+                {mounted ? (
+                  <>
+                    {token ? (
+                      <div className="space-y-2">
+                        <Link href="user/dashboard" onClick={toggleMenu}>
+                          <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
+                            <FaTachometerAlt className="mr-3 text-xl" />
+                            <span className="flex-1">My Dashboard</span>
+                          </div>
+                        </Link>
+                        <Link href="user/profile" onClick={toggleMenu}>
+                          <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
+                            <FaCog className="mr-3 text-xl" />
+                            <span className="flex-1">Profile Settings</span>
+                          </div>
+                        </Link>
+                        <Link href="/mybooking" onClick={toggleMenu}>
+                          <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
+                            <FaHistory className="mr-3 text-xl" />
+                            <span className="flex-1">My Bookings</span>
+                          </div>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            toggleMenu();
+                          }}
+                          className="w-full mt-4 p-4 rounded-2xl flex items-center text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 text-base font-medium transition-all duration-300 transform hover:scale-[1.02] border border-red-200 hover:border-red-300"
+                        >
+                          <FaSignOutAlt className="mr-3 text-xl" />
+                          <span className="flex-1 text-left">Logout</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <Link href="/register" onClick={toggleMenu}>
+                        <div className="p-4 rounded-2xl flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg shadow-orange-200 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
+                          <FaUserCircle className="mr-3 text-xl" />
+                          SignUp/SignIn
                         </div>
                       </Link>
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          toggleMenu();
-                        }}
-                        className="w-full mt-2 p-3 rounded-lg flex items-center text-red-600 hover:bg-red-50"
-                      >
-                        <FaSignOutAlt className="mr-2" />
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <Link href="/register" onClick={toggleMenu}>
-                      <div className="p-3 rounded-lg flex items-center justify-center bg-redOrange text-cream hover:bg-orange-600">
-                        SignUp/SignIn
-                      </div>
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <div className="p-3 w-full bg-gray-200 rounded-lg animate-pulse h-12"></div>
-              )}
+                    )}
+                  </>
+                ) : (
+                  <div className="p-4 w-full bg-gray-200 rounded-2xl animate-pulse h-16"></div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Social Media Links in Mobile Menu */}
-          <div className="absolute bottom-8 left-0 w-full px-4">
-            <div className="flex justify-center space-x-6">
-              <Link
-                href="https://wa.me/+911234567890"
-                target="_blank"
-                aria-label="WhatsApp"
-              >
-                <div className="p-2 bg-green-600 text-cream rounded-full hover:bg-green-700">
-                  <FaWhatsappSquare className="text-lg" />
-                </div>
-              </Link>
-              <Link href="/cart" aria-label="Cart">
-                <div className="p-2 bg-orange-700 text-cream rounded-full hover:bg-orange-800 relative">
-                  <FaCartPlus className="text-lg" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 text-xs bg-red-500 text-cream rounded-full w-5 h-5 flex items-center justify-center border-2 border-cream">
-                      {cartCount}
-                    </span>
-                  )}
-                </div>
-              </Link>
-              {mounted && !token && (
-                <Link href="/login" aria-label="Login">
-                  <div className="p-2 bg-redOrange text-cream rounded-full hover:bg-orange-600">
-                    <FaUserCircle className="text-lg" />
+            {/* Mobile Menu Footer */}
+            <div className="p-4 sm:p-6 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-orange-50">
+              <div className="text-center mb-4">
+                <p className="text-xs font-medium text-gray-600 mb-2">Connect with us</p>
+              </div>
+              <div className="flex justify-center space-x-4">
+                <Link
+                  href="https://wa.me/+911234567890"
+                  target="_blank"
+                  aria-label="WhatsApp"
+                  onClick={toggleMenu}
+                >
+                  <div className="w-14 h-14 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-all duration-300 flex items-center justify-center shadow-lg transform hover:scale-110 hover:rotate-3">
+                    <FaWhatsappSquare className="text-2xl" />
                   </div>
                 </Link>
-              )}
+                <Link href="/cart" aria-label="Cart" onClick={toggleMenu}>
+                  <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 flex items-center justify-center shadow-lg transform hover:scale-110 hover:rotate-3 relative">
+                    <FaCartPlus className="text-2xl" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 text-xs bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center border-2 border-white font-bold shadow-lg">
+                        {cartCount}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+                {mounted && !token && (
+                  <Link href="/login" aria-label="Login" onClick={toggleMenu}>
+                    <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center shadow-lg transform hover:scale-110 hover:rotate-3">
+                      <FaUserCircle className="text-2xl" />
+                    </div>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Spacer for fixed navbar */}
-      <div className={`${isScrolled ? "h-16" : "h-20"}`}></div>
-
-      {/* Responsive styles */}
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .logo-wrapper {
-            width: 150px;
-            height: 60px;
-          }
-        }
-
-        @media (min-width: 768px) and (max-width: 1024px) {
-          .logo-wrapper {
-            width: 180px;
-          }
-        }
-      `}</style>
+      <div className={`${isScrolled ? "h-14 sm:h-16" : "h-16 sm:h-18 md:h-20"} transition-all duration-300`}></div>
     </>
   );
 };

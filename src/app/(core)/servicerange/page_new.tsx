@@ -52,7 +52,7 @@ export default function ServiceRange() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <section className="relative bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
+    <section className="relative py-20 sm:py-24 lg:py-28 bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
       {/* Modern Background Elements */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-orange-400 to-red-400 rounded-full blur-3xl animate-pulse"></div>
@@ -69,7 +69,7 @@ export default function ServiceRange() {
           transition={{ duration: 0.8 }}
           className="text-center max-w-4xl mx-auto mb-16 lg:mb-20"
         >
-          {/* <motion.div 
+          <motion.div 
             className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl mb-8 shadow-2xl"
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ duration: 0.6 }}
@@ -77,15 +77,15 @@ export default function ServiceRange() {
             <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
-          </motion.div> */}
+          </motion.div>
           
           <span className="inline-block px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 text-sm font-semibold rounded-full mb-6 border border-orange-200">
             Our Sacred Offerings
           </span>
           
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-8 leading-tight">
-            <span className="text-gray-900">Comprehensive Range of{" "}</span>
-            <span className="relative bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent inline-block">
+            Comprehensive Range of{" "}
+            <span className="relative inline-block">
               Sacred Services
               <motion.div 
                 className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"

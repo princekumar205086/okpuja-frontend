@@ -96,117 +96,125 @@ const steps = [
 ];
 
 const HowItWorks = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut" as const
+      }
+    }
+  };
+
   return (
-    <section className="bg-gradient-to-b from-cream to-cream/90 pt-10 pb-8 sm:pt-12 sm:pb-8 lg:pt-16 lg:pb-10">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-16 md:py-24 bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-10 w-40 h-40 bg-gradient-to-br from-orange-400 to-red-400 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-32 h-32 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full blur-2xl"></div>
+      </div>
+
+      {/* Floating geometric shapes */}
+      <div className="absolute top-32 right-20 w-6 h-6 bg-orange-400 rounded-full animate-pulse hidden lg:block"></div>
+      <div className="absolute bottom-40 left-16 w-4 h-4 bg-amber-400 rounded-full animate-pulse hidden lg:block"></div>
+      <div className="absolute top-1/4 right-1/3 w-8 h-8 border-2 border-orange-300 rounded-full hidden lg:block"></div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-8 md:mb-10"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12 md:mb-16"
         >
-          <span className="text-redOrange text-sm uppercase font-semibold tracking-wider">
+          <span className="inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm uppercase tracking-wider font-semibold rounded-full mb-4">
             Simple Process
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2 text-gray-800">
-            How OKPUJA Works
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <span className="text-gray-900">How</span>
+            <span className="block sm:inline bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent ml-0 sm:ml-3">
+              OKPUJA Works
+            </span>
           </h2>
-          <div className="w-16 h-1 bg-redOrange mx-auto mt-3 mb-4 rounded-full"></div>
-          <p className="max-w-2xl mx-auto text-gray-600 text-base sm:text-lg">
-            Immerse yourself in the serenity of sacred puja services with just a
-            few simple steps.
+          <div className="w-24 h-1.5 bg-gradient-to-r from-orange-500 to-red-500 mx-auto rounded-full mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Experience the divine through our streamlined process that connects you with 
+            authentic spiritual traditions and expert pandits
           </p>
         </motion.div>
 
-        {/* Featured Section with Image */}
+        {/* Enhanced Featured Section */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="bg-redOrange shadow-xl rounded-2xl overflow-hidden mb-10 sm:mb-12"
+          className="relative bg-gradient-to-br from-orange-500 to-red-600 shadow-2xl rounded-3xl overflow-hidden mb-16 md:mb-20"
         >
-          <div className="flex flex-col lg:flex-row">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-red-600/20 backdrop-blur-3xl"></div>
+          
+          <div className="relative flex flex-col lg:flex-row">
             {/* Content Side */}
-            <div className="lg:w-1/2 p-5 sm:p-6 md:p-8 xl:p-10 flex flex-col justify-center">
-              <h3 className="text-2xl sm:text-3xl font-bold text-cream mb-3 sm:mb-4">
-                Experience Sacred Traditions With Ease
+            <div className="lg:w-1/2 p-8 md:p-12 xl:p-16 flex flex-col justify-center">
+              <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Experience Sacred Traditions 
+                <span className="block text-orange-100">With Ease</span>
               </h3>
 
-              <div className="space-y-3 mb-5 sm:mb-6">
-                <div className="flex items-start">
-                  <div className="bg-cream/20 p-2 rounded-full mr-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-cream"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-cream">
-                    Expert pandits and purohits with verified credentials
-                  </p>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-cream/20 p-2 rounded-full mr-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-cream"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-cream">
-                    Rituals tailored to your specific requirements and
-                    traditions
-                  </p>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-cream/20 p-2 rounded-full mr-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-cream"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-cream">
-                    Convenient puja samagri delivery right to your doorstep
-                  </p>
-                </div>
+              <div className="space-y-4 mb-8">
+                {[
+                  "Expert pandits and purohits with verified credentials",
+                  "Rituals tailored to your specific requirements and traditions", 
+                  "Convenient puja samagri delivery right to your doorstep"
+                ].map((text, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="flex items-start"
+                  >
+                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-xl mr-4 flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-white/90 leading-relaxed">{text}</p>
+                  </motion.div>
+                ))}
               </div>
 
               <Link href="/pujaservice">
                 <motion.span
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="inline-block bg-cream text-redOrange font-medium px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-block bg-white text-orange-600 font-semibold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-orange-50"
                 >
                   Book Your Puja Now
                 </motion.span>
@@ -214,7 +222,7 @@ const HowItWorks = () => {
             </div>
 
             {/* Image Side */}
-            <div className="lg:w-1/2 relative h-64 sm:h-80 lg:h-auto">
+            <div className="lg:w-1/2 relative h-80 lg:h-auto min-h-[400px]">
               <Image
                 src="/image/hawan.jpg"
                 alt="Sacred hawan ceremony"
@@ -223,81 +231,96 @@ const HowItWorks = () => {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 quality={90}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-redOrange/60 to-transparent lg:from-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-600/40 via-transparent to-transparent lg:from-transparent"></div>
+              
+              {/* Floating elements on image */}
+              <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-white rounded-full animate-pulse"></div>
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Process Steps */}
-        <div className="relative">
-          {/* Connecting Line (visible on tablet and up) */}
-          <div className="hidden md:block absolute top-1/4 left-0 right-0 h-0.5 bg-gray-200 z-0"></div>
+        {/* Process Steps with enhanced design */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="relative"
+        >
+          {/* Enhanced Connecting Line */}
+          <div className="hidden lg:block absolute top-24 left-0 right-0 h-1 bg-gradient-to-r from-orange-200 via-red-300 to-orange-200 z-0 rounded-full"></div>
+          <div className="hidden lg:block absolute top-24 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 z-0 rounded-full animate-pulse opacity-50"></div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 sm:gap-y-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
             {steps.map((step, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative z-10"
+                variants={itemVariants}
+                whileHover={{ y: -8 }}
+                className="relative z-10 group"
               >
-                <div className="bg-white rounded-xl shadow-md overflow-hidden h-full flex flex-col">
-                  <div className="relative h-48 sm:h-40">
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-2xl overflow-hidden h-full flex flex-col transition-all duration-500 border border-white/20">
+                  {/* Enhanced Image Section */}
+                  <div className="relative h-52 overflow-hidden">
                     <Image
                       src={step.imagesrc}
                       alt={step.title}
                       fill
-                      className="object-cover"
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
 
-                    {/* Step Number */}
-                    <div className="absolute -top-1 -left-1 w-12 h-12 bg-redOrange rounded-br-xl flex items-center justify-center text-xl font-bold text-white shadow-md">
+                    {/* Enhanced Step Number */}
+                    <div className="absolute top-4 left-4 w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                       {index + 1}
                     </div>
 
-                    {/* Icon overlay */}
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <div className="bg-white/90 rounded-full p-3 text-redOrange">
+                    {/* Icon overlay with better styling */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end justify-center pb-4">
+                      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 text-orange-600 shadow-lg group-hover:scale-110 transition-transform duration-300">
                         {step.icon}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                  {/* Enhanced Content Section */}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-300">
                       {step.title}
                     </h3>
-                    <p className="text-gray-600 text-sm flex-grow">
+                    <p className="text-gray-600 leading-relaxed flex-grow">
                       {step.description}
                     </p>
+                    
+                    {/* Progress indicator */}
+                    <div className="w-16 h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full mt-4 group-hover:w-24 transition-all duration-500"></div>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Bottom CTA */}
+        {/* Enhanced Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="text-center mt-10"
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="text-center mt-16 md:mt-20"
         >
-          <p className="text-gray-700 mb-4 text-lg">
-            Ready to experience a seamless spiritual journey with OKPUJA?
+          <p className="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">
+            Ready to experience a seamless spiritual journey with authentic traditions and expert guidance?
           </p>
           <Link href="/pujaservice">
             <motion.span
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="inline-block bg-redOrange hover:bg-redOrange/90 text-white font-medium px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+              className="inline-block bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-10 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Get Started
+              Start Your Spiritual Journey
             </motion.span>
           </Link>
         </motion.div>

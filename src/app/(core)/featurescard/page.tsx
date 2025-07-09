@@ -115,90 +115,110 @@ const FeaturedPujas: React.FC = () => {
   };
 
   return (
-    <section className="featured-pujas pt-10 pb-6 sm:pt-12 sm:pb-8 bg-gradient-to-b from-cream to-cream/80">
-      <div className="container mx-auto px-4 sm:px-6">
+    <section className="relative py-16 md:py-24 bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-32 left-16 w-24 h-24 bg-gradient-to-br from-orange-400 to-red-400 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-32 right-16 w-32 h-32 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full blur-2xl"></div>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 relative">
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-8 sm:mb-10"
+          className="text-center mb-12 md:mb-16"
         >
-          <span className="text-redOrange text-sm uppercase tracking-wider font-semibold">
+          <span className="inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm uppercase tracking-wider font-semibold rounded-full mb-4">
             Popular Ceremonies
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mt-2">
-            Featured Pujas
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <span className="text-gray-900">Featured</span>
+            <span className="block sm:inline bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent ml-0 sm:ml-3">
+              Pujas
+            </span>
           </h2>
-          <div className="w-20 h-1.5 bg-redOrange mx-auto rounded-full mb-4"></div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            Here are some of the most popular Pujas and Homas booked on our
-            portal
+          <div className="w-24 h-1.5 bg-gradient-to-r from-orange-500 to-red-500 mx-auto rounded-full mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Experience the divine through our most popular Pujas and Homas, 
+            carefully curated to bring blessings and prosperity to your life
           </p>
         </motion.div>
 
         <div className="relative">
-          {/* Custom Navigation Buttons */}
+          {/* Enhanced Custom Navigation Buttons */}
           <button
             onClick={goToPrev}
-            className="absolute left-0 sm:-left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-redOrange hover:text-white text-gray-800 rounded-full p-2 shadow-md transition-all duration-300 hidden sm:flex items-center justify-center"
+            className="absolute left-0 sm:-left-6 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white text-gray-700 rounded-2xl p-3 shadow-lg hover:shadow-xl transition-all duration-300 hidden sm:flex items-center justify-center group"
             aria-label="Previous slide"
           >
-            <IoChevronBack size={24} />
+            <IoChevronBack size={24} className="group-hover:scale-110 transition-transform duration-200" />
           </button>
 
           <button
             onClick={goToNext}
-            className="absolute right-0 sm:-right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-redOrange hover:text-white text-gray-800 rounded-full p-2 shadow-md transition-all duration-300 hidden sm:flex items-center justify-center"
+            className="absolute right-0 sm:-right-6 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white text-gray-700 rounded-2xl p-3 shadow-lg hover:shadow-xl transition-all duration-300 hidden sm:flex items-center justify-center group"
             aria-label="Next slide"
           >
-            <IoChevronForward size={24} />
+            <IoChevronForward size={24} className="group-hover:scale-110 transition-transform duration-200" />
           </button>
 
-          {/* Slider Component - TypeScript Fix */}
+          {/* Enhanced Slider Component */}
           <div className="puja-slider-container">
             <Slider ref={sliderRef} {...settings}>
               {pujas.map((puja, index) => (
-                <div key={index} className="px-2 py-1">
+                <div key={index} className="px-3 py-2">
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
-                    className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col"
+                    whileHover={{ y: -8 }}
+                    className="group bg-white/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col border border-white/20"
                   >
-                    <div className="relative h-44 sm:h-48 overflow-hidden">
+                    {/* Enhanced Image Section */}
+                    <div className="relative h-52 sm:h-56 overflow-hidden">
                       <Image
                         src={puja.imageSource}
                         alt={puja.pujaName}
                         fill
                         sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                      <div className="absolute bottom-3 right-3 bg-redOrange/90 text-cream text-xs px-2 py-1 rounded-full">
-                        {puja.duration}
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                      
+                      {/* Duration badge */}
+                      <div className="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                        ⏱ {puja.duration}
                       </div>
+
+                      {/* Floating overlay on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-orange-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     </div>
 
-                    <div className="p-4 flex-1 flex flex-col">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1.5">
+                    {/* Enhanced Content Section */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-300">
                         {puja.pujaName}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-3 flex-1">
+                      <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1">
                         {puja.description}
                       </p>
 
+                      {/* Enhanced CTA Button */}
                       <Link
                         href={`/pujaservice/${puja.pujaName
                           .toLowerCase()
                           .replace(/\s+/g, "-")}`}
-                        className="inline-flex items-center justify-center bg-cream hover:bg-redOrange border border-redOrange text-redOrange hover:text-white py-2 px-4 rounded-lg transition-colors duration-300 text-sm font-medium mt-auto group"
+                        className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 px-6 rounded-2xl transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 group/button"
                       >
-                        View Details
+                        <span>View Details</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform"
+                          className="h-4 w-4 ml-2 transform group-hover/button:translate-x-1 transition-transform duration-200"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -219,71 +239,84 @@ const FeaturedPujas: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 text-center">
+        {/* Enhanced CTA Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          viewport={{ once: true }}
+          className="mt-12 md:mt-16 text-center"
+        >
+          <p className="text-gray-600 text-lg mb-6">
+            Discover more sacred ceremonies and spiritual services
+          </p>
           <Link href="/pujaservice">
             <motion.span
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className="inline-block bg-redOrange hover:bg-redOrange/90 text-white py-2.5 px-7 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              className="inline-block bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-4 px-8 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Explore All Puja Services
             </motion.span>
           </Link>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Professional HR divider with ornament */}
-      <div className="container mx-auto px-4 sm:px-6 mt-12 sm:mt-16">
+      {/* Professional decorative divider */}
+      <div className="container mx-auto px-4 sm:px-6 mt-16 md:mt-20">
         <div className="flex items-center justify-center">
           <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-          <div className="mx-4">
-            <svg
-              className="h-6 w-6 text-redOrange/60"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-              <circle cx="12" cy="12" r="5" />
-            </svg>
+          <div className="mx-6">
+            <div className="w-3 h-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
           </div>
           <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
         </div>
       </div>
 
-      {/* CSS for Custom Dots */}
+      {/* Enhanced CSS for Custom Dots */}
       <style jsx global>{`
-        .custom-dots {
-          bottom: -25px;
+        .puja-slider-container .slick-dots {
+          bottom: -40px;
+          display: flex !important;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .puja-slider-container .slick-dots li {
+          margin: 0;
         }
 
         .custom-dot {
-          width: 10px;
-          height: 10px;
-          background: #d1d5db;
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #d1d5db, #9ca3af);
           border-radius: 50%;
           display: inline-block;
-          margin: 0 4px;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .slick-active .custom-dot {
-          background: #e25822;
-          width: 24px;
-          border-radius: 10px;
+          background: linear-gradient(135deg, #f97316, #dc2626);
+          width: 32px;
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
         }
 
         @media (max-width: 640px) {
-          .custom-dots {
-            bottom: -22px;
+          .puja-slider-container .slick-dots {
+            bottom: -35px;
           }
 
           .custom-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
           }
 
           .slick-active .custom-dot {
-            width: 20px;
+            width: 24px;
           }
         }
       `}</style>

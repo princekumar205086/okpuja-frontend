@@ -43,7 +43,7 @@ const UpcomingEvents = () => {
   const [hoveredEvent, setHoveredEvent] = useState<number | null>(null);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50 ">
+    <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50 py-20 sm:py-24 lg:py-28">
       {/* Modern Background Elements */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-r from-orange-400/10 to-red-400/10 -skew-y-2 transform -translate-y-20"></div>
@@ -60,21 +60,21 @@ const UpcomingEvents = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16 lg:mb-20"
         >
-          {/* <motion.div 
+          <motion.div 
             className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl mb-8 shadow-2xl"
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ duration: 0.6 }}
           >
             <FaCalendarAlt className="w-10 h-10 text-white" />
-          </motion.div> */}
+          </motion.div>
           
           <span className="inline-block px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 text-sm font-semibold rounded-full mb-6 border border-orange-200">
             Sacred Celebrations
           </span>
           
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold  mb-8 ">
-            <span className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight">Upcoming Sacred{" "}</span>
-            <span className="relative inline-block bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent ml-0 sm:ml-3">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-8 leading-tight">
+            Upcoming Sacred{" "}
+            <span className="relative inline-block">
               Events & Festivals
               <motion.div 
                 className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"

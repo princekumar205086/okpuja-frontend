@@ -37,7 +37,7 @@ export default function ThemeInitializer() {
         bodyElement.classList.remove('dark');
       }
     }
-  }, []); // Only run once on mount
+  }, [mode]); // Run on mount and when mode changes
 
   return null; // This component doesn't render anything
 }

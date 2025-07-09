@@ -5,6 +5,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { FaQuoteLeft, FaChevronLeft, FaChevronRight, FaStar, FaMapMarkerAlt } from "react-icons/fa";
 
 const reviews = [
   {
@@ -15,6 +16,7 @@ const reviews = [
     rating: 5,
     location: "Mumbai, Maharashtra",
     service: "Griha Pravesh Puja",
+    date: "2 weeks ago"
   },
   {
     id: 2,
@@ -24,6 +26,7 @@ const reviews = [
     rating: 4,
     location: "Delhi, NCR",
     service: "Astrology Consultation",
+    date: "1 month ago"
   },
   {
     id: 3,
@@ -33,6 +36,7 @@ const reviews = [
     rating: 3,
     location: "Ahmedabad, Gujarat",
     service: "Saraswati Puja",
+    date: "3 weeks ago"
   },
   {
     id: 4,
@@ -42,6 +46,7 @@ const reviews = [
     rating: 5,
     location: "Hyderabad, Telangana",
     service: "Kundali Matching",
+    date: "1 week ago"
   },
   {
     id: 5,
@@ -51,6 +56,7 @@ const reviews = [
     rating: 4,
     location: "Jaipur, Rajasthan",
     service: "Griha Pravesh Puja",
+    date: "2 months ago"
   },
   {
     id: 6,
@@ -60,6 +66,7 @@ const reviews = [
     rating: 5,
     location: "Kolkata, West Bengal",
     service: "Career Astrology",
+    date: "3 days ago"
   },
   {
     id: 7,
@@ -69,6 +76,7 @@ const reviews = [
     rating: 3,
     location: "Chennai, Tamil Nadu",
     service: "Lakshmi Puja",
+    date: "1 month ago"
   },
   {
     id: 8,
@@ -78,6 +86,7 @@ const reviews = [
     rating: 4,
     location: "Pune, Maharashtra",
     service: "Navagraha Shanti Puja",
+    date: "2 weeks ago"
   },
 ];
 
@@ -87,7 +96,7 @@ export default function CustomerReviews() {
   const settings = {
     dots: true,
     infinite: true,
-    speed: 500,
+    speed: 600,
     slidesToShow: 3,
     slidesToScroll: 1,
     autoplay: true,
@@ -106,7 +115,7 @@ export default function CustomerReviews() {
         settings: {
           slidesToShow: 1,
           centerMode: true,
-          centerPadding: '40px',
+          centerPadding: '20px',
         },
       },
       {
@@ -135,124 +144,161 @@ export default function CustomerReviews() {
   // Star rendering helper function
   const renderStars = (rating) => {
     return (
-      <div className="flex">
+      <div className="flex space-x-1">
         {[...Array(5)].map((_, i) => (
-          <svg
+          <FaStar
             key={i}
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 ${i < rating ? "text-yellow-400" : "text-gray-300"}`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            />
-          </svg>
+            className={`h-4 w-4 ${i < rating ? "text-yellow-400" : "text-gray-300"}`}
+          />
         ))}
       </div>
     );
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white to-cream">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-16 md:py-24 bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50 overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-orange-400 to-red-400 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full blur-2xl"></div>
+      </div>
+
+      {/* Floating geometric shapes */}
+      <div className="absolute top-32 right-20 w-6 h-6 bg-orange-400 rounded-full animate-pulse hidden lg:block"></div>
+      <div className="absolute bottom-40 left-16 w-4 h-4 bg-amber-400 rounded-full animate-pulse hidden lg:block"></div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-10 sm:mb-14"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12 md:mb-16"
         >
-          <span className="inline-block px-3 py-1 bg-redOrange/10 text-redOrange rounded-full text-sm font-medium mb-4">Testimonials</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">What Our Clients Say</h2>
-          <div className="w-20 h-1 bg-redOrange mx-auto mb-6 rounded-full"></div>
-          <p className="max-w-2xl mx-auto text-gray-600 text-lg">
-            Discover why thousands of clients trust OKPUJA for their spiritual needs and religious ceremonies
+          <span className="inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm uppercase tracking-wider font-semibold rounded-full mb-4">
+            Testimonials
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <span className="text-gray-900">What Our </span>
+            <span className="block sm:inline bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent ml-0 sm:ml-3">
+              Clients Say
+            </span>
+          </h2>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-orange-500 to-red-500 mx-auto rounded-full mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Discover why thousands of clients trust OKPUJA for their spiritual needs and sacred ceremonies
           </p>
         </motion.div>
 
-        {/* Highlighted Review */}
+        {/* Enhanced Highlighted Review */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-12 sm:mb-16 max-w-4xl mx-auto"
+          className="mb-16 md:mb-20 max-w-5xl mx-auto"
         >
-          <div className="p-1 bg-gradient-to-r from-redOrange to-orange-400 rounded-2xl">
-            <div className="bg-white p-6 sm:p-8 rounded-xl relative flex flex-col sm:flex-row items-center gap-6">
-              <div className="absolute -top-5 left-8 bg-white rounded-full p-3 shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-redOrange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl blur-xl opacity-20"></div>
+            <div className="relative bg-white/90 backdrop-blur-sm p-8 md:p-12 rounded-3xl shadow-2xl border border-white/20">
+              {/* Quote icon */}
+              <div className="absolute -top-6 left-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-4 shadow-lg">
+                <FaQuoteLeft className="h-6 w-6 text-white" />
               </div>
 
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32">
-                <Image
-                  src="https://randomuser.me/api/portraits/women/35.jpg"
-                  alt="Featured customer"
-                  className="rounded-full object-cover border-4 border-white shadow-lg"
-                  fill
-                  sizes="(max-width: 768px) 96px, 128px"
-                />
-                <div className="absolute -bottom-2 -right-2 bg-yellow-400 rounded-full p-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="flex-1 text-center sm:text-left">
-                <div className="flex justify-center sm:justify-start mb-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
+              <div className="flex flex-col lg:flex-row items-center gap-8">
+                <div className="relative">
+                  <div className="w-32 h-32 relative">
+                    <Image
+                      src="https://randomuser.me/api/portraits/women/35.jpg"
+                      alt="Featured customer"
+                      className="rounded-2xl object-cover shadow-lg"
+                      fill
+                      sizes="128px"
+                    />
+                  </div>
+                  <div className="absolute -bottom-3 -right-3 bg-green-500 rounded-xl p-2 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
                   </div>
                 </div>
-                <p className="text-gray-700 text-lg sm:text-xl italic mb-4">
-                  "Thanks to OKPUJA, I was able to arrange a beautiful Griha Pravesh ceremony for our new home. The pandit was knowledgeable, punctual, and guided us through every ritual with patience. The experience was truly divine!"
-                </p>
-                <div>
-                  <p className="font-semibold text-gray-800">Sneha Kapoor</p>
-                  <p className="text-sm text-gray-500">Jaipur, Rajasthan • Griha Pravesh Puja</p>
+
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="flex justify-center lg:justify-start mb-4">
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="h-6 w-6 text-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <blockquote className="text-gray-700 text-xl md:text-2xl italic mb-6 leading-relaxed">
+                    "Thanks to OKPUJA, I was able to arrange a beautiful Griha Pravesh ceremony for our new home. The pandit was knowledgeable, punctual, and guided us through every ritual with patience. The experience was truly divine!"
+                  </blockquote>
+                  <div>
+                    <p className="font-bold text-xl text-gray-900">Sneha Kapoor</p>
+                    <div className="flex items-center justify-center lg:justify-start mt-2 text-gray-600">
+                      <FaMapMarkerAlt className="h-4 w-4 mr-2 text-orange-500" />
+                      <span>Jaipur, Rajasthan</span>
+                      <span className="mx-2">•</span>
+                      <span>Griha Pravesh Puja</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Custom Navigation */}
+        {/* Enhanced Navigation and Slider */}
         <div className="flex justify-between items-center mb-8">
-          <h3 className="text-xl font-semibold text-gray-800">Client Experiences</h3>
+          <h3 className="text-2xl font-bold text-gray-900">Client Experiences</h3>
           <div className="flex space-x-3">
             <button
               onClick={goToPrev}
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-cream transition-all duration-200"
+              className="p-3 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white transition-all duration-300 group"
               aria-label="Previous testimonial"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <FaChevronLeft className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
             </button>
             <button
               onClick={goToNext}
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-cream transition-all duration-200"
+              className="p-3 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white transition-all duration-300 group"
               aria-label="Next testimonial"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <FaChevronRight className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
             </button>
           </div>
         </div>
 
-        {/* Testimonials Slider */}
-        <div className="testimonials-slider mb-10">
-          <Slider ref={sliderRef} {...settings} className="pb-14">
+        {/* Enhanced Testimonials Slider */}
+        <div className="testimonials-slider mb-12">
+          <Slider ref={sliderRef} {...settings} className="pb-16">
             {reviews.map((review) => (
               <div key={review.id} className="px-3 py-2 h-full">
                 <motion.div
@@ -260,34 +306,45 @@ export default function CustomerReviews() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
-                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-6 sm:p-7 h-full flex flex-col"
+                  whileHover={{ y: -8 }}
+                  className="group bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 md:p-8 h-full flex flex-col border border-white/20"
                 >
-                  <div className="mb-5 text-redOrange">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 opacity-20" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                    </svg>
+                  {/* Quote icon */}
+                  <div className="mb-6 text-orange-500 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                    <FaQuoteLeft className="h-8 w-8" />
                   </div>
 
-                  <p className="text-gray-700 mb-6 text-base flex-grow">
+                  {/* Review text */}
+                  <p className="text-gray-700 mb-6 text-base leading-relaxed flex-grow">
                     {review.review}
                   </p>
 
-                  <div className="flex items-center">
-                    <div className="relative w-12 h-12 mr-4">
-                      <Image
-                        src={review.image}
-                        alt={review.name}
-                        className="rounded-full object-cover"
-                        fill
-                        sizes="48px"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                      <div className="flex items-center mt-1">
-                        {renderStars(review.rating)}
+                  {/* Customer info */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="relative w-12 h-12 mr-4">
+                        <Image
+                          src={review.image}
+                          alt={review.name}
+                          className="rounded-xl object-cover"
+                          fill
+                          sizes="48px"
+                        />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{review.service}</p>
+                      <div>
+                        <h4 className="font-bold text-gray-900">{review.name}</h4>
+                        <div className="flex items-center mt-1 mb-1">
+                          {renderStars(review.rating)}
+                        </div>
+                        <p className="text-xs text-gray-500">{review.service}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400">{review.date}</p>
+                      <div className="flex items-center text-xs text-gray-500 mt-1">
+                        <FaMapMarkerAlt className="h-3 w-3 mr-1 text-orange-500" />
+                        {review.location.split(',')[0]}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -296,30 +353,30 @@ export default function CustomerReviews() {
           </Slider>
         </div>
 
-        {/* Bottom CTA */}
+        {/* Enhanced Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="text-center mt-4 sm:mt-8"
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-center"
         >
-          <p className="text-gray-600 mb-5 text-lg">
-            Join thousands of satisfied clients who have experienced our sacred services
+          <p className="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">
+            Join thousands of satisfied clients who have experienced our sacred services and spiritual guidance
           </p>
           <a
             href="/pujaservice"
-            className="inline-flex items-center px-6 py-3 bg-redOrange text-white font-medium rounded-lg hover:bg-redOrange/90 transition-colors duration-300 shadow-md hover:shadow-lg"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
           >
             Book Your Puja Today
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </a>
         </motion.div>
       </div>
 
-      {/* Custom styles for slider */}
+      {/* Enhanced Custom styles for slider */}
       <style jsx global>{`
         .testimonials-slider .slick-track {
           display: flex !important;
@@ -333,33 +390,52 @@ export default function CustomerReviews() {
           height: 100%;
         }
         
-        .custom-dots {
-          bottom: -5px;
+        .testimonials-slider .slick-dots {
+          bottom: -40px;
+          display: flex !important;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .testimonials-slider .slick-dots li {
+          margin: 0;
         }
         
         .custom-dot {
-          width: 8px;
-          height: 8px;
-          background-color: #E9DBCF;
+          width: 12px;
+          height: 12px;
+          background: linear-gradient(135deg, #d1d5db, #9ca3af);
           border-radius: 50%;
           display: inline-block;
-          transition: all 0.3s ease;
-          margin: 0 4px;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .slick-active .custom-dot {
-          background-color: #E25822;
-          width: 24px;
-          border-radius: 10px;
+          background: linear-gradient(135deg, #f97316, #dc2626);
+          width: 32px;
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
         }
 
         @media (max-width: 640px) {
-          .testimonials-slider {
-            margin: 0 -16px;
-            width: calc(100% + 32px);
+          .testimonials-slider .slick-dots {
+            bottom: -35px;
+          }
+
+          .custom-dot {
+            width: 10px;
+            height: 10px;
+          }
+
+          .slick-active .custom-dot {
+            width: 24px;
           }
         }
       `}</style>
     </section>
   );
 }
+

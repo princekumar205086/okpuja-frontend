@@ -196,8 +196,8 @@ const QualifiedPandit = () => {
                 </div>
 
                 <blockquote className="text-lg text-white mb-6 leading-relaxed">
-                  &quot;Joining this platform has transformed my practice. I now reach devotees 
-                  from across India and have built a strong reputation through verified reviews. 
+                  &quot;Joining this platform has transformed my practice. I now reach devotees
+                  from across India and have built a strong reputation through verified reviews.
                   The payment system is reliable and the platform support is excellent.&quot;
                 </blockquote>
 
