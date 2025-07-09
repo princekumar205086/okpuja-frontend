@@ -164,10 +164,7 @@ const FeaturedPujas: React.FC = () => {
           >
             <IoChevronForward size={24} />
           </button>
-
-          {/* Slider Component - TypeScript Fix */}
           <div className="puja-slider-container">
-            {/* @ts-ignore - We need to ignore TypeScript here as Slider's types are not fully compatible */}
             <Slider ref={sliderRef} {...settings}>
               {pujas.map((puja, index) => (
                 <div key={index} className="px-2 py-1">
