@@ -296,8 +296,8 @@ const Header = () => {
 
               {/* Cart Icon */}
               <Link href="/cart" className="relative" aria-label="Go to cart">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
-                  <FaCartPlus className="text-base sm:text-lg" />
+                <div className="w-9 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                  <FaCartPlus className="text-base sm:text-sm" />
                   {/* Cart Count Badge */}
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-white font-bold">
@@ -362,7 +362,7 @@ const Header = () => {
                 <button
                   onClick={toggleMenu}
                   aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                  className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-all duration-300 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-300 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   {isMenuOpen ? (
                     <RiCloseLine className="text-lg sm:text-xl" />
@@ -377,7 +377,7 @@ const Header = () => {
 
         {/* Enhanced Mobile Menu with Overlay */}
         <div
-          className={`md:hidden fixed inset-0 bg-orange-500 z-40 transition-all duration-500 ease-in-out ${
+          className={`md:hidden fixed inset-0 bg-black z-40 transition-all duration-500 ease-in-out ${
             isMenuOpen 
               ? "opacity-60 backdrop-blur-sm" 
               : "opacity-0 pointer-events-none backdrop-blur-none"
@@ -397,18 +397,9 @@ const Header = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
             
             <div className="relative z-10 flex items-center">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3 backdrop-blur-sm">
-                <Image
-                  alt="OKPUJA"
-                  src="/image/okpuja logo.png"
-                  width={24}
-                  height={24}
-                  className="object-contain brightness-0 invert"
-                />
-              </div>
               <div>
-                <h2 className="text-white font-bold text-lg tracking-wide">OKPUJA</h2>
-                <p className="text-white/80 text-xs">Your Puja & Astrology</p>
+                <h3 className="text-white font-bold text-lg text-center tracking-wide">OKPUJA</h3>
+                <p className="text-white/80 text-xs text-center"><i>Vastu | Puja | Astrology</i></p>
               </div>
             </div>
             
