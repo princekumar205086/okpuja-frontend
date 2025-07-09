@@ -124,13 +124,8 @@ const Header = () => {
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
           isScrolled 
             ? "bg-white/98 backdrop-blur-md shadow-2xl border-b border-orange-100 h-14 sm:h-16" 
-            : "bg-trans bg-[#000000ee] backdrop-blur-none h-16 sm:h-18 md:h-20"
+            : "bg-trans backdrop-blur-none h-16 sm:h-18 md:h-20 text-cream"
         }`}
-        style={{
-          background: isScrolled 
-            ? 'rgba(255, 255, 255, 0.98)' 
-            : 'linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)'
-        }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 h-full">
           <div className="flex items-center justify-between h-full">
@@ -161,7 +156,7 @@ const Header = () => {
                           ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg transform scale-105"
                           : isScrolled 
                             ? "text-gray-700 hover:bg-orange-50 hover:text-orange-600 hover:scale-105" 
-                            : "text-gray-800 hover:bg-white/20 hover:text-orange-600 hover:scale-105"
+                            : "text-cream hover:bg-white/20 hover:text-orange-300 hover:scale-105"
                       } cursor-pointer relative group flex items-center`}
                     >
                       {item.name}
@@ -233,7 +228,7 @@ const Header = () => {
                           ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg transform scale-105"
                           : isScrolled 
                             ? "text-gray-700 hover:bg-orange-50 hover:text-orange-600 hover:scale-105" 
-                            : "text-gray-800 hover:bg-white/20 hover:text-orange-600 hover:scale-105"
+                            : "text-cream hover:bg-white/20 hover:text-orange-300 hover:scale-105"
                       } cursor-pointer whitespace-nowrap`}
                     >
                       {item.name}
@@ -382,7 +377,7 @@ const Header = () => {
 
         {/* Enhanced Mobile Menu with Overlay */}
         <div
-          className={`md:hidden fixed inset-0 bg-black z-40 transition-all duration-500 ease-in-out ${
+          className={`md:hidden fixed inset-0 bg-orange-500 z-40 transition-all duration-500 ease-in-out ${
             isMenuOpen 
               ? "opacity-60 backdrop-blur-sm" 
               : "opacity-0 pointer-events-none backdrop-blur-none"
