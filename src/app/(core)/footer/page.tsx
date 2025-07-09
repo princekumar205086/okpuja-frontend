@@ -53,7 +53,7 @@ const Footer = () => {
       {/* Top decorative element */}
       <div className="absolute top-0 left-0 right-0 h-3 bg-redOrange"></div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-2 sm:px-6 lg:px-8 mt-1">
         {/* Newsletter Section */}
         <div className="max-w-5xl mx-auto mb-14 px-4 py-8 bg-white rounded-xl shadow-lg">
           <div className="flex flex-col md:flex-row items-center justify-between">
@@ -87,7 +87,7 @@ const Footer = () => {
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-12">
           {/* Company Info Section */}
-          <div className="bg-white/60 rounded-xl p-6 shadow-md">
+          <div className="rounded-xl p-6 shadow-md">
             <div className="flex justify-center sm:justify-start mb-5">
               <Image
                 src="/image/okpuja logo social.png"
