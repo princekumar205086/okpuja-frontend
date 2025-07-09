@@ -145,15 +145,22 @@ const HowItWorks = () => {
           <span className="inline-block px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm uppercase tracking-wider font-semibold rounded-full mb-4">
             Simple Process
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            <span className="text-gray-900">How</span>
-            <span className="block sm:inline bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent ml-0 sm:ml-3">
+          <h2 className="text-3xl sm:text-3xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-8 leading-tight">
+            <span className="text-gray-900">Want to know, How{" "}</span>
+            <span className="relative bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent inline-block">
               OKPUJA Works
+              <motion.div
+                className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
+                initial={{ width: 0 }}
+                whileInView={{ width: "100%" }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.5 }}
+              />
             </span>
           </h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-orange-500 to-red-500 mx-auto rounded-full mb-6"></div>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Experience the divine through our streamlined process that connects you with 
+            Experience the divine through our streamlined process that connects you with
             authentic spiritual traditions and expert pandits
           </p>
         </motion.div>
@@ -167,19 +174,19 @@ const HowItWorks = () => {
           className="relative bg-gradient-to-br from-orange-500 to-red-600 shadow-2xl rounded-3xl overflow-hidden mb-16 md:mb-20"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-red-600/20 backdrop-blur-3xl"></div>
-          
+
           <div className="relative flex flex-col lg:flex-row">
             {/* Content Side */}
             <div className="lg:w-1/2 p-8 md:p-12 xl:p-16 flex flex-col justify-center">
               <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Experience Sacred Traditions 
+                Experience Sacred Traditions
                 <span className="block text-orange-100">With Ease</span>
               </h3>
 
               <div className="space-y-4 mb-8">
                 {[
                   "Expert pandits and purohits with verified credentials",
-                  "Rituals tailored to your specific requirements and traditions", 
+                  "Rituals tailored to your specific requirements and traditions",
                   "Convenient puja samagri delivery right to your doorstep"
                 ].map((text, index) => (
                   <motion.div
@@ -232,7 +239,7 @@ const HowItWorks = () => {
                 quality={90}
               />
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600/40 via-transparent to-transparent lg:from-transparent"></div>
-              
+
               {/* Floating elements on image */}
               <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
                 <div className="w-6 h-6 bg-white rounded-full animate-pulse"></div>
@@ -293,7 +300,7 @@ const HowItWorks = () => {
                     <p className="text-gray-600 leading-relaxed flex-grow">
                       {step.description}
                     </p>
-                    
+
                     {/* Progress indicator */}
                     <div className="w-16 h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full mt-4 group-hover:w-24 transition-all duration-500"></div>
                   </div>

@@ -83,7 +83,7 @@ export default function ServiceRange() {
             Our Sacred Offerings
           </span>
           
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-8 leading-tight">
+          <h2 className="text-3xl sm:text-3xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-8 leading-tight">
             <span className="text-gray-900">Comprehensive Range of{" "}</span>
             <span className="relative bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent inline-block">
               Sacred Services

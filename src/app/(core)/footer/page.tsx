@@ -332,12 +332,12 @@ const Footer = () => {
             </p>
             <p className="text-white text-sm flex items-center">
               Powered by{" "}
-              <Link
+              <span><Link
                 href="https://www.webdigger.in"
                 className="ml-1 hover:underline font-medium"
               >
                 Webdigger
-              </Link>
+              </Link></span>
             </p>
           </div>
         </div>
