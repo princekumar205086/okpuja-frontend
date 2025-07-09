@@ -16,8 +16,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning={true}>
+      <head>
+        {/* Inline script to set initial theme class before hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const mode = localStorage.getItem('theme') || 'light';
+                if (mode === 'dark') {
+                  document.documentElement.classList.add('dark');
+                  document.body.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                  document.body.classList.remove('dark');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning={true}>
         <ThemeInitializer />
         <EmotionProvider>
           <LoadingProvider>
