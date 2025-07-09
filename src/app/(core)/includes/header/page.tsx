@@ -288,7 +288,7 @@ const Header = () => {
                   target="_blank"
                   aria-label="Contact on WhatsApp"
                 >
-                  <div className="w-9 h-9 xl:w-10 xl:h-10 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                  <div className="w-9 h-9 xl:w-10 xl:h-10 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
                     <FaWhatsappSquare className="text-lg xl:text-xl" />
                   </div>
                 </Link>
@@ -297,7 +297,7 @@ const Header = () => {
               {/* Cart Icon */}
               <Link href="/cart" className="relative" aria-label="Go to cart">
                 <div className="w-9 h-11 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
-                  <FaCartPlus className="text-base sm:text-sm" />
+                  <FaCartPlus className="text-xl sm:text-xl" />
                   {/* Cart Count Badge */}
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center border-2 border-white font-bold">
@@ -315,13 +315,13 @@ const Header = () => {
                       <button
                         onClick={handleLogout}
                         aria-label="Logout"
-                        className="w-9 h-9 xl:w-10 xl:h-10 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg"
+                        className="w-9 h-9 xl:w-10 xl:h-10 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg"
                       >
                         <FaSignOutAlt className="text-base xl:text-lg" />
                       </button>
                     ) : (
                       <Link href="/login" aria-label="Login to account">
-                        <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
+                        <div className="w-9 h-9 xl:w-10 xl:h-10 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center shadow-lg">
                           <FaUserCircle className="text-base xl:text-lg" />
                         </div>
                       </Link>
