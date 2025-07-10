@@ -3,6 +3,7 @@ import ToasterClient from "./ToasterClient";
 import EmotionProvider from "./EmotionProvider";
 import { LoadingProvider } from "./context/LoadingContext";
 import ThemeInitializer from "./components/ThemeInitializer";
+import AppWrapper from "./components/AppWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -40,7 +41,9 @@ export default function RootLayout({
         <ThemeInitializer />
         <EmotionProvider>
           <LoadingProvider>
-            {children}
+            <AppWrapper>
+              {children}
+            </AppWrapper>
             <ToasterClient />
           </LoadingProvider>
         </EmotionProvider>

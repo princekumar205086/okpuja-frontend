@@ -67,18 +67,36 @@ export const useAuthStore = create<AuthState>()(
 
       // Initialize auth state from localStorage
       initAuth: () => {
+        set({ loading: true });
         try {
+          // Check if we're in the browser
+          if (typeof window === 'undefined') {
+            set({ loading: false });
+            return;
+          }
+
           const access = localStorage.getItem("access");
           const refresh = localStorage.getItem("refresh");
           const userStr = localStorage.getItem("user");
           
           if (access && refresh && userStr) {
             const user = JSON.parse(userStr);
-            
             set({
               user,
               access,
               refresh,
+              loading: false,
+              error: null,
+            });
+          } else {
+            // Clear any partial data
+            localStorage.removeItem("access");
+            localStorage.removeItem("refresh");
+            localStorage.removeItem("user");
+            set({ 
+              user: null,
+              access: null,
+              refresh: null,
               loading: false,
               error: null,
             });

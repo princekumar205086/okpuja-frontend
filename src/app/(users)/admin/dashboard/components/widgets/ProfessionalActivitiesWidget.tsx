@@ -21,7 +21,7 @@ import {
   Users,
   DollarSign,
   FileText,
-  Image,
+  Image as LucideImage,
   MessageCircle,
   MoreHorizontal,
   Activity,
@@ -169,7 +169,7 @@ const ProfessionalActivitiesWidget: React.FC = () => {
       case 'blog':
         return { icon: <FileText size={16} />, color: 'bg-cyan-500' };
       case 'gallery':
-        return { icon: <Image size={16} />, color: 'bg-lime-500' };
+        return { icon: <LucideImage size={16} aria-label="Gallery" />, color: 'bg-lime-500' };
       case 'contact':
         return { icon: <MessageCircle size={16} />, color: 'bg-yellow-500' };
       default:

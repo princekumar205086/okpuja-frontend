@@ -607,3 +607,76 @@ html {
   box-shadow: 
     0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
+
+/* Custom responsive styles for OKPUJA */
+.okpuja-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .okpuja-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .okpuja-container {
+    max-width: 1200px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Ensure form inputs are properly sized on mobile */
+.okpuja-input {
+  font-size: 16px; /* Prevents zoom on iOS */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@media (max-width: 640px) {
+  .okpuja-input {
+    font-size: 16px;
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* Custom scrollbar for better UX */
+.okpuja-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.okpuja-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.okpuja-scrollbar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.okpuja-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Smooth transitions for better UX */
+.okpuja-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus styles for accessibility */
+.okpuja-focus:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Button hover effects */
+.okpuja-button-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
