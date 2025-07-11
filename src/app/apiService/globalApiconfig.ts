@@ -12,6 +12,22 @@ const apiClient = axios.create({
   },
 });
 
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
@@ -35,27 +51,55 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
       originalRequest._retry = true;
-      
+      isRefreshing = true;
+
       const refreshToken = localStorage.getItem('refresh');
       if (refreshToken) {
         try {
           const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
             refresh: refreshToken,
           });
-          
+
           const { access } = response.data;
           localStorage.setItem('access', access);
           
-          // Retry original request with new token
+          // Update the authorization header for the original request
           originalRequest.headers.Authorization = `Bearer ${access}`;
+          
+          processQueue(null, access);
+          isRefreshing = false;
+          
+          // Retry the original request
           return apiClient(originalRequest);
+          
         } catch (refreshError) {
-          // Refresh failed, redirect to login
+          console.error('Token refresh failed:', refreshError);
+          processQueue(refreshError, null);
+          isRefreshing = false;
+          
+          // Clear auth data and redirect to login
           localStorage.removeItem('access');
           localStorage.removeItem('refresh');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          
+          // Only redirect if we're in the browser
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          
           return Promise.reject(refreshError);
         }
       } else {
@@ -63,7 +107,13 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        
+        isRefreshing = false;
+        return Promise.reject(error);
       }
     }
     

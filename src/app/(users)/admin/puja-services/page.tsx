@@ -240,6 +240,7 @@ const PujaServicesPage: React.FC = () => {
             ) : (
               <ServiceCardView
                 services={services}
+                loading={loading}
                 onView={handleView}
                 onEdit={handleEdit}
                 onDelete={handleDelete}

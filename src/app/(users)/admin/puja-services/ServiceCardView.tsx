@@ -1,234 +1,360 @@
 import React from 'react';
 import {
-    Grid,
-    Card,
-    CardContent,
-    CardMedia,
-    Typography,
-    Chip,
-    Box,
-    IconButton,
-    Tooltip,
-    CardActions,
-    Button,
-    Stack,
-    alpha,
-    useTheme,
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Chip,
+  IconButton,
+  Grid,
+  Badge,
+  Tooltip,
+  CardActions,
+  Skeleton,
 } from '@mui/material';
 import {
-    Edit,
-    Delete,
-    Visibility,
-    Schedule,
-    Category,
-    LocationOn,
-    AccessTime,
+  Visibility,
+  Edit,
+  Delete,
+  Schedule,
+  Category,
+  LocationOn,
+  MoreVert,
 } from '@mui/icons-material';
-import { usePujaServiceStore, PujaService } from '../../../stores/pujaServiceStore';
+import { PujaService } from '@/app/stores/pujaServiceStore';
 import {
-    formatDuration,
-    formatDateTime,
-    getImageUrl,
-    serviceTypeOptions,
-    truncateText
+  formatDuration,
+  formatDateTime,
+  getImageUrl,
+  serviceTypeOptions,
+  truncateText
 } from './utils';
-import Image from 'next/image';
 
 interface ServiceCardViewProps {
-    services: PujaService[];
-    onView: (service: PujaService) => void;
-    onEdit: (service: PujaService) => void;
-    onDelete: (service: PujaService) => void;
+  services: PujaService[];
+  loading: boolean;
+  onView: (service: PujaService) => void;
+  onEdit: (service: PujaService) => void;
+  onDelete: (service: PujaService) => void;
 }
 
+// Loading skeleton component
+const ServiceCardSkeleton: React.FC = () => (
+  <Card
+    sx={{
+      height: 400,
+      display: 'flex',
+      flexDirection: 'column',
+      borderRadius: 2,
+      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+    }}
+  >
+    <Skeleton variant="rectangular" height={200} />
+    <CardContent sx={{ flex: 1, p: 3 }}>
+      <Skeleton variant="text" height={32} width="80%" />
+      <Skeleton variant="text" height={20} width="60%" sx={{ mt: 1 }} />
+      <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+        <Skeleton variant="rounded" width={60} height={24} />
+        <Skeleton variant="rounded" width={80} height={24} />
+      </Box>
+      <Skeleton variant="text" height={60} sx={{ mt: 2 }} />
+    </CardContent>
+  </Card>
+);
+
+const ServiceCard: React.FC<{
+  service: PujaService;
+  onView: (service: PujaService) => void;
+  onEdit: (service: PujaService) => void;
+  onDelete: (service: PujaService) => void;
+}> = ({ service, onView, onEdit, onDelete }) => {
+  const serviceTypeOption = serviceTypeOptions.find(opt => opt.value === service.type);
+  const serviceTypeLabel = serviceTypeOption?.label || service.type;
+
+  return (
+    <Card
+      sx={{
+        height: 400,
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 2,
+        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)',
+          '& .card-media': {
+            transform: 'scale(1.05)',
+          },
+          '& .card-actions': {
+            opacity: 1,
+            transform: 'translateY(0)',
+          },
+        },
+      }}
+      onClick={() => onView(service)}
+    >
+      {/* Status Badge */}
+      <Badge
+        badgeContent={
+          <Chip
+            label={service.is_active ? 'Active' : 'Inactive'}
+            color={service.is_active ? 'success' : 'error'}
+            size="small"
+            sx={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              zIndex: 2,
+              fontWeight: 600,
+              fontSize: '0.75rem',
+            }}
+          />
+        }
+      />
+
+      {/* Service Type Badge */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          zIndex: 2,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          borderRadius: 1,
+          px: 1.5,
+          py: 0.5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+        }}
+      >
+        <LocationOn sx={{ fontSize: 14, color: 'white' }} />
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'white',
+            fontWeight: 600,
+            fontSize: '0.75rem',
+          }}
+        >
+          {serviceTypeLabel}
+        </Typography>
+      </Box>
+
+      {/* Floating Action Buttons */}
+      <Box
+        className="card-actions"
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, 20px)',
+          opacity: 0,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          zIndex: 3,
+          display: 'flex',
+          gap: 1,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Tooltip title="View Details">
+          <IconButton
+            size="small"
+            onClick={() => onView(service)}
+            sx={{
+              backgroundColor: 'info.main',
+              color: 'white',
+              '&:hover': { backgroundColor: 'info.dark' },
+            }}
+          >
+            <Visibility fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Edit Service">
+          <IconButton
+            size="small"
+            onClick={() => onEdit(service)}
+            sx={{
+              backgroundColor: 'warning.main',
+              color: 'white',
+              '&:hover': { backgroundColor: 'warning.dark' },
+            }}
+          >
+            <Edit fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete Service">
+          <IconButton
+            size="small"
+            onClick={() => onDelete(service)}
+            sx={{
+              backgroundColor: 'error.main',
+              color: 'white',
+              '&:hover': { backgroundColor: 'error.dark' },
+            }}
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {/* Service Image */}
+      <CardMedia
+        component="img"
+        className="card-media"
+        height="200"
+        image={getImageUrl(service.image_url)}
+        alt={service.title}
+        sx={{
+          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          objectFit: 'cover',
+        }}
+      />
+
+      {/* Card Content */}
+      <CardContent sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+        {/* Service Title */}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            lineHeight: 1.3,
+            mb: 1,
+            color: 'text.primary',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {service.title}
+        </Typography>
+
+        {/* Service Info Chips */}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
+          <Chip
+            label={service.category_detail?.name || 'No Category'}
+            size="small"
+            variant="outlined"
+            icon={<Category fontSize="small" />}
+            sx={{
+              borderRadius: 1,
+              fontSize: '0.75rem',
+              height: 24,
+            }}
+          />
+          <Chip
+            label={formatDuration(service.duration_minutes)}
+            size="small"
+            variant="outlined"
+            icon={<Schedule fontSize="small" />}
+            sx={{
+              borderRadius: 1,
+              fontSize: '0.75rem',
+              height: 24,
+            }}
+          />
+        </Box>
+
+        {/* Description */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            flex: 1,
+            fontSize: '0.875rem',
+            lineHeight: 1.5,
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {truncateText(service.description, 120)}
+        </Typography>
+
+        {/* Footer with updated time */}
+        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 500,
+            }}
+          >
+            Updated: {formatDateTime(service.updated_at)}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
 const ServiceCardView: React.FC<ServiceCardViewProps> = ({
-    services,
-    onView,
-    onEdit,
-    onDelete,
+  services,
+  loading,
+  onView,
+  onEdit,
+  onDelete,
 }) => {
-    const { loading } = usePujaServiceStore();
-    const theme = useTheme();
-
-    // Loading skeleton
-    if (loading) {
-        return (
-            <Grid container spacing={3}>
-                {Array.from(new Array(8)).map((_, index) => (
-                    <div
-                        key={index}
-                        className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3"
-                    >
-                        <div className="flex flex-col h-[400px] bg-white rounded shadow">
-                            <div className="h-[200px] bg-gray-200 animate-pulse rounded-t" />
-                            <div className="flex-1 p-4 flex flex-col">
-                                <div className="h-6 bg-gray-200 mb-2 rounded animate-pulse" />
-                                <div className="h-10 bg-gray-200 mb-4 rounded animate-pulse" />
-                                <div className="flex gap-2">
-                                    <div className="h-6 w-16 bg-gray-200 rounded animate-pulse" />
-                                    <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </Grid>
-        );
-    }
-
-    // Empty state
-    if (services.length === 0) {
-        return (
-            <Box sx={{
-                textAlign: 'center',
-                py: 8,
-                px: 2,
-                bgcolor: 'background.paper',
-                borderRadius: 2,
-                border: '2px dashed',
-                borderColor: 'divider'
-            }}>
-                <Typography variant="h6" color="text.secondary" gutterBottom>
-                    No services found
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    Try adjusting your search or filters, or create a new service to get started.
-                </Typography>
-            </Box>
-        );
-    }
-
+  if (loading) {
     return (
-        <Grid container spacing={3}>
-            {services.map((service) => {
-                const serviceTypeOption = serviceTypeOptions.find(
-                    option => option.value === service.type
-                );
-
-                const serviceTypeLabel = serviceTypeOption?.label || service.type;
-
-                return (
-                    <div
-                        key={service.id}
-                        className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3"
-                    >
-                        <div
-                            className="flex flex-col h-[400px] bg-white rounded shadow cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg relative overflow-hidden"
-                            onClick={() => onView(service)}
-                        >
-                            {/* Image Section */}
-                            <div className="relative overflow-hidden">
-                                <Image
-                                    src={getImageUrl(service.image_url)}
-                                    alt={service.title}
-                                    className="card-media h-[200px] w-full object-cover transition-transform duration-300 hover:scale-105"
-                                    width={400}
-                                    height={200}
-                                />
-                                {/* Status Badge */}
-                                <span
-                                    className={`absolute top-3 right-3 px-2 py-1 rounded text-xs font-semibold ${service.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                        }`}
-                                >
-                                    {service.is_active ? 'Active' : 'Inactive'}
-                                </span>
-                                {/* Service Type Badge */}
-                                <span
-                                    className="absolute top-3 left-3 px-2 py-1 rounded text-xs font-semibold bg-black/70 text-white flex items-center gap-1"
-                                >
-                                    {serviceTypeOption?.icon}
-                                    {serviceTypeLabel}
-                                </span>
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 p-4 flex flex-col">
-                                <h3 className="font-semibold mb-1 text-lg leading-tight line-clamp-2">
-                                    {service.title}
-                                </h3>
-                                <p className="text-sm text-gray-600 mb-2 line-clamp-2 min-h-[40px]">
-                                    {service.description}
-                                </p>
-                                {/* Info Chips */}
-                                <div className="flex flex-row flex-wrap gap-2 mb-2">
-                                    <span className="flex items-center gap-1 px-2 py-1 border rounded text-xs">
-                                        <Category fontSize="small" />
-                                        {service.category_detail?.name || 'No Category'}
-                                    </span>
-                                    <span className="flex items-center gap-1 px-2 py-1 border rounded text-xs">
-                                        <AccessTime fontSize="small" />
-                                        {formatDuration(service.duration_minutes)}
-                                    </span>
-                                </div>
-                                {/* Metadata */}
-                                <div className="flex justify-between items-center mt-auto">
-                                    <span className="text-xs text-gray-400">ID: #{service.id}</span>
-                                    <span className="text-xs text-gray-400">{formatDateTime(service.updated_at)}</span>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex justify-between items-center px-4 pt-0 pb-4">
-                                <div className="flex gap-1">
-                                    <Tooltip title="View Details">
-                                        <IconButton
-                                            size="small"
-                                            color="primary"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onView(service);
-                                            }}
-                                            className="hover:bg-blue-50"
-                                        >
-                                            <Visibility fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Edit Service">
-                                        <IconButton
-                                            size="small"
-                                            color="primary"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onEdit(service);
-                                            }}
-                                            className="hover:bg-blue-50"
-                                        >
-                                            <Edit fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Delete Service">
-                                        <IconButton
-                                            size="small"
-                                            color="error"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDelete(service);
-                                            }}
-                                            className="hover:bg-red-50"
-                                        >
-                                            <Delete fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </div>
-                                <Button
-                                    size="small"
-                                    variant="outlined"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onView(service);
-                                    }}
-                                    className="min-w-fit text-xs rounded"
-                                    sx={{ textTransform: 'none', borderRadius: 2 }}
-                                >
-                                    Details
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
-        </Grid>
+      <Grid container spacing={3}>
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3">
+            <ServiceCardSkeleton />
+          </div>
+        ))}
+      </Grid>
     );
+  }
+
+  if (services.length === 0) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 8,
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h6" color="text.secondary" gutterBottom>
+          No services found
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Try adjusting your search criteria or add a new service.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Grid container spacing={3}>
+      {services.map((service) => (
+        <div
+          key={service.id}
+          className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3"
+        >
+          <ServiceCard
+            service={service}
+            onView={onView}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </div>
+      ))}
+    </Grid>
+  );
 };
 
 export default ServiceCardView;
