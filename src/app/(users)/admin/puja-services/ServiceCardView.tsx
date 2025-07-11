@@ -7,7 +7,6 @@ import {
   Typography,
   Chip,
   IconButton,
-  Grid,
   Badge,
   Tooltip,
   CardActions,
@@ -43,15 +42,22 @@ interface ServiceCardViewProps {
 const ServiceCardSkeleton: React.FC = () => (
   <Card
     sx={{
-      height: 400,
+      height: { xs: 'auto', md: 400 },
+      minHeight: { xs: 320, md: 400 },
       display: 'flex',
       flexDirection: 'column',
       borderRadius: 2,
       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
     }}
   >
-    <Skeleton variant="rectangular" height={200} />
-    <CardContent sx={{ flex: 1, p: 3 }}>
+    <Skeleton 
+      variant="rectangular" 
+      sx={{ 
+        height: { xs: 160, md: 200 },
+        width: '100%'
+      }} 
+    />
+    <CardContent sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
       <Skeleton variant="text" height={32} width="80%" />
       <Skeleton variant="text" height={20} width="60%" sx={{ mt: 1 }} />
       <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
@@ -75,7 +81,8 @@ const ServiceCard: React.FC<{
   return (
     <Card
       sx={{
-        height: 400,
+        height: { xs: 'auto', md: 400 },
+        minHeight: { xs: 320, md: 400 },
         display: 'flex',
         flexDirection: 'column',
         borderRadius: 2,
@@ -207,17 +214,18 @@ const ServiceCard: React.FC<{
       <CardMedia
         component="img"
         className="card-media"
-        height="200"
+        height={200}
         image={getImageUrl(service.image_url)}
         alt={service.title}
         sx={{
           transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           objectFit: 'cover',
+          height: { xs: 160, md: 200 },
         }}
       />
 
       {/* Card Content */}
-      <CardContent sx={{ flex: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flex: 1, p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column' }}>
         {/* Service Title */}
         <Typography
           variant="h6"
@@ -297,22 +305,27 @@ const ServiceCard: React.FC<{
   );
 };
 
-const ServiceCardView: React.FC<ServiceCardViewProps> = ({
-  services,
-  loading,
-  onView,
-  onEdit,
-  onDelete,
-}) => {
+const ServiceCardView: React.FC<ServiceCardViewProps> = (props) => {
+  const { services, loading, onView, onEdit, onDelete } = props;
+
   if (loading) {
     return (
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+            lg: 'repeat(4, 1fr)',
+          },
+          gap: 3,
+        }}
+      >
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3">
-            <ServiceCardSkeleton />
-          </div>
+          <ServiceCardSkeleton key={index} />
         ))}
-      </Grid>
+      </Box>
     );
   }
 
@@ -339,21 +352,28 @@ const ServiceCardView: React.FC<ServiceCardViewProps> = ({
   }
 
   return (
-    <Grid container spacing={3}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(3, 1fr)',
+          lg: 'repeat(4, 1fr)',
+        },
+        gap: 3,
+      }}
+    >
       {services.map((service) => (
-        <div
+        <ServiceCard
           key={service.id}
-          className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3"
-        >
-          <ServiceCard
-            service={service}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </div>
+          service={service}
+          onView={onView}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ))}
-    </Grid>
+    </Box>
   );
 };
 

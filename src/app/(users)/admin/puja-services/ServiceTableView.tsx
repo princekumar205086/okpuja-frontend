@@ -10,6 +10,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Paper,
 } from '@mui/material';
 import {
   DataGrid,
@@ -265,7 +266,14 @@ const ServiceTableView: React.FC<ServiceTableViewProps> = ({
   };
 
   return (
-    <Box sx={{ height: 'calc(100vh - 300px)', minHeight: 400, width: '100%' }}>
+    <Paper sx={{ 
+      width: '100%', 
+      height: 'calc(100vh - 300px)',
+      minHeight: 400,
+      overflow: 'hidden',
+      borderRadius: 2,
+      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
+    }}>
       <DataGrid
         rows={services}
         columns={columns}
@@ -288,25 +296,71 @@ const ServiceTableView: React.FC<ServiceTableViewProps> = ({
           },
         }}
         sx={{
+          border: 0,
+          height: '100%',
+          borderRadius: 2,
+          backgroundColor: 'background.paper',
+          '& .MuiDataGrid-main': {
+            borderRadius: 2,
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: 'primary.50',
+            borderBottom: '2px solid',
+            borderColor: 'primary.200',
+            color: 'primary.800',
+            fontSize: '0.875rem',
+            fontWeight: 700,
+            minHeight: 56,
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 700,
+            },
+          },
+          '& .MuiDataGrid-columnSeparator': {
+            display: 'none',
+          },
           '& .MuiDataGrid-row': {
+            backgroundColor: 'background.paper',
+            borderBottom: '1px solid',
+            borderColor: 'grey.100',
             cursor: 'pointer',
+            transition: 'all 0.2s ease-in-out',
+            minHeight: 72,
             '&:hover': {
-              backgroundColor: 'action.hover',
+              backgroundColor: 'primary.25',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 2px 8px rgb(0 0 0 / 0.1)',
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'primary.50',
+              '&:hover': {
+                backgroundColor: 'primary.100',
+              },
             },
           },
           '& .MuiDataGrid-cell': {
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            borderBottom: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '12px 16px',
+            fontSize: '0.875rem',
           },
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: 'grey.50',
-            borderBottom: '2px solid',
-            borderColor: 'divider',
+          '& .MuiDataGrid-footerContainer': {
+            borderTop: '2px solid',
+            borderColor: 'grey.200',
+            backgroundColor: 'grey.25',
+            minHeight: 60,
           },
           '& .MuiDataGrid-toolbarContainer': {
-            padding: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
+            padding: '12px 16px',
+            borderBottom: '2px solid',
+            borderColor: 'grey.200',
+            backgroundColor: 'grey.25',
+            '& .MuiButton-root': {
+              borderRadius: 2,
+            },
+          },
+          '& .MuiDataGrid-virtualScroller': {
+            backgroundColor: 'background.paper',
           },
         }}
         initialState={{
@@ -347,7 +401,7 @@ const ServiceTableView: React.FC<ServiceTableViewProps> = ({
           <ListItemText>Delete Service</ListItemText>
         </MenuItem>
       </Menu>
-    </Box>
+    </Paper>
   );
 };
 

@@ -15,10 +15,12 @@ import {
   Alert,
   CircularProgress,
   Avatar,
+  Grid
 } from '@mui/material';
 import { Close, CloudUpload, Delete } from '@mui/icons-material';
 import { usePujaServiceStore, PujaService, CreatePujaServiceData, UpdatePujaServiceData } from '../../../stores/pujaServiceStore';
 import { serviceTypeOptions, getImageUrl } from './utils';
+import RichTextEditor from './RichTextEditor';
 
 interface ServiceFormProps {
   open: boolean;
@@ -64,12 +66,12 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
   useEffect(() => {
     if (mode === 'edit' && service) {
       setFormData({
-        title: service.title,
-        description: service.description,
-        category: service.category.toString(),
-        type: service.type,
-        duration_minutes: service.duration_minutes,
-        is_active: service.is_active,
+        title: service.title || '',
+        description: service.description || '',
+        category: service.category ? service.category.toString() : '',
+        type: service.type || 'HOME',
+        duration_minutes: service.duration_minutes || 60,
+        is_active: service.is_active ?? true,
       });
       setImagePreview(service.image_url || '');
     } else {
@@ -89,12 +91,21 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
     clearError();
   }, [mode, service, clearError]);
 
-  // Fetch categories on mount
+  // Fetch categories on mount and when drawer opens
   useEffect(() => {
-    if (open && categories.length === 0) {
-      fetchCategories();
+    if (open) {
+      console.log('Form opened, categories length:', categories.length);
+      if (categories.length === 0) {
+        console.log('Fetching categories...');
+        fetchCategories();
+      }
     }
-  }, [open, categories.length, fetchCategories]);
+  }, [open, fetchCategories, categories.length]);
+
+  // Log categories when they change
+  useEffect(() => {
+    console.log('Categories updated:', categories);
+  }, [categories]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -261,61 +272,61 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             
             {/* Image Upload Section */}
             <Box>
               <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-                Service Image
+              Service Image
               </Typography>
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {imagePreview && (
-                  <Box sx={{ position: 'relative', width: 'fit-content' }}>
-                    <Avatar
-                      src={imagePreview}
-                      sx={{ width: 120, height: 120, border: '2px solid #e0e0e0' }}
-                      variant="rounded"
-                    />
-                    <IconButton
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        top: -8,
-                        right: -8,
-                        bgcolor: 'error.main',
-                        color: 'white',
-                        '&:hover': { bgcolor: 'error.dark' },
-                      }}
-                      onClick={handleRemoveImage}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </Box>
-                )}
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ display: 'none' }}
+              {imagePreview && (
+                <Box sx={{ position: 'relative', width: 'fit-content' }}>
+                <Avatar
+                  src={imagePreview}
+                  sx={{ width: 120, height: 120, border: '2px solid #e0e0e0' }}
+                  variant="rounded"
                 />
-                
-                <Button
-                  variant="outlined"
-                  startIcon={<CloudUpload />}
-                  onClick={() => fileInputRef.current?.click()}
-                  sx={{ width: 'fit-content' }}
+                <IconButton
+                  size="small"
+                  sx={{
+                  position: 'absolute',
+                  top: -8,
+                  right: -8,
+                  bgcolor: 'error.main',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'error.dark' },
+                  }}
+                  onClick={handleRemoveImage}
                 >
-                  {imagePreview ? 'Change Image' : 'Upload Image'}
-                </Button>
-                
-                {formErrors.image && (
-                  <Typography color="error" variant="caption">
-                    {formErrors.image}
-                  </Typography>
-                )}
+                  <Delete fontSize="small" />
+                </IconButton>
+                </Box>
+              )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+              />
+              
+              <Button
+                variant="outlined"
+                startIcon={<CloudUpload />}
+                onClick={() => fileInputRef.current?.click()}
+                sx={{ width: 'fit-content' }}
+              >
+                {imagePreview ? 'Change Image' : 'Upload Image'}
+              </Button>
+              
+              {formErrors.image && (
+                <Typography color="error" variant="caption">
+                {formErrors.image}
+                </Typography>
+              )}
               </Box>
             </Box>
 
@@ -330,84 +341,101 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
               required
             />
 
-            {/* Description */}
-            <TextField
-              label="Description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+            {/* Description with Rich Text Editor */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" gutterBottom>
+              Description *
+              </Typography>
+              <RichTextEditor
+              content={formData.description}
+              onChange={(content) => handleInputChange('description', content)}
+              placeholder="Enter service description..."
               error={!!formErrors.description}
               helperText={formErrors.description}
-              multiline
-              rows={4}
-              fullWidth
-              required
-            />
+              maxLength={2000}
+              />
+            </Box>
 
-            {/* Category and Type in same row on larger screens */}
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 2 
-            }}>
+            {/* Category and Type in responsive flex layout */}
+            <div className="w-full flex flex-col gap-4 md:flex-row">
+              <div className="w-full md:w-1/2">
               <FormControl fullWidth error={!!formErrors.category} required>
                 <InputLabel>Category</InputLabel>
                 <Select
-                  value={formData.category}
-                  label="Category"
-                  onChange={(e) => handleInputChange('category', e.target.value)}
+                value={formData.category}
+                label="Category"
+                onChange={(e) => handleInputChange('category', e.target.value)}
                 >
-                  {categories.map((category) => (
-                    <MenuItem key={category.id} value={category.id.toString()}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
+                {categories.length === 0 ? (
+                  <MenuItem disabled>
+                  <Typography variant="body2" color="text.secondary">
+                    Loading categories...
+                  </Typography>
+                  </MenuItem>
+                ) : (
+                  categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </MenuItem>
+                  ))
+                )}
                 </Select>
                 {formErrors.category && (
-                  <Typography color="error" variant="caption" sx={{ mt: 0.5 }}>
-                    {formErrors.category}
-                  </Typography>
+                <Typography color="error" variant="caption" sx={{ mt: 0.5 }}>
+                  {formErrors.category}
+                </Typography>
                 )}
               </FormControl>
+              </div>
 
+              <div className="w-full md:w-1/2">
               <FormControl fullWidth>
                 <InputLabel>Service Type</InputLabel>
                 <Select
-                  value={formData.type}
-                  label="Service Type"
-                  onChange={(e) => handleInputChange('type', e.target.value)}
+                value={formData.type}
+                label="Service Type"
+                onChange={(e) => handleInputChange('type', e.target.value)}
                 >
-                  {serviceTypeOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
+                {serviceTypeOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {option.icon}
+                    {option.label}
+                  </Box>
+                  </MenuItem>
+                ))}
                 </Select>
               </FormControl>
-            </Box>
+              </div>
+            </div>
 
-            {/* Duration */}
-            <TextField
-              label="Duration (minutes)"
-              type="number"
-              value={formData.duration_minutes}
-              onChange={(e) => handleInputChange('duration_minutes', parseInt(e.target.value) || 0)}
-              error={!!formErrors.duration_minutes}
-              helperText={formErrors.duration_minutes}
-              fullWidth
-              required
-              inputProps={{ min: 1 }}
-            />
-
-            {/* Active Status */}
-            <FormControlLabel
-              control={
+            {/* Duration and Status in responsive flex layout */}
+            <div className="w-full flex flex-col md:flex-row gap-4">
+              <div className="w-full md:w-2/3">
+              <TextField
+                label="Duration (minutes)"
+                type="number"
+                value={formData.duration_minutes}
+                onChange={(e) => handleInputChange('duration_minutes', parseInt(e.target.value) || 0)}
+                error={!!formErrors.duration_minutes}
+                helperText={formErrors.duration_minutes}
+                fullWidth
+                required
+                inputProps={{ min: 1 }}
+              />
+              </div>
+              <div className="w-full md:w-1/3 flex items-center justify-start md:justify-center">
+              <FormControlLabel
+                control={
                 <Switch
                   checked={formData.is_active}
                   onChange={(e) => handleInputChange('is_active', e.target.checked)}
                 />
-              }
-              label="Active Status"
-            />
+                }
+                label="Active Status"
+              />
+              </div>
+            </div>
 
             {/* Submit Buttons */}
             <Box sx={{ 
