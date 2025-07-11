@@ -1,0 +1,1 @@
+/* This is a placeholder for the service image that should be added to the public folder */
