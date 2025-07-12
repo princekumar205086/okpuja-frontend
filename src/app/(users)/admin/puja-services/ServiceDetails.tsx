@@ -165,7 +165,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({
                 </Box>
 
                 <Typography variant="body1" color="text.secondary">
-                  {service.description}
+                  <div dangerouslySetInnerHTML={{ __html: service.description }} />
                 </Typography>
               </Box>
             </Box>
@@ -259,15 +259,18 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({
                         <Typography variant="h6" gutterBottom color="primary">
                             Description
                         </Typography>
-                        <Typography
-                            variant="body1"
+                        <Box
                             sx={{
                                 whiteSpace: 'pre-wrap',
                                 lineHeight: 1.6,
+                                '& p': { mb: 1 },
+                                '& ul, & ol': { pl: 2, mb: 1 },
+                                '& li': { mb: 0.5 },
+                                '& strong': { fontWeight: 600 },
+                                '& em': { fontStyle: 'italic' },
                             }}
-                        >
-                            {service.description}
-                        </Typography>
+                            dangerouslySetInnerHTML={{ __html: service.description }}
+                        />
                     </div>
                 </div>
             </div>

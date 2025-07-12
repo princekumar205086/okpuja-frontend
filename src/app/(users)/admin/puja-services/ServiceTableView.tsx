@@ -36,7 +36,7 @@ import {
   formatDateTime, 
   getImageUrl, 
   serviceTypeOptions, 
-  truncateText 
+  truncateHtmlText 
 } from './utils';
 
 interface ServiceTableViewProps {
@@ -130,7 +130,7 @@ const ServiceTableView: React.FC<ServiceTableViewProps> = ({
             {params.value}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {truncateText(params.row.description, 60)}
+            {truncateHtmlText(params.row.description, 60)}
           </Typography>
         </Box>
       ),

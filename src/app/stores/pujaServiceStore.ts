@@ -428,7 +428,8 @@ export const usePujaServiceStore = create<PujaServiceState>()(
         try {
           await apiClient.post('/puja/packages/create/', data);
           const { fetchPackages } = get();
-          await fetchPackages();
+          // Re-fetch packages for the specific service to maintain filtering
+          await fetchPackages(data.puja_service);
           toast.success("Package created successfully!");
           return true;
         } catch (err: any) {
@@ -443,7 +444,8 @@ export const usePujaServiceStore = create<PujaServiceState>()(
         try {
           await apiClient.patch(`/puja/packages/${id}/`, data);
           const { fetchPackages } = get();
-          await fetchPackages();
+          // Re-fetch packages for the specific service to maintain filtering
+          await fetchPackages(data.puja_service);
           toast.success("Package updated successfully!");
           return true;
         } catch (err: any) {
@@ -456,9 +458,22 @@ export const usePujaServiceStore = create<PujaServiceState>()(
 
       deletePackage: async (id: number): Promise<boolean> => {
         try {
+          // Get the current package to find its service ID before deletion
+          const { packages } = get();
+          const packageToDelete = packages.find(pkg => pkg.id === id);
+          // Ensure serviceId is always a number
+          const serviceId = typeof packageToDelete?.puja_service === 'number'
+            ? packageToDelete?.puja_service
+            : packageToDelete?.puja_service?.id;
+          
           await apiClient.delete(`/puja/packages/${id}/`);
           const { fetchPackages } = get();
-          await fetchPackages();
+          // Re-fetch packages for the specific service to maintain filtering
+          if (typeof serviceId === 'number') {
+            await fetchPackages(serviceId);
+          } else {
+            await fetchPackages();
+          }
           toast.success("Package deleted successfully!");
           return true;
         } catch (err: any) {

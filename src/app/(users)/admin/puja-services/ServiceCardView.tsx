@@ -27,7 +27,7 @@ import {
   formatDateTime,
   getImageUrl,
   serviceTypeOptions,
-  truncateText
+  truncateHtmlText
 } from './utils';
 
 interface ServiceCardViewProps {
@@ -284,7 +284,7 @@ const ServiceCard: React.FC<{
             overflow: 'hidden',
           }}
         >
-          {truncateText(service.description, 120)}
+          {truncateHtmlText(service.description, 120)}
         </Typography>
 
         {/* Footer with updated time */}

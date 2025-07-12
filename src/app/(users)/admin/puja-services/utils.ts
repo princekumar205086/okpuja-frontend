@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import { PujaService } from '@/app/stores/pujaServiceStore';
-import { Home, Business, Computer } from '@mui/icons-material';
+import { Home, Business, Computer, Star, StarHalf, StarBorder, Settings } from '@mui/icons-material';
 import React from 'react';
 
 // Type definitions
@@ -23,6 +23,7 @@ export interface LanguageOption {
 export interface PackageTypeOption {
   value: string;
   label: string;
+  icon: React.ReactElement;
 }
 
 // Service status options
@@ -58,12 +59,28 @@ export const languageOptions: LanguageOption[] = [
   { value: 'REGIONAL', label: 'Regional' },
 ];
 
-// Package type options
+// Package type options with icons
 export const packageTypeOptions: PackageTypeOption[] = [
-  { value: 'BASIC', label: 'Basic' },
-  { value: 'STANDARD', label: 'Standard' },
-  { value: 'PREMIUM', label: 'Premium' },
-  { value: 'CUSTOM', label: 'Custom' },
+  { 
+    value: 'BASIC', 
+    label: 'Basic',
+    icon: React.createElement(StarBorder, { fontSize: 'small' })
+  },
+  { 
+    value: 'STANDARD', 
+    label: 'Standard',
+    icon: React.createElement(StarHalf, { fontSize: 'small' })
+  },
+  { 
+    value: 'PREMIUM', 
+    label: 'Premium',
+    icon: React.createElement(Star, { fontSize: 'small' })
+  },
+  { 
+    value: 'CUSTOM', 
+    label: 'Custom',
+    icon: React.createElement(Settings, { fontSize: 'small' })
+  },
 ];
 
 // Format currency (Indian Rupee)
@@ -123,6 +140,27 @@ export const truncateText = (text: string, maxLength: number = 100): string => {
   return text.substring(0, maxLength).trim() + '...';
 };
 
+// Strip HTML tags from content and return plain text
+export const stripHtmlTags = (html: string): string => {
+  if (!html) return '';
+  
+  // Create a temporary div element to parse HTML
+  if (typeof window !== 'undefined') {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || '';
+  }
+  
+  // Fallback for server-side: simple regex to remove HTML tags
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+};
+
+// Truncate HTML content and return plain text
+export const truncateHtmlText = (html: string, maxLength: number = 100): string => {
+  const plainText = stripHtmlTags(html);
+  return truncateText(plainText, maxLength);
+};
+
 // Export services to Excel
 export const exportServicesToExcel = (services: PujaService[], filename: string = 'puja-services') => {
   try {
@@ -130,7 +168,7 @@ export const exportServicesToExcel = (services: PujaService[], filename: string 
     const exportData = services.map(service => ({
       'ID': service.id,
       'Title': service.title,
-      'Description': service.description,
+      'Description': stripHtmlTags(service.description), // Strip HTML for Excel export
       'Category': service.category_detail?.name || 'No Category',
       'Type': service.type,
       'Duration (minutes)': service.duration_minutes,

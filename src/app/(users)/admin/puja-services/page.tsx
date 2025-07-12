@@ -15,6 +15,10 @@ import {
   DialogActions,
   DialogContentText,
   Button,
+  useTheme,
+  useMediaQuery,
+  Paper,
+  Stack,
 } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import { usePujaServiceStore, PujaService } from '../../../stores/pujaServiceStore';
@@ -29,6 +33,9 @@ import ServiceDetails from './ServiceDetails';
 import { toast } from 'react-hot-toast';
 
 const PujaServicesPage: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
   const { user } = useAuthStore();
   const {
     services = [],
@@ -176,9 +183,18 @@ const PujaServicesPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
-      <Container maxWidth="xl" sx={{ py: 3 }}>
-        {/* Error Alert */}
+    <Box sx={{ 
+      minHeight: '100vh', 
+      bgcolor: { xs: 'background.default', md: 'grey.50' },
+    }}>
+      <Container 
+        maxWidth="xl" 
+        sx={{ 
+          py: { xs: 2, md: 3 },
+          px: { xs: 2, md: 3 },
+        }}
+      >
+        {/* Error Snackbar */}
         <Snackbar
           open={!!error}
           autoHideDuration={6000}
@@ -191,76 +207,180 @@ const PujaServicesPage: React.FC = () => {
         </Snackbar>
 
         {/* Page Header */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Puja Services Management
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage all puja services, categories, and bookings from this centralized dashboard.
-          </Typography>
-        </Box>
+        <Paper 
+          elevation={0}
+          sx={{ 
+            p: { xs: 3, md: 4 },
+            mb: 3,
+            borderRadius: { xs: 2, md: 3 },
+            border: '1px solid',
+            borderColor: 'divider',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+          }}
+        >
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            gap: 2,
+          }}>
+            <Box>
+              <Typography 
+                variant={isMobile ? "h5" : "h4"} 
+                fontWeight="bold" 
+                gutterBottom
+                sx={{ color: 'white' }}
+              >
+                Puja Services Management
+              </Typography>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  maxWidth: 600 
+                }}
+              >
+                Manage all puja services, categories, and packages from this centralized dashboard.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignSelf: { xs: 'stretch', sm: 'auto' },
+            }}>
+              <Typography variant="h6" fontWeight="bold" sx={{ color: 'white' }}>
+                {totalCount} Total Services
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
 
         {/* Toolbar */}
-        <ServiceToolbar
-          onCreateNew={handleCreateNew}
-          onRefresh={handleRefresh}
-          totalServices={totalCount}
-          filteredServices={Array.isArray(services) ? services.length : 0}
-        />
+        <Paper 
+          elevation={0}
+          sx={{ 
+            mb: 3,
+            borderRadius: { xs: 2, md: 3 },
+            border: '1px solid',
+            borderColor: 'divider',
+            overflow: 'hidden',
+          }}
+        >
+          <ServiceToolbar
+            onCreateNew={handleCreateNew}
+            onRefresh={handleRefresh}
+            totalServices={totalCount}
+            filteredServices={Array.isArray(services) ? services.length : 0}
+          />
+        </Paper>
 
         {/* Search and Filters */}
-        <SearchAndFilters 
-          onFiltersChange={handleFiltersChange}
-          onRefresh={handleRefresh}
-        />
+        <Paper 
+          elevation={0}
+          sx={{ 
+            mb: 3,
+            borderRadius: { xs: 2, md: 3 },
+            border: '1px solid',
+            borderColor: 'divider',
+            overflow: 'hidden',
+          }}
+        >
+          <SearchAndFilters 
+            onFiltersChange={handleFiltersChange}
+            onRefresh={handleRefresh}
+          />
+        </Paper>
 
         {/* Loading State */}
         {loading && services.length === 0 && (
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            py: 8 
-          }}>
-            <CircularProgress size={40} />
-          </Box>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              py: 8,
+              borderRadius: { xs: 2, md: 3 },
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Stack spacing={2} alignItems="center">
+              <CircularProgress size={40} />
+              <Typography variant="body2" color="text.secondary">
+                Loading services...
+              </Typography>
+            </Stack>
+          </Paper>
         )}
 
         {/* Content */}
         <Fade in={!loading || services.length > 0}>
           <Box>
             {/* Data Display */}
-            {viewMode === 'table' ? (
-              <ServiceTableView
-                services={services}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ) : (
-              <ServiceCardView
-                services={services}
-                loading={loading}
-                onView={handleView}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            )}
+            <Paper 
+              elevation={0}
+              sx={{ 
+                borderRadius: { xs: 2, md: 3 },
+                border: '1px solid',
+                borderColor: 'divider',
+                overflow: 'hidden',
+                mb: 3,
+              }}
+            >
+              {viewMode === 'table' ? (
+                <ServiceTableView
+                  services={services}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ) : (
+                <ServiceCardView
+                  services={services}
+                  loading={loading}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )}
+            </Paper>
 
             {/* Pagination */}
             {!loading && services.length > 0 && (
-              <ServicePagination onPageChange={handlePageChange} />
+              <Paper 
+                elevation={0}
+                sx={{ 
+                  borderRadius: { xs: 2, md: 3 },
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  overflow: 'hidden',
+                }}
+              >
+                <ServicePagination onPageChange={handlePageChange} />
+              </Paper>
             )}
           </Box>
         </Fade>
 
         {/* Empty State */}
         {!loading && services.length === 0 && !error && (
-          <Box sx={{ 
-            textAlign: 'center', 
-            py: 8,
-            px: 2,
-          }}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              textAlign: 'center', 
+              py: 8,
+              px: 2,
+              borderRadius: { xs: 2, md: 3 },
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No services found
             </Typography>
@@ -275,11 +395,12 @@ const PujaServicesPage: React.FC = () => {
                 variant="contained"
                 onClick={handleCreateNew}
                 size="large"
+                sx={{ borderRadius: 2 }}
               >
                 Create First Service
               </Button>
             )}
-          </Box>
+          </Paper>
         )}
 
         {/* Service Form Modal */}

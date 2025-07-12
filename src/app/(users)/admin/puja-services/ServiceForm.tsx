@@ -238,40 +238,69 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
       onClose={handleClose}
       PaperProps={{
         sx: {
-          height: '90vh',
-          borderTopLeftRadius: 16,
-          borderTopRightRadius: 16,
+          height: { xs: '95vh', md: '90vh' },
+          borderTopLeftRadius: { xs: 20, md: 16 },
+          borderTopRightRadius: { xs: 20, md: 16 },
+          maxWidth: { md: 1000 },
+          mx: { md: 'auto' },
         },
       }}
     >
-      <Box sx={{ p: 3, height: '100%', overflow: 'auto' }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          mb: 3,
-          pb: 2,
+          p: { xs: 2, md: 3 },
           borderBottom: '1px solid',
-          borderColor: 'divider'
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
         }}>
-          <Typography variant="h5" fontWeight="bold">
-            {mode === 'create' ? 'Create New Service' : 'Edit Service'}
-          </Typography>
-          <IconButton onClick={handleClose} size="large">
-            <Close />
-          </IconButton>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+          }}>
+            <Box>
+              <Typography variant="h6" fontWeight="bold">
+                {mode === 'create' ? 'Create New Service' : 'Edit Service'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {mode === 'create' ? 'Add a new puja service' : 'Update service information'}
+              </Typography>
+            </Box>
+            <IconButton 
+              onClick={handleClose} 
+              disabled={loading}
+              sx={{ 
+                bgcolor: 'grey.100',
+                '&:hover': { bgcolor: 'grey.200' }
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Box>
         </Box>
 
         {/* Error Alert */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
+          <Alert 
+            severity="error" 
+            sx={{ m: { xs: 2, md: 3 }, mb: 0, borderRadius: 2 }} 
+            onClose={clearError}
+          >
             {error}
           </Alert>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
+        {/* Form Content */}
+        <Box sx={{ 
+          flex: 1, 
+          overflow: 'auto',
+          p: { xs: 2, md: 3 },
+        }}>
+          <form onSubmit={handleSubmit}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             
             {/* Image Upload Section */}
@@ -342,17 +371,17 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
             />
 
             {/* Description with Rich Text Editor */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-              Description *
+            <Box>
+              <Typography variant="subtitle2" gutterBottom fontWeight={500}>
+                Service Description *
               </Typography>
               <RichTextEditor
-              content={formData.description}
-              onChange={(content) => handleInputChange('description', content)}
-              placeholder="Enter service description..."
-              error={!!formErrors.description}
-              helperText={formErrors.description}
-              maxLength={2000}
+                content={formData.description}
+                onChange={(content) => handleInputChange('description', content)}
+                placeholder="Describe the service, rituals, benefits, and what's included..."
+                error={!!formErrors.description}
+                helperText={formErrors.description}
+                maxLength={2000}
               />
             </Box>
 
@@ -436,38 +465,49 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
               />
               </div>
             </div>
-
-            {/* Submit Buttons */}
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 2, 
-              pt: 2,
-              flexDirection: { xs: 'column', sm: 'row' },
-              justifyContent: 'flex-end'
-            }}>
-              <Button
-                variant="outlined"
-                onClick={handleClose}
-                sx={{ minWidth: 120 }}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={loading}
-                sx={{ minWidth: 120 }}
-                startIcon={loading ? <CircularProgress size={16} /> : null}
-              >
-                {loading
-                  ? mode === 'create' ? 'Creating...' : 'Updating...'
-                  : mode === 'create' ? 'Create Service' : 'Update Service'
-                }
-              </Button>
             </Box>
+          </form>
+        </Box>
+
+        {/* Form Actions */}
+        <Box sx={{ 
+          p: { xs: 2, md: 3 },
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'flex-end'
+          }}>
+            <Button
+              variant="outlined"
+              onClick={handleClose}
+              sx={{ order: { xs: 2, sm: 1 } }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              variant="contained"
+              disabled={loading}
+              sx={{ 
+                order: { xs: 1, sm: 2 },
+                minWidth: 140 
+              }}
+              startIcon={loading ? <CircularProgress size={16} /> : null}
+            >
+              {loading
+                ? mode === 'create' ? 'Creating...' : 'Updating...'
+                : mode === 'create' ? 'Create Service' : 'Update Service'
+              }
+            </Button>
           </Box>
-        </form>
+        </Box>
       </Box>
     </Drawer>
   );
