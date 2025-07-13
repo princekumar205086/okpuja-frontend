@@ -10,9 +10,22 @@ import { encryptId } from '../encryption';
 interface ServiceCardProps {
   service: PujaService;
   index?: number;
+  onBookingAction?: () => boolean;
+  packageCount?: number;
+  packagePreviews?: Array<{ price: number; package_type: string }>;
 }
 
-export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
+export default function ServiceCard({ 
+  service, 
+  index = 0, 
+  onBookingAction, 
+  packageCount = 0, 
+  packagePreviews = [] 
+}: ServiceCardProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    // For now, we'll just navigate to the service details page
+    // The authentication check will happen there when user tries to book
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -21,12 +34,12 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className="group h-full"
     >
-      <Link href={`/pujaservice/${encryptId(service.id)}`}>
+      <Link href={`/pujaservice/${encryptId(service.id)}`} onClick={handleClick}>
         <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer h-full flex flex-col">
           {/* Image Container */}
           <div className="relative h-48 overflow-hidden">
             <Image
-              src={service.image_card}
+              src={service.image_card ?? '/default-image.jpg'}
               alt={service.title}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -44,7 +57,7 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
                 transition={{ delay: 0.3 + index * 0.1 }}
                 className="px-3 py-1.5 rounded-full text-xs font-semibold bg-orange-500/90 text-white backdrop-blur-sm"
               >
-                {service.category.name}
+                {service.category?.name}
               </motion.span>
             </div>
           </div>
@@ -55,18 +68,18 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
               {service.title}
             </h3>
             
-            <p className="text-gray-600 text-sm leading-relaxed flex-1 line-clamp-3 mb-4">
-              {service.description}
-            </p>
+            <p className="text-gray-600 text-sm leading-relaxed flex-1 line-clamp-3 mb-4"
+               dangerouslySetInnerHTML={{ __html: service.description }}
+            />
             
             {/* Available Packages */}
             <div className="mb-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500 font-medium">Available Packages:</span>
-                <span className="text-orange-600 font-semibold">{service.packages.length} options</span>
+                <span className="text-orange-600 font-semibold">{packageCount} option{packageCount !== 1 ? 's' : ''}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-1">
-                {service.packages.slice(0, 2).map((pkg, idx) => (
+                {packagePreviews.slice(0, 2).map((pkg, idx) => (
                   <span 
                     key={idx}
                     className="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-md font-medium"
@@ -74,9 +87,14 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
                     ₹{pkg.price}
                   </span>
                 ))}
-                {service.packages.length > 2 && (
+                {packageCount > 2 && (
                   <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                    +{service.packages.length - 2} more
+                    +{packageCount - 2} more
+                  </span>
+                )}
+                {packageCount === 0 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-md">
+                    Loading packages...
                   </span>
                 )}
               </div>

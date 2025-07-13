@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { PujaCategory } from '../types';
 import { typeDisplayNames } from '../mockData';
+import { INDIAN_STATES } from '../constants';
 
 interface SearchFilterProps {
   categories: PujaCategory[];
@@ -92,7 +93,7 @@ export default function SearchFilter({
                 >
                   <option value="">All Categories</option>
                   {categories.map((category) => (
-                    <option key={category.id} value={category.name}>
+                    <option key={category.id} value={category.id}>
                       {category.name}
                     </option>
                   ))}
@@ -129,12 +130,11 @@ export default function SearchFilter({
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 >
                   <option value="">All Locations</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Kolkata">Kolkata</option>
-                  <option value="Pune">Pune</option>
+                  {INDIAN_STATES.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -189,7 +189,7 @@ export default function SearchFilter({
               )}
               {activeFilters.category && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                  Category: {activeFilters.category}
+                  Category: {categories.find(cat => cat.id.toString() === activeFilters.category)?.name || activeFilters.category}
                   <button
                     onClick={() => onCategoryFilter('')}
                     className="ml-2 hover:text-blue-600"

@@ -116,14 +116,28 @@ export interface PujaServiceState {
   filters: {
     category?: number;
     type?: ServiceType;
+    location?: string;
+    language?: Language;
     is_active?: boolean;
     date_from?: string;
     date_to?: string;
+    sortBy?: 'title' | 'price' | 'duration' | 'created_at';
+    sortOrder?: 'asc' | 'desc';
   };
   
   // Actions
   // Services
-  fetchServices: (params?: { page?: number; search?: string; category?: number; type?: ServiceType; is_active?: boolean }) => Promise<void>;
+  fetchServices: (params?: { 
+    page?: number; 
+    search?: string; 
+    category?: number; 
+    type?: ServiceType; 
+    location?: string;
+    language?: Language;
+    is_active?: boolean;
+    sortBy?: string;
+    sortOrder?: string;
+  }) => Promise<void>;
   createService: (data: CreatePujaServiceData) => Promise<boolean>;
   updateService: (data: UpdatePujaServiceData) => Promise<boolean>;
   deleteService: (id: number) => Promise<boolean>;
@@ -185,7 +199,10 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           if (params?.search) queryParams.append('search', params.search);
           if (params?.category) queryParams.append('category', params.category.toString());
           if (params?.type) queryParams.append('type', params.type);
+          if (params?.location) queryParams.append('location', params.location);
+          if (params?.language) queryParams.append('language', params.language);
           if (params?.is_active !== undefined) queryParams.append('is_active', params.is_active.toString());
+          if (params?.sortBy) queryParams.append('ordering', params.sortOrder === 'desc' ? `-${params.sortBy}` : params.sortBy);
           
           const { pageSize } = get();
           queryParams.append('page_size', pageSize.toString());

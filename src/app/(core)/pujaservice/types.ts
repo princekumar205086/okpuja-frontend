@@ -8,22 +8,25 @@ export interface PujaCategory {
 export interface PujaService {
   id: number;
   title: string;
-  image: string;
-  image_thumbnail: string;
-  image_card: string;
+  image?: string;
+  image_url?: string;
+  image_thumbnail?: string;
+  image_card?: string;
   description: string;
-  category: PujaCategory;
+  category?: PujaCategory;
+  category_detail?: PujaCategory;
   type: 'HOME' | 'TEMPLE' | 'ONLINE';
   duration_minutes: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  packages: Package[];
+  packages?: Package[];
 }
 
 export interface Package {
   id: number;
-  puja_service: number;
+  puja_service?: number;
+  puja_service_detail?: PujaService;
   location: string;
   language: 'HINDI' | 'ENGLISH' | 'SANSKRIT' | 'REGIONAL';
   package_type: 'BASIC' | 'STANDARD' | 'PREMIUM' | 'CUSTOM';

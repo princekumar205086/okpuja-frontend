@@ -62,7 +62,42 @@ export default function LoginForm() {
   // Check if already logged in
   useEffect(() => {
     if (user && user.account_status === 'ACTIVE') {
-      // Redirect based on role
+      // Check for return URL or booking state
+      const bookingState = localStorage.getItem('bookingState');
+      const cartState = localStorage.getItem('cartState');
+      const returnUrl = localStorage.getItem('returnUrl');
+      
+      if (bookingState) {
+        try {
+          const state = JSON.parse(bookingState);
+          if (state.returnUrl) {
+            router.push(state.returnUrl);
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing booking state:', error);
+        }
+      }
+      
+      if (cartState) {
+        try {
+          const state = JSON.parse(cartState);
+          if (state.returnUrl) {
+            router.push(state.returnUrl);
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing cart state:', error);
+        }
+      }
+      
+      if (returnUrl) {
+        localStorage.removeItem('returnUrl');
+        router.push(returnUrl);
+        return;
+      }
+      
+      // Default redirect based on role
       if (user.role === "ADMIN") {
         router.push("/admin/dashboard");
       } else if (user.role === "EMPLOYEE") {

@@ -5,14 +5,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Clock, MapPin, Users, Star, Share2, Heart, CheckCircle, 
-  Calendar, Globe, Shield, Award, Phone, Mail, MessageCircle 
+import {
+  ArrowLeft, Clock, MapPin, Users, Star, Share2, Heart, CheckCircle,
+  Calendar, Globe, Shield, Award, Phone, Mail, MessageCircle
 } from 'lucide-react';
 import moment from 'moment-timezone';
-import { PujaService, Package } from '../types';
-import { mockPujaServices, typeDisplayNames, languageDisplayNames, packageTypeDisplayNames } from '../mockData';
+import { PujaService, Package } from '../../../stores/pujaServiceStore';
+import { usePujaServiceStore } from '../../../stores/pujaServiceStore';
+import { useAuthStore } from '../../../stores/authStore';
+import { typeDisplayNames, languageDisplayNames, packageTypeDisplayNames } from '../mockData';
 import { decryptId, encryptId } from '../encryption';
+import { PACKAGE_CONFIG } from '../constants';
+import LoginPrompt from '../components/LoginPrompt';
+import toast from 'react-hot-toast';
 
 // Set timezone to IST
 moment.tz.setDefault("Asia/Kolkata");
@@ -21,7 +26,18 @@ export default function ServiceDetailPage() {
   const params = useParams();
   const router = useRouter();
   const encryptedId = params.id as string;
-  
+  const { user } = useAuthStore();
+
+  const {
+    services,
+    packages,
+    loading: storeLoading,
+    error,
+    getServiceById,
+    fetchPackages,
+    clearError,
+  } = usePujaServiceStore();
+
   const [service, setService] = useState<PujaService | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState('');
@@ -31,6 +47,7 @@ export default function ServiceDetailPage() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   // Decrypt ID and find service
   useEffect(() => {
@@ -42,45 +59,111 @@ export default function ServiceDetailPage() {
           router.push('/pujaservice');
           return;
         }
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        const foundService = mockPujaServices.find(s => s.id === parseInt(serviceId));
+
+        // Try to get service from store first
+        let foundService = services.find(s => s.id === parseInt(serviceId));
+
         if (!foundService) {
+          // Fetch from API if not in store
+          foundService = await getServiceById(parseInt(serviceId)) || undefined;
+        }
+
+        if (!foundService) {
+          toast.error('Service not found');
           router.push('/pujaservice');
           return;
         }
-        
+
         setService(foundService);
+
+        // Fetch packages for this service
+        await fetchPackages(parseInt(serviceId));
+
       } catch (error) {
-        router.push('/pujaservice');
+        console.error('Error loading service:', error);
+        toast.error('Failed to load service details');
       } finally {
         setLoading(false);
       }
     };
 
-    loadService();
-  }, [encryptedId, router]);
+    if (encryptedId) {
+      loadService();
+    }
+  }, [encryptedId, services, getServiceById, fetchPackages, router]);
 
-  // Get available locations and languages
-  const availableLocations = service ? [...new Set(service.packages.map(pkg => pkg.location))] : [];
-  const availableLanguages = service ? [...new Set(service.packages.map(pkg => pkg.language))] : [];
+  // Restore booking state after login
+  useEffect(() => {
+    if (user && service) {
+      const bookingState = localStorage.getItem('bookingState');
+      const cartState = localStorage.getItem('cartState');
+
+      if (bookingState) {
+        try {
+          const state = JSON.parse(bookingState);
+          if (state.serviceId === service.id) {
+            // Restore the booking state
+            if (state.location) setSelectedLocation(state.location);
+            if (state.language) setSelectedLanguage(state.language);
+            if (state.date) setSelectedDate(state.date);
+            if (state.time) setSelectedTime(state.time);
+
+            // Find and set the package
+            if (state.packageId && packages.length > 0) {
+              const pkg = packages.find(p => p.id === state.packageId);
+              if (pkg) setSelectedPackage(pkg);
+            }
+
+            localStorage.removeItem('bookingState');
+            toast.success('Welcome back! Your booking details have been restored.');
+          }
+        } catch (error) {
+          console.error('Error restoring booking state:', error);
+        }
+      }
+
+      if (cartState) {
+        try {
+          const state = JSON.parse(cartState);
+          if (state.serviceId === service.id) {
+            // Restore the cart state
+            if (state.location) setSelectedLocation(state.location);
+            if (state.language) setSelectedLanguage(state.language);
+
+            // Find and set the package
+            if (state.packageId && packages.length > 0) {
+              const pkg = packages.find(p => p.id === state.packageId);
+              if (pkg) setSelectedPackage(pkg);
+            }
+
+            localStorage.removeItem('cartState');
+            toast.success('Welcome back! Your cart selection has been restored.');
+          }
+        } catch (error) {
+          console.error('Error restoring cart state:', error);
+        }
+      }
+    }
+  }, [user, service, packages]);
+
+  // Get available locations and languages from packages
+  const availableLocations = packages ? [...new Set(packages.map(pkg => pkg.location))] : [];
+  const availableLanguages = packages ? [...new Set(packages.map(pkg => pkg.language))] : [];
 
   // Filter packages based on location and language
   useEffect(() => {
-    if (!service || !selectedLocation || !selectedLanguage) {
+    if (!packages || !selectedLocation || !selectedLanguage) {
       setFilteredPackages([]);
       setSelectedPackage(null);
       return;
     }
 
-    const filtered = service.packages.filter(
+    const filtered = packages.filter(
       pkg => pkg.location === selectedLocation && pkg.language === selectedLanguage
     );
     setFilteredPackages(filtered);
     setSelectedPackage(null);
-  }, [selectedLocation, selectedLanguage, service]);
+  }, [selectedLocation, selectedLanguage, service, packages]);
 
   // Date validation
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,13 +192,53 @@ export default function ServiceDetailPage() {
   };
 
   const handleBooking = () => {
+    if (!user) {
+      // Save booking state before redirecting to login
+      const bookingState = {
+        serviceId: service?.id,
+        packageId: selectedPackage?.id,
+        location: selectedLocation,
+        language: selectedLanguage,
+        date: selectedDate,
+        time: selectedTime,
+        returnUrl: window.location.href
+      };
+      localStorage.setItem('bookingState', JSON.stringify(bookingState));
+      setShowLoginPrompt(true);
+      return;
+    }
+
     if (!selectedPackage || !selectedDate || !selectedTime) {
       setErrorMessage("Please complete all required fields.");
       return;
     }
-    
+
     // Handle booking logic here
-    alert('Booking functionality would be implemented here!');
+    toast.success('Booking functionality would be implemented here!');
+  };
+
+  const handleAddToCart = () => {
+    if (!user) {
+      // Save cart state before redirecting to login  
+      const cartState = {
+        serviceId: service?.id,
+        packageId: selectedPackage?.id,
+        location: selectedLocation,
+        language: selectedLanguage,
+        returnUrl: window.location.href
+      };
+      localStorage.setItem('cartState', JSON.stringify(cartState));
+      setShowLoginPrompt(true);
+      return;
+    }
+
+    if (!selectedPackage) {
+      setErrorMessage("Please select a package first.");
+      return;
+    }
+
+    // Handle add to cart logic here
+    toast.success('Added to cart successfully!');
   };
 
   if (loading) {
@@ -147,14 +270,14 @@ export default function ServiceDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
       {/* Navigation */}
-      <motion.div 
+      <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
-            <Link 
+            <Link
               href="/pujaservice"
               className="flex items-center text-gray-600 hover:text-orange-600 transition-colors group text-sm sm:text-base"
             >
@@ -175,21 +298,21 @@ export default function ServiceDetailPage() {
       </motion.div>
 
       {/* Hero Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative h-64 sm:h-80 lg:h-96 overflow-hidden"
+        className="relative h-64 sm:h-80 lg:h-[500px] overflow-hidden"
       >
         <Image
-          src={service.image}
+          src={service.image_url || '/placeholder-service.jpg'}
           alt={service.title}
           fill
-          className="object-cover"
+          className="object-contain bg-gray-100"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        
+
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white">
           <div className="max-w-7xl mx-auto">
@@ -199,25 +322,24 @@ export default function ServiceDetailPage() {
               transition={{ delay: 0.3 }}
               className="flex flex-wrap items-center gap-3 mb-4"
             >
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                service.type === 'HOME' 
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${service.type === 'HOME'
                   ? 'bg-green-500/90 text-white'
                   : service.type === 'TEMPLE'
-                  ? 'bg-blue-500/90 text-white'
-                  : 'bg-purple-500/90 text-white'
-              }`}>
+                    ? 'bg-blue-500/90 text-white'
+                    : 'bg-purple-500/90 text-white'
+                }`}>
                 {typeDisplayNames[service.type]}
               </span>
               <span className="px-4 py-2 rounded-full text-sm font-semibold bg-orange-500/90 text-white">
-                {service.category.name}
+                {service.category_detail?.name || 'Puja Service'}
               </span>
               <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                 <span className="text-sm font-semibold">4.8 (156 reviews)</span>
               </div>
             </motion.div>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
@@ -225,8 +347,8 @@ export default function ServiceDetailPage() {
             >
               {service.title}
             </motion.h1>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -238,7 +360,7 @@ export default function ServiceDetailPage() {
               </div>
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-2" />
-                <span>{service.packages.length} packages available</span>
+                <span>{packages.length} packages available</span>
               </div>
             </motion.div>
           </div>
@@ -246,7 +368,7 @@ export default function ServiceDetailPage() {
       </motion.div>
 
       {/* Professional Message */}
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
@@ -258,7 +380,7 @@ export default function ServiceDetailPage() {
             <div>
               <h3 className="font-semibold text-orange-900 mb-1">Sacred Assurance</h3>
               <p className="text-orange-800 text-sm leading-relaxed">
-                Our experienced pandits perform each ritual with utmost care and devotion according to authentic Vedic traditions. 
+                Our experienced pandits perform each ritual with utmost care and devotion according to authentic Vedic traditions.
                 Your spiritual well-being is our highest priority, backed by years of expertise and countless satisfied devotees.
               </p>
             </div>
@@ -271,7 +393,7 @@ export default function ServiceDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Description */}
-            <motion.div 
+            <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.7 }}
@@ -279,14 +401,15 @@ export default function ServiceDetailPage() {
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-6">About This Puja</h2>
               <div className="prose prose-orange max-w-none">
-                <p className="text-gray-700 leading-relaxed text-lg">
-                  {service.description}
-                </p>
+                <div
+                  className="text-gray-700 leading-relaxed text-lg"
+                  dangerouslySetInnerHTML={{ __html: service.description }}
+                />
               </div>
             </motion.div>
 
             {/* What's Included */}
-            <motion.div 
+            <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 }}
@@ -307,7 +430,7 @@ export default function ServiceDetailPage() {
                   'Complete ritual setup',
                   'Spiritual consultation'
                 ].map((item, index) => (
-                  <motion.div 
+                  <motion.div
                     key={index}
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -324,7 +447,7 @@ export default function ServiceDetailPage() {
 
           {/* Booking Sidebar */}
           <div className="lg:col-span-1">
-            <motion.div 
+            <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9 }}
@@ -334,7 +457,7 @@ export default function ServiceDetailPage() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Book Your Puja</h3>
                 <p className="text-gray-600 text-sm">Choose your preferred options below</p>
               </div>
-              
+
               {/* Location & Language Selection */}
               <div className="space-y-6 mb-8">
                 <div>
@@ -393,55 +516,62 @@ export default function ServiceDetailPage() {
                           key={pkg.id}
                           whileHover={{ scale: 1.02, y: -2 }}
                           whileTap={{ scale: 0.98 }}
-                          className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                            selectedPackage?.id === pkg.id
+                          className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all duration-300 ${selectedPackage?.id === pkg.id
                               ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50 shadow-lg'
                               : 'border-gray-200 hover:border-orange-300 hover:shadow-md bg-white'
-                          }`}
+                            }`}
                           onClick={() => setSelectedPackage(pkg)}
                         >
                           {/* Package Type Badge */}
                           <div className="flex items-center justify-between mb-3">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                              selectedPackage?.id === pkg.id
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${selectedPackage?.id === pkg.id
                                 ? 'bg-orange-500 text-white'
                                 : 'bg-orange-100 text-orange-600'
-                            }`}>
+                              }`}>
                               {packageTypeDisplayNames[pkg.package_type]}
                             </span>
                             <div className="text-right">
                               <span className="text-2xl font-bold text-orange-600">
-                                ₹{parseFloat(pkg.price).toLocaleString()}
+                                ₹{parseFloat(pkg.price.toString()).toLocaleString('en-IN')}
                               </span>
                               <div className="text-xs text-gray-500">per service</div>
                             </div>
                           </div>
 
                           {/* Package Description */}
-                          <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                            {pkg.description}
-                          </p>
+                          <div
+                            className="text-sm text-gray-700 mb-4 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: pkg.description }}
+                          />
 
                           {/* Package Features */}
                           <div className="space-y-2">
                             <div className="flex items-center text-sm">
                               <Users className="h-4 w-4 mr-2 text-green-500" />
                               <span className="text-gray-700">
-                                <strong>{pkg.priest_count}</strong> Professional Priest{pkg.priest_count > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center text-sm">
-                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                              <span className="text-gray-700">
-                                {pkg.includes_materials ? 'All Puja Materials Included' : 'Materials Not Included'}
+                                <strong>
+                                  {PACKAGE_CONFIG[pkg.package_type]?.priests || pkg.priest_count}
+                                </strong> Professional Priest{
+                                  (typeof PACKAGE_CONFIG[pkg.package_type]?.priests === 'number'
+                                    ? Number(PACKAGE_CONFIG[pkg.package_type]?.priests) > 1
+                                    : pkg.priest_count > 1) ? 's' : ''
+                                }
                               </span>
                             </div>
 
                             <div className="flex items-center text-sm">
                               <Clock className="h-4 w-4 mr-2 text-green-500" />
                               <span className="text-gray-700">
-                                Complete Vedic Rituals
+                                <strong>
+                                  {PACKAGE_CONFIG[pkg.package_type]?.duration || '2-3'} hours
+                                </strong> duration
+                              </span>
+                            </div>
+
+                            <div className="flex items-center text-sm">
+                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                              <span className="text-gray-700">
+                                {pkg.includes_materials ? 'All Puja Materials Included' : 'Materials Not Included'}
                               </span>
                             </div>
 
@@ -508,7 +638,7 @@ export default function ServiceDetailPage() {
                         />
                       </div>
                     </div>
-                    
+
                     {errorMessage && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -528,14 +658,13 @@ export default function ServiceDetailPage() {
                 whileTap={{ scale: 0.98 }}
                 disabled={!selectedPackage || !selectedDate || !selectedTime}
                 onClick={handleBooking}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
-                  selectedPackage && selectedDate && selectedTime
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${selectedPackage && selectedDate && selectedTime
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 {selectedPackage && selectedDate && selectedTime
-                  ? `Book Now - ₹${parseFloat(selectedPackage.price).toLocaleString()}`
+                  ? `Book Now - ₹${parseFloat(selectedPackage.price.toString()).toLocaleString('en-IN')}`
                   : 'Complete Selection to Book'
                 }
               </motion.button>
@@ -563,7 +692,7 @@ export default function ServiceDetailPage() {
         </div>
 
         {/* Customer Reviews Section - Moved Below Booking */}
-        <motion.div 
+        <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.2 }}
@@ -582,7 +711,7 @@ export default function ServiceDetailPage() {
               <span className="ml-2 text-gray-500">(156 reviews)</span>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {[
               {
@@ -622,7 +751,7 @@ export default function ServiceDetailPage() {
                 location: 'Ahmedabad'
               }
             ].map((review, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 initial={{ x: -30, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -640,9 +769,9 @@ export default function ServiceDetailPage() {
                     </div>
                     <div className="flex items-center mb-2">
                       {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`h-4 w-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                         />
                       ))}
                       <span className="ml-2 text-sm text-gray-500">{review.time}</span>
@@ -656,7 +785,7 @@ export default function ServiceDetailPage() {
         </motion.div>
 
         {/* Related Services Carousel */}
-        <motion.div 
+        <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.5 }}
@@ -666,10 +795,10 @@ export default function ServiceDetailPage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">You Might Also Like</h2>
             <p className="text-gray-600">Explore other spiritual services</p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {mockPujaServices
-              .filter(s => s.id !== service.id && s.category.id === service.category.id)
+            {services
+              .filter(s => s.id !== service.id && s.category_detail?.id === service.category_detail?.id)
               .slice(0, 4)
               .map((relatedService, index) => (
                 <motion.div
@@ -683,19 +812,18 @@ export default function ServiceDetailPage() {
                 >
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={relatedService.image}
+                      src={relatedService.image_url || '/placeholder-service.jpg'}
                       alt={relatedService.title}
                       fill
                       className="object-cover transition-transform duration-300 hover:scale-110"
                     />
                     <div className="absolute top-4 left-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        relatedService.type === 'HOME' 
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${relatedService.type === 'HOME'
                           ? 'bg-green-500 text-white'
                           : relatedService.type === 'TEMPLE'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-purple-500 text-white'
-                      }`}>
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-purple-500 text-white'
+                        }`}>
                         {typeDisplayNames[relatedService.type]}
                       </span>
                     </div>
@@ -706,21 +834,21 @@ export default function ServiceDetailPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-6">
-                    <h3 className="font-bold text-gray-900 mb-2 text-lg leading-tight" style={{ 
+                    <h3 className="font-bold text-gray-900 mb-2 text-lg leading-tight" style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden'
                     }}>{relatedService.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4" style={{ 
+                    <p className="text-gray-600 text-sm mb-4" style={{
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden'
                     }}>{relatedService.description}</p>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center text-sm text-gray-500">
                         <Clock className="h-4 w-4 mr-1" />
@@ -729,7 +857,7 @@ export default function ServiceDetailPage() {
                       <div className="text-right">
                         <span className="text-sm text-gray-500">Starting from</span>
                         <div className="font-bold text-orange-600">
-                          ₹{Math.min(...relatedService.packages.map(p => parseFloat(p.price))).toLocaleString()}
+                          ₹5,000+
                         </div>
                       </div>
                     </div>
@@ -737,14 +865,22 @@ export default function ServiceDetailPage() {
                 </motion.div>
               ))}
           </div>
-          
-          {mockPujaServices.filter(s => s.id !== service.id && s.category.id === service.category.id).length === 0 && (
+
+          {services.filter(s => s.id !== service.id && s.category_detail?.id === service.category_detail?.id).length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500">No related services found in this category.</p>
             </div>
           )}
         </motion.div>
       </div>
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <LoginPrompt
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
+        />
+      )}
     </div>
   );
 }

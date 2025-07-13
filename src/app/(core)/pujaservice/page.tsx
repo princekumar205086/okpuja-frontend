@@ -2,118 +2,167 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { PujaService, PujaServiceFilters, PaginationParams } from './types';
-import { mockPujaServices, mockCategories } from './mockData';
 import SearchFilter from './components/SearchFilter';
 import CategoryTabs from './components/CategoryTabs';
 import SortOptions from './components/SortOptions';
 import ServiceCard from './components/ServiceCard';
 import Pagination from './components/Pagination';
 import { ServiceGridSkeleton } from './components/LoadingSkeletons';
-import { filterServices, sortServices, paginateServices } from './utils';
+import { usePujaServiceStore } from '../../stores/pujaServiceStore';
+import { useAuthStore } from '../../stores/authStore';
+import { usePackageCount } from './hooks/usePackageCount';
+import LoginPrompt from './components/LoginPrompt';
 
 export default function PujaservicePage() {
-  const [services, setServices] = useState<PujaService[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<PujaServiceFilters>({
-    search: '',
-    category: '',
-    type: '',
-    location: '',
-    language: '',
-    sortBy: 'title',
-    sortOrder: 'asc'
-  });
-  const [pagination, setPagination] = useState<PaginationParams>({
-    page: 1,
-    limit: 12,
-    total: 0,
-    totalPages: 0
-  });
+  const { user } = useAuthStore();
+  
+  const {
+    services,
+    categories,
+    loading,
+    error,
+    searchTerm,
+    currentPage,
+    pageSize,
+    totalCount,
+    totalPages,
+    filters,
+    fetchServices,
+    fetchCategories,
+    setSearchTerm,
+    setCurrentPage,
+    setFilters,
+    clearError,
+  } = usePujaServiceStore();
 
-  // Simulate API loading
+  const { packageCounts, loading: packagesLoading } = usePackageCount(services);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Initialize data
   useEffect(() => {
-    const loadServices = async () => {
-      setLoading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setServices(mockPujaServices);
-      setLoading(false);
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([
+          fetchCategories(),
+          fetchServices({ page: 1 })
+        ]);
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+      }
     };
 
-    loadServices();
-  }, []);
+    loadInitialData();
+  }, [fetchCategories, fetchServices]);
 
-  // Process services through filter, sort, and pagination pipeline
-  const processedData = useMemo(() => {
-    if (loading) return { services: [], pagination: { page: 1, limit: 12, total: 0, totalPages: 0 } };
-
-    // Filter services
-    const filtered = filterServices(services, filters);
-    
-    // Sort services
-    const sorted = sortServices(filtered, filters.sortBy || 'title', filters.sortOrder || 'asc');
-    
-    // Paginate services
-    return paginateServices(sorted, pagination.page, pagination.limit);
-  }, [services, filters, pagination.page, pagination.limit, loading]);
-
-  // Update pagination when data changes
+  // Reload services when filters change
   useEffect(() => {
-    if (!loading && processedData.pagination.total !== pagination.total) {
-      setPagination(prev => ({
-        ...prev,
-        total: processedData.pagination.total,
-        totalPages: processedData.pagination.totalPages
-      }));
+    if (searchTerm !== undefined || Object.keys(filters).length > 0) {
+      const loadServices = async () => {
+        try {
+          await fetchServices({
+            page: 1,
+            search: searchTerm,
+            category: filters.category,
+            type: filters.type,
+            location: filters.location,
+            language: filters.language,
+            sortBy: filters.sortBy,
+            sortOrder: filters.sortOrder,
+            is_active: true, // Only show active services to public
+          });
+        } catch (error) {
+          console.error('Failed to load services:', error);
+        }
+      };
+
+      loadServices();
     }
-  }, [processedData.pagination.total, processedData.pagination.totalPages, pagination.total, loading]);
+  }, [searchTerm, filters, fetchServices]);
+
+  // Handle pagination
+  const handlePageChange = async (page: number) => {
+    try {
+      setCurrentPage(page);
+      await fetchServices({
+        page,
+        search: searchTerm,
+        category: filters.category,
+        type: filters.type,
+        location: filters.location,
+        language: filters.language,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        is_active: true,
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error('Failed to change page:', error);
+    }
+  };
 
   // Filter handlers
   const handleSearch = (query: string) => {
-    setFilters(prev => ({ ...prev, search: query }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setSearchTerm(query);
+    setCurrentPage(1);
   };
 
   const handleCategoryFilter = (category: string) => {
-    setFilters(prev => ({ ...prev, category }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    const categoryId = category ? parseInt(category) : undefined;
+    setFilters({ ...filters, category: categoryId });
+    setCurrentPage(1);
   };
 
   const handleTypeFilter = (type: string) => {
-    setFilters(prev => ({ ...prev, type }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters({ ...filters, type: type || undefined });
+    setCurrentPage(1);
   };
 
   const handleLocationFilter = (location: string) => {
-    setFilters(prev => ({ ...prev, location }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters({ ...filters, location: location || undefined });
+    setCurrentPage(1);
   };
 
   const handleLanguageFilter = (language: string) => {
-    setFilters(prev => ({ ...prev, language }));
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters({ ...filters, language: language || undefined });
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      search: '',
-      category: '',
-      type: '',
-      location: '',
-      language: '',
-      sortBy: 'title',
-      sortOrder: 'asc'
-    });
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters({});
+    setSearchTerm('');
+    setCurrentPage(1);
   };
 
   const handleSortChange = (sortBy: 'title' | 'price' | 'duration' | 'created_at', sortOrder: 'asc' | 'desc') => {
-    setFilters(prev => ({ ...prev, sortBy, sortOrder }));
+    setFilters({ ...filters, sortBy, sortOrder });
   };
 
-  const handlePageChange = (page: number) => {
-    setPagination(prev => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Handle authentication-required actions
+  const handleBookingAction = () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return false;
+    }
+    return true;
+  };
+
+  // Transform services to match expected format
+  const transformedServices = useMemo(() => {
+    return services.map(service => ({
+      ...service,
+      image: service.image_url || '',
+      image_thumbnail: service.image_url || '',
+      image_card: service.image_url || '',
+      category: service.category_detail || { id: 0, name: 'Unknown', created_at: '', updated_at: '' },
+      packages: [], // Packages will be fetched separately when needed
+    }));
+  }, [services]);
+
+  const paginationData = {
+    page: currentPage,
+    limit: pageSize,
+    total: totalCount,
+    totalPages: totalPages,
   };
 
   return (
@@ -150,9 +199,41 @@ export default function PujaservicePage() {
         </div>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error loading services</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => {
+                      clearError();
+                      fetchServices({ page: 1, is_active: true });
+                    }}
+                    className="bg-red-100 text-red-800 px-3 py-1 rounded-md text-sm hover:bg-red-200 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search and Filters */}
       <SearchFilter
-        categories={mockCategories}
+        categories={categories}
         onSearch={handleSearch}
         onCategoryFilter={handleCategoryFilter}
         onTypeFilter={handleTypeFilter}
@@ -160,8 +241,8 @@ export default function PujaservicePage() {
         onLanguageFilter={handleLanguageFilter}
         onClearFilters={handleClearFilters}
         activeFilters={{
-          search: filters.search || '',
-          category: filters.category || '',
+          search: searchTerm || '',
+          category: (filters.category || '').toString(),
           type: filters.type || '',
           location: filters.location || '',
           language: filters.language || ''
@@ -170,8 +251,8 @@ export default function PujaservicePage() {
 
       {/* Category Tabs - Mobile Optimized */}
       <CategoryTabs
-        categories={mockCategories}
-        activeCategory={filters.category || ''}
+        categories={categories}
+        activeCategory={(filters.category || '').toString()}
         onCategoryChange={handleCategoryFilter}
       />
 
@@ -181,7 +262,7 @@ export default function PujaservicePage() {
           sortBy={filters.sortBy || 'title'}
           sortOrder={filters.sortOrder || 'asc'}
           onSortChange={handleSortChange}
-          totalResults={processedData.pagination.total}
+          totalResults={totalCount}
         />
       )}
 
@@ -189,19 +270,29 @@ export default function PujaservicePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {loading ? (
           <ServiceGridSkeleton count={12} />
-        ) : processedData.services.length > 0 ? (
+        ) : transformedServices.length > 0 ? (
           <>
             {/* Results Summary - Mobile */}
             <div className="mb-6 sm:hidden">
               <p className="text-sm text-gray-600 text-center">
-                Showing {processedData.services.length} of {processedData.pagination.total} services
+                Showing {transformedServices.length} of {totalCount} services
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {processedData.services.map((service, index) => (
-                <ServiceCard key={service.id} service={service} index={index} />
-              ))}
+              {transformedServices.map((service, index) => {
+                const packageData = packageCounts[service.id];
+                return (
+                  <ServiceCard 
+                    key={service.id} 
+                    service={service} 
+                    index={index}
+                    onBookingAction={handleBookingAction}
+                    packageCount={packageData?.count || 0}
+                    packagePreviews={packageData?.packages || []}
+                  />
+                );
+              })}
             </div>
           </>
         ) : (
@@ -228,10 +319,18 @@ export default function PujaservicePage() {
       </div>
 
       {/* Pagination */}
-      {!loading && processedData.services.length > 0 && (
+      {!loading && transformedServices.length > 0 && (
         <Pagination
-          pagination={processedData.pagination}
+          pagination={paginationData}
           onPageChange={handlePageChange}
+        />
+      )}
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <LoginPrompt
+          isOpen={showLoginPrompt}
+          onClose={() => setShowLoginPrompt(false)}
         />
       )}
 

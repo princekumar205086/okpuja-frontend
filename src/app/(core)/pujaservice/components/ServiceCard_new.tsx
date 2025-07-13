@@ -26,7 +26,7 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
           {/* Image Container */}
           <div className="relative h-48 overflow-hidden">
             <Image
-              src={service.image_card}
+              src={service.image_card ?? '/placeholder.png'}
               alt={service.title}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -44,7 +44,7 @@ export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
                 transition={{ delay: 0.3 + index * 0.1 }}
                 className="px-3 py-1.5 rounded-full text-xs font-semibold bg-orange-500/90 text-white backdrop-blur-sm"
               >
-                {service.category.name}
+                {service.category?.name}
               </motion.span>
             </div>
           </div>
