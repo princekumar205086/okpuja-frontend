@@ -9,13 +9,13 @@ export const filterServices = (services: PujaService[], filters: PujaServiceFilt
     filtered = filtered.filter(service =>
       service.title.toLowerCase().includes(searchLower) ||
       service.description.toLowerCase().includes(searchLower) ||
-      service.category.name.toLowerCase().includes(searchLower)
+      service.category?.name?.toLowerCase().includes(searchLower)
     );
   }
 
   // Category filter
   if (filters.category) {
-    filtered = filtered.filter(service => service.category.name === filters.category);
+    filtered = filtered.filter(service => service.category?.name === filters.category);
   }
 
   // Type filter
@@ -26,14 +26,14 @@ export const filterServices = (services: PujaService[], filters: PujaServiceFilt
   // Location filter
   if (filters.location) {
     filtered = filtered.filter(service =>
-      service.packages.some(pkg => pkg.location === filters.location)
+      Array.isArray(service.packages) && service.packages.some(pkg => pkg.location === filters.location)
     );
   }
 
   // Language filter
   if (filters.language) {
     filtered = filtered.filter(service =>
-      service.packages.some(pkg => pkg.language === filters.language)
+      Array.isArray(service.packages) && service.packages.some(pkg => pkg.language === filters.language)
     );
   }
 
@@ -41,7 +41,7 @@ export const filterServices = (services: PujaService[], filters: PujaServiceFilt
   if (filters.priceRange) {
     const [minPrice, maxPrice] = filters.priceRange;
     filtered = filtered.filter(service => {
-      if (service.packages.length === 0) return true;
+      if (!service.packages || service.packages.length === 0) return true;
       const serviceMinPrice = Math.min(...service.packages.map(p => parseFloat(p.price)));
       const serviceMaxPrice = Math.max(...service.packages.map(p => parseFloat(p.price)));
       return serviceMinPrice <= maxPrice && serviceMaxPrice >= minPrice;
@@ -62,8 +62,8 @@ export const sortServices = (services: PujaService[], sortBy: 'title' | 'price' 
         comparison = a.title.localeCompare(b.title);
         break;
       case 'price':
-        const priceA = a.packages.length > 0 ? Math.min(...a.packages.map(p => parseFloat(p.price))) : 0;
-        const priceB = b.packages.length > 0 ? Math.min(...b.packages.map(p => parseFloat(p.price))) : 0;
+        const priceA = Array.isArray(a.packages) && a.packages.length > 0 ? Math.min(...a.packages.map(p => parseFloat(p.price))) : 0;
+        const priceB = Array.isArray(b.packages) && b.packages.length > 0 ? Math.min(...b.packages.map(p => parseFloat(p.price))) : 0;
         comparison = priceA - priceB;
         break;
       case 'duration':
@@ -102,9 +102,11 @@ export const paginateServices = (services: PujaService[], page: number, limit: n
 export const getUniqueLocations = (services: PujaService[]): string[] => {
   const locations = new Set<string>();
   services.forEach(service => {
-    service.packages.forEach(pkg => {
-      locations.add(pkg.location);
-    });
+    if (Array.isArray(service.packages)) {
+      service.packages.forEach(pkg => {
+        locations.add(pkg.location);
+      });
+    }
   });
   return Array.from(locations).sort();
 };
@@ -114,11 +116,13 @@ export const getPriceRange = (services: PujaService[]): [number, number] => {
   let maxPrice = 0;
 
   services.forEach(service => {
-    service.packages.forEach(pkg => {
-      const price = parseFloat(pkg.price);
-      minPrice = Math.min(minPrice, price);
-      maxPrice = Math.max(maxPrice, price);
-    });
+    if (Array.isArray(service.packages)) {
+      service.packages.forEach(pkg => {
+        const price = parseFloat(pkg.price);
+        minPrice = Math.min(minPrice, price);
+        maxPrice = Math.max(maxPrice, price);
+      });
+    }
   });
 
   return minPrice === Infinity ? [0, 0] : [minPrice, maxPrice];
