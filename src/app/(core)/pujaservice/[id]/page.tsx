@@ -13,6 +13,7 @@ import moment from 'moment-timezone';
 import { PujaService, Package } from '../../../stores/pujaServiceStore';
 import { usePujaServiceStore } from '../../../stores/pujaServiceStore';
 import { useAuthStore } from '../../../stores/authStore';
+import { useCartStore } from '../../../stores/cartStore';
 import { typeDisplayNames, languageDisplayNames, packageTypeDisplayNames } from '../mockData';
 import { decryptId, encryptId } from '../encryption';
 import { PACKAGE_CONFIG } from '../constants';
@@ -37,6 +38,8 @@ export default function ServiceDetailPage() {
     fetchPackages,
     clearError,
   } = usePujaServiceStore();
+
+  const { addToCart, loading: cartLoading } = useCartStore();
 
   const [service, setService] = useState<PujaService | null>(null);
   const [loading, setLoading] = useState(true);
@@ -217,7 +220,7 @@ export default function ServiceDetailPage() {
     toast.success('Booking functionality would be implemented here!');
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!user) {
       // Save cart state before redirecting to login  
       const cartState = {
@@ -225,6 +228,8 @@ export default function ServiceDetailPage() {
         packageId: selectedPackage?.id,
         location: selectedLocation,
         language: selectedLanguage,
+        date: selectedDate,
+        time: selectedTime,
         returnUrl: window.location.href
       };
       localStorage.setItem('cartState', JSON.stringify(cartState));
@@ -232,13 +237,35 @@ export default function ServiceDetailPage() {
       return;
     }
 
-    if (!selectedPackage) {
-      setErrorMessage("Please select a package first.");
+    if (!selectedPackage || !selectedDate || !selectedTime) {
+      setErrorMessage("Please complete all required fields.");
       return;
     }
 
-    // Handle add to cart logic here
-    toast.success('Added to cart successfully!');
+    // Prepare cart item data
+    const cartItemData = {
+      service_type: 'PUJA' as const,
+      puja_service: service!.id,
+      package_id: selectedPackage.id,
+      selected_date: selectedDate,
+      selected_time: selectedTime,
+    };
+
+    try {
+      const success = await addToCart(cartItemData);
+      if (success) {
+        // Clear form data after successful addition
+        setSelectedDate('');
+        setSelectedTime('');
+        setErrorMessage('');
+        
+        // Optionally redirect to cart or show success message
+        // router.push('/cart');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setErrorMessage("Failed to add item to cart. Please try again.");
+    }
   };
 
   if (loading) {
@@ -652,22 +679,44 @@ export default function ServiceDetailPage() {
                 )}
               </AnimatePresence>
 
-              {/* Book Button */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={!selectedPackage || !selectedDate || !selectedTime}
-                onClick={handleBooking}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${selectedPackage && selectedDate && selectedTime
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-              >
-                {selectedPackage && selectedDate && selectedTime
-                  ? `Book Now - ₹${parseFloat(selectedPackage.price.toString()).toLocaleString('en-IN')}`
-                  : 'Complete Selection to Book'
-                }
-              </motion.button>
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                {/* Book Now Button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={!selectedPackage || !selectedDate || !selectedTime}
+                  onClick={handleBooking}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${selectedPackage && selectedDate && selectedTime
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                  {selectedPackage && selectedDate && selectedTime
+                    ? `Book Now - ₹${parseFloat(selectedPackage.price.toString()).toLocaleString('en-IN')}`
+                    : 'Complete Selection to Book'
+                  }
+                </motion.button>
+
+                {/* Add to Cart Button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={!selectedPackage || !selectedDate || !selectedTime || cartLoading}
+                  onClick={handleAddToCart}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 border-2 ${selectedPackage && selectedDate && selectedTime
+                      ? 'border-orange-500 text-orange-600 hover:bg-orange-50 shadow-md hover:shadow-lg'
+                      : 'border-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                  {cartLoading 
+                    ? 'Adding to Cart...' 
+                    : selectedPackage && selectedDate && selectedTime
+                      ? `Add to Cart - ₹${parseFloat(selectedPackage.price.toString()).toLocaleString('en-IN')}`
+                      : 'Complete Selection to Add to Cart'
+                  }
+                </motion.button>
+              </div>
 
               {/* Contact Info */}
               <div className="mt-6 pt-6 border-t border-gray-100">

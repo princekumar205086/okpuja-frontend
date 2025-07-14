@@ -18,6 +18,7 @@ import {
   FaTachometerAlt,
   FaCog,
   FaHistory,
+  FaShoppingCart,
 } from "react-icons/fa";
 import { RiMenu3Line, RiCloseLine } from "react-icons/ri";
 import Link from "next/link";
@@ -25,6 +26,7 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/app/stores/authStore";
+import { useCartStore } from "@/app/stores/cartStore";
 
 
 const Header = () => {
@@ -32,14 +34,15 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const cartItems: number[] = [];
-  const cartCount = cartItems.length;
   const router = useRouter();
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Get auth store
   const { user, logout } = useAuthStore();
+  
+  // Get cart store
+  const { totalCount: cartCount, fetchCartItems, getLocalCartCount } = useCartStore();
 
   // Helper function to get user display name
   const getUserDisplayName = () => {
@@ -107,6 +110,13 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [pathname]);
+
+  // Fetch cart items when user is available
+  useEffect(() => {
+    if (user && mounted) {
+      fetchCartItems();
+    }
+  }, [user, mounted, fetchCartItems]);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
