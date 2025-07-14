@@ -30,7 +30,6 @@ import { useAuthStore } from "@/app/stores/authStore";
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
   const cartItems: number[] = [];
@@ -42,6 +41,52 @@ const Header = () => {
   // Get auth store
   const { user, logout } = useAuthStore();
 
+  // Helper function to get user display name
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    
+    if (user.full_name) {
+      return user.full_name;
+    }
+    
+    if (user.email) {
+      // Extract name from email (before @)
+      const emailName = user.email.split('@')[0];
+      // Capitalize first letter and replace dots/underscores with spaces
+      return emailName.charAt(0).toUpperCase() + emailName.slice(1).replace(/[._]/g, ' ');
+    }
+    
+    return user.role === 'ADMIN' ? 'Admin' : user.role === 'EMPLOYEE' ? 'Employee' : 'User';
+  };
+
+  // Helper function to get dashboard URL based on role
+  const getDashboardUrl = () => {
+    if (!user) return '/login';
+    
+    switch (user.role) {
+      case 'ADMIN':
+        return '/admin/dashboard';
+      case 'EMPLOYEE':
+        return '/employee/dashboard';
+      default:
+        return '/user/dashboard';
+    }
+  };
+
+  // Helper function to get profile URL based on role
+  const getProfileUrl = () => {
+    if (!user) return '/login';
+    
+    switch (user.role) {
+      case 'ADMIN':
+        return '/admin/profile';
+      case 'EMPLOYEE':
+        return '/employee/profile';
+      default:
+        return '/user/profile';
+    }
+  };
+
   useEffect(() => {
     // Set mounted to true after component mounts
     setMounted(true);
@@ -51,16 +96,6 @@ const Header = () => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 10);
     };
-
-    // Get auth token
-    const storedToken = localStorage.getItem("token");
-    setToken(storedToken);
-
-    // Close menu when route changes
-    // const closeMenuOnRouteChange = () => {
-    //   setIsMenuOpen(false);
-    //   setShowDropdown(false);
-    // };
 
     // Event listeners
     window.addEventListener("scroll", handleScroll);
@@ -167,37 +202,78 @@ const Header = () => {
                 {/* Dashboard/Login Link */}
                 {mounted ? (
                   <>
-                    {token ? (
+                    {user ? (
                       <div className="relative" ref={dropdownRef}>
                         <button
                           onClick={toggleDropdown}
-                          className="flex items-center px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all duration-300"
+                          className="flex items-center px-3 xl:px-4 py-2 rounded-lg text-sm xl:text-base font-medium transition-all duration-300 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 hover:from-orange-100 hover:to-amber-100 border border-orange-200"
                         >
-                          Dashboard <FaChevronDown className="ml-2 text-xs" />
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-amber-600 rounded-full flex items-center justify-center mr-2">
+                              <span className="text-white font-bold text-sm">
+                                {getUserDisplayName().charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="hidden xl:block">
+                              <div className="text-left">
+                                <div className="text-sm font-semibold text-gray-800">
+                                  {getUserDisplayName()}
+                                </div>
+                                <div className="text-xs text-gray-500 capitalize">
+                                  {user.role.toLowerCase()}
+                                </div>
+                              </div>
+                            </div>
+                            <FaChevronDown className="ml-2 text-xs text-gray-500" />
+                          </div>
                         </button>
 
                         {showDropdown && (
-                          <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100">
-                            <Link href="user/dashboard">
-                              <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100">
+                            <div className="px-4 py-3 border-b border-gray-100">
+                              <div className="flex items-center">
+                                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-amber-600 rounded-full flex items-center justify-center mr-3">
+                                  <span className="text-white font-bold">
+                                    {getUserDisplayName().charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-semibold text-gray-800">
+                                    {getUserDisplayName()}
+                                  </div>
+                                  <div className="text-xs text-gray-500">{user.email}</div>
+                                  <div className="text-xs text-orange-600 capitalize font-medium">
+                                    {user.role.toLowerCase()}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <Link href={getDashboardUrl()}>
+                              <span className="flex px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors items-center">
+                                <FaTachometerAlt className="mr-3 text-orange-500" />
                                 My Dashboard
                               </span>
                             </Link>
-                            <Link href="user/profile">
-                              <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                            <Link href={getProfileUrl()}>
+                              <span className="flex px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors items-center">
+                                <FaCog className="mr-3 text-orange-500" />
                                 Profile Settings
                               </span>
                             </Link>
-                            <Link href="/mybooking">
-                              <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
-                                My Bookings
-                              </span>
-                            </Link>
+                            {user.role === 'USER' && (
+                              <Link href="/mybooking">
+                                <span className="flex px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors items-center">
+                                  <FaHistory className="mr-3 text-orange-500" />
+                                  My Bookings
+                                </span>
+                              </Link>
+                            )}
                             <hr className="my-2 border-gray-100" />
                             <button
                               onClick={handleLogout}
-                              className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                              className="flex w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors items-center"
                             >
+                              <FaSignOutAlt className="mr-3 text-red-500" />
                               Logout
                             </button>
                           </div>
@@ -255,10 +331,10 @@ const Header = () => {
                         </Link>
                       ))}
                       
-                      {token && (
+                      {user && (
                         <>
                           <hr className="my-2 border-gray-100" />
-                          <Link href="user/dashboard">
+                          <Link href={getDashboardUrl()}>
                             <span className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
                               Dashboard
                             </span>
@@ -269,7 +345,7 @@ const Header = () => {
                   )}
                 </div>
 
-                {!token && mounted && (
+                {!user && mounted && (
                   <Link href="/register">
                     <span className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-medium text-sm whitespace-nowrap shadow-lg">
                       SignUp
@@ -311,7 +387,7 @@ const Header = () => {
               <div className="hidden lg:block">
                 {mounted ? (
                   <>
-                    {token ? (
+                    {user ? (
                       <button
                         onClick={handleLogout}
                         aria-label="Logout"
@@ -336,7 +412,7 @@ const Header = () => {
               <div className="hidden md:block lg:hidden">
                 {mounted ? (
                   <>
-                    {token ? (
+                    {user ? (
                       <button
                         onClick={handleLogout}
                         aria-label="Logout"
@@ -445,26 +521,48 @@ const Header = () => {
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Account</h3>
                 {mounted ? (
                   <>
-                    {token ? (
+                    {user ? (
                       <div className="space-y-2">
-                        <Link href="user/dashboard" onClick={toggleMenu}>
+                        {/* User Info Card */}
+                        <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-2xl border border-orange-200 mb-4">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-600 rounded-full flex items-center justify-center mr-3">
+                              <span className="text-white font-bold text-lg">
+                                {getUserDisplayName().charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-semibold text-gray-800">
+                                {getUserDisplayName()}
+                              </div>
+                              <div className="text-xs text-gray-500">{user.email}</div>
+                              <div className="text-xs text-orange-600 capitalize font-medium">
+                                {user.role.toLowerCase()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Link href={getDashboardUrl()} onClick={toggleMenu}>
                           <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
                             <FaTachometerAlt className="mr-3 text-xl" />
                             <span className="flex-1">My Dashboard</span>
                           </div>
                         </Link>
-                        <Link href="user/profile" onClick={toggleMenu}>
+                        <Link href={getProfileUrl()} onClick={toggleMenu}>
                           <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
                             <FaCog className="mr-3 text-xl" />
                             <span className="flex-1">Profile Settings</span>
                           </div>
                         </Link>
-                        <Link href="/mybooking" onClick={toggleMenu}>
-                          <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
-                            <FaHistory className="mr-3 text-xl" />
-                            <span className="flex-1">My Bookings</span>
-                          </div>
-                        </Link>
+                        {user.role === 'USER' && (
+                          <Link href="/mybooking" onClick={toggleMenu}>
+                            <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
+                              <FaHistory className="mr-3 text-xl" />
+                              <span className="flex-1">My Bookings</span>
+                            </div>
+                          </Link>
+                        )}
                         <button
                           onClick={() => {
                             handleLogout();
@@ -517,7 +615,7 @@ const Header = () => {
                     )}
                   </div>
                 </Link>
-                {mounted && !token && (
+                {mounted && !user && (
                   <Link href="/login" aria-label="Login" onClick={toggleMenu}>
                     <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-2xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center justify-center shadow-lg transform hover:scale-110 hover:rotate-3">
                       <FaUserCircle className="text-2xl" />

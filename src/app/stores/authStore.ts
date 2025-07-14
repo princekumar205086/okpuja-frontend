@@ -10,6 +10,9 @@ type User = {
   account_status: string;
   email_verified: boolean;
   full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
   avatar?: string;
 };
 
@@ -30,6 +33,11 @@ type LoginResponse = {
   role: string;
   account_status: string;
   email_verified: boolean;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  avatar?: string;
 };
 
 type ErrorResponse = {
@@ -126,7 +134,7 @@ export const useAuthStore = create<AuthState>()(
             password,
           });
 
-          const { refresh, access, id, role, account_status, email_verified } = response.data;
+          const { refresh, access, id, role, account_status, email_verified, full_name, first_name, last_name, phone, avatar } = response.data;
 
           // Check account status
           if (account_status !== 'ACTIVE') {
@@ -156,6 +164,11 @@ export const useAuthStore = create<AuthState>()(
             role,
             account_status,
             email_verified,
+            full_name,
+            first_name,
+            last_name,
+            phone,
+            avatar,
           };
 
           // Store in localStorage

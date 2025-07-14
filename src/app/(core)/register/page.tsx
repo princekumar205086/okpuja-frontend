@@ -422,9 +422,11 @@ export default function RegisterForm() {
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                       Email Address
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <FaEnvelope className="h-5 w-5 text-gray-400" />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <FaEnvelope className={`h-5 w-5 transition-colors duration-200 ${
+                          formState.email ? 'text-orange-500' : 'text-gray-400'
+                        } group-focus-within:text-orange-500`} />
                       </div>
                       <input
                         id="email"
@@ -432,14 +434,21 @@ export default function RegisterForm() {
                         type="email"
                         value={formState.email}
                         onChange={handleInputChange}
-                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/70 backdrop-blur-sm ${
-                          formErrors.email ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/90 backdrop-blur-sm placeholder-gray-400 ${
+                          formErrors.email ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
+                        } focus:bg-white shadow-sm hover:shadow-md focus:shadow-lg`}
                         placeholder="Enter your email"
                       />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/5 to-amber-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
                     </div>
                     {formErrors.email && (
-                      <p className="mt-2 text-sm text-red-600">{formErrors.email}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 text-sm text-red-600"
+                      >
+                        {formErrors.email}
+                      </motion.p>
                     )}
                   </div>
 
@@ -448,9 +457,11 @@ export default function RegisterForm() {
                     <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
                       Phone Number
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <FaPhone className="h-5 w-5 text-gray-400" />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <FaPhone className={`h-5 w-5 transition-colors duration-200 ${
+                          formState.phone ? 'text-orange-500' : 'text-gray-400'
+                        } group-focus-within:text-orange-500`} />
                       </div>
                       <input
                         id="phone"
@@ -458,14 +469,21 @@ export default function RegisterForm() {
                         type="tel"
                         value={formState.phone}
                         onChange={handleInputChange}
-                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/70 backdrop-blur-sm ${
-                          formErrors.phone ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/90 backdrop-blur-sm placeholder-gray-400 ${
+                          formErrors.phone ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
+                        } focus:bg-white shadow-sm hover:shadow-md focus:shadow-lg`}
                         placeholder="Enter your phone number"
                       />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/5 to-amber-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
                     </div>
                     {formErrors.phone && (
-                      <p className="mt-2 text-sm text-red-600">{formErrors.phone}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 text-sm text-red-600"
+                      >
+                        {formErrors.phone}
+                      </motion.p>
                     )}
                   </div>
 
@@ -475,9 +493,11 @@ export default function RegisterForm() {
                       <label htmlFor="employee_registration_code" className="block text-sm font-semibold text-gray-700 mb-2">
                         Employee Registration Code
                       </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <FaKey className="h-5 w-5 text-gray-400" />
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                          <FaKey className={`h-5 w-5 transition-colors duration-200 ${
+                            formState.employee_registration_code ? 'text-orange-500' : 'text-gray-400'
+                          } group-focus-within:text-orange-500`} />
                         </div>
                         <input
                           id="employee_registration_code"
@@ -485,14 +505,21 @@ export default function RegisterForm() {
                           type="text"
                           value={formState.employee_registration_code || ""}
                           onChange={handleInputChange}
-                          className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/70 backdrop-blur-sm ${
-                            formErrors.employee_registration_code ? 'border-red-300' : 'border-gray-200'
-                          }`}
+                          className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/90 backdrop-blur-sm placeholder-gray-400 ${
+                            formErrors.employee_registration_code ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
+                          } focus:bg-white shadow-sm hover:shadow-md focus:shadow-lg`}
                           placeholder="Enter employee registration code"
                         />
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/5 to-amber-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
                       </div>
                       {formErrors.employee_registration_code && (
-                        <p className="mt-2 text-sm text-red-600">{formErrors.employee_registration_code}</p>
+                        <motion.p 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 text-sm text-red-600"
+                        >
+                          {formErrors.employee_registration_code}
+                        </motion.p>
                       )}
                     </div>
                   )}
@@ -502,9 +529,11 @@ export default function RegisterForm() {
                     <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                       Password
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <FaLock className="h-5 w-5 text-gray-400" />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <FaLock className={`h-5 w-5 transition-colors duration-200 ${
+                          formState.password ? 'text-orange-500' : 'text-gray-400'
+                        } group-focus-within:text-orange-500`} />
                       </div>
                       <input
                         id="password"
@@ -512,14 +541,14 @@ export default function RegisterForm() {
                         type={showPassword ? "text" : "password"}
                         value={formState.password}
                         onChange={handleInputChange}
-                        className={`w-full pl-12 pr-12 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/70 backdrop-blur-sm ${
-                          formErrors.password ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full pl-12 pr-12 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/90 backdrop-blur-sm placeholder-gray-400 ${
+                          formErrors.password ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
+                        } focus:bg-white shadow-sm hover:shadow-md focus:shadow-lg`}
                         placeholder="Create a strong password"
                       />
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center z-10 hover:scale-110 transition-transform duration-200"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -528,14 +557,19 @@ export default function RegisterForm() {
                           <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                         )}
                       </button>
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/5 to-amber-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
                     </div>
                     
                     {/* Password Strength Indicator */}
                     {formState.password && (
-                      <div className="mt-2">
-                        <div className="flex justify-between text-sm mb-1">
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mt-3"
+                      >
+                        <div className="flex justify-between text-sm mb-2">
                           <span className="text-gray-600">Password strength:</span>
-                          <span className={`font-medium ${
+                          <span className={`font-medium transition-colors duration-200 ${
                             passwordStrength.strength >= 75 ? 'text-green-600' :
                             passwordStrength.strength >= 50 ? 'text-blue-600' :
                             passwordStrength.strength >= 25 ? 'text-yellow-600' : 'text-red-600'
@@ -543,17 +577,24 @@ export default function RegisterForm() {
                             {passwordStrength.text}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-                            style={{ width: `${passwordStrength.strength}%` }}
-                          ></div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${passwordStrength.strength}%` }}
+                            className={`h-2 rounded-full transition-all duration-500 ${passwordStrength.color}`}
+                          />
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     
                     {formErrors.password && (
-                      <p className="mt-2 text-sm text-red-600">{formErrors.password}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 text-sm text-red-600"
+                      >
+                        {formErrors.password}
+                      </motion.p>
                     )}
                   </div>
 
@@ -562,9 +603,11 @@ export default function RegisterForm() {
                     <label htmlFor="password2" className="block text-sm font-semibold text-gray-700 mb-2">
                       Confirm Password
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <FaLock className="h-5 w-5 text-gray-400" />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <FaLock className={`h-5 w-5 transition-colors duration-200 ${
+                          formState.password2 ? 'text-orange-500' : 'text-gray-400'
+                        } group-focus-within:text-orange-500`} />
                       </div>
                       <input
                         id="password2"
@@ -572,14 +615,14 @@ export default function RegisterForm() {
                         type={showConfirmPassword ? "text" : "password"}
                         value={formState.password2}
                         onChange={handleInputChange}
-                        className={`w-full pl-12 pr-12 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/70 backdrop-blur-sm ${
-                          formErrors.password2 ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full pl-12 pr-12 py-4 border-2 rounded-xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all duration-200 text-base bg-white/90 backdrop-blur-sm placeholder-gray-400 ${
+                          formErrors.password2 ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
+                        } focus:bg-white shadow-sm hover:shadow-md focus:shadow-lg`}
                         placeholder="Confirm your password"
                       />
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center z-10 hover:scale-110 transition-transform duration-200"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
                         {showConfirmPassword ? (
@@ -588,23 +631,37 @@ export default function RegisterForm() {
                           <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                         )}
                       </button>
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/5 to-amber-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
                     </div>
                     {formErrors.password2 && (
-                      <p className="mt-2 text-sm text-red-600">{formErrors.password2}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 text-sm text-red-600"
+                      >
+                        {formErrors.password2}
+                      </motion.p>
                     )}
                   </div>
 
                   {/* Create Account Button */}
-                  <button
+                  <motion.button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center"
+                    whileHover={{ scale: loading ? 1 : 1.02 }}
+                    whileTap={{ scale: loading ? 1 : 0.98 }}
+                    className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-4 rounded-xl font-semibold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center group overflow-hidden relative"
                   >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                     {loading ? (
-                      <FaSpinner className="animate-spin mr-2" />
-                    ) : null}
-                    {loading ? "Creating Account..." : "Create Account"}
-                  </button>
+                      <>
+                        <FaSpinner className="animate-spin mr-2 relative z-10" />
+                        <span className="relative z-10">Creating Account...</span>
+                      </>
+                    ) : (
+                      <span className="relative z-10">Create Account</span>
+                    )}
+                  </motion.button>
 
                   {/* Divider */}
                   <div className="relative my-8">
