@@ -12,8 +12,8 @@ import { toast } from 'react-hot-toast';
 const PaymentCallbackPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { checkBookingStatus } = usePaymentStore();
-  const { clearCart } = useCartStore();
+  const { checkBookingStatus, retryWebhookForPayment, checkAndProcessPayment } = usePaymentStore();
+  const { clearCart, checkPaymentAndCreateBooking } = useCartStore();
   const { clearCheckoutSession, setBookingId } = useCheckoutStore();
   
   const [loading, setLoading] = useState(true);
@@ -31,16 +31,32 @@ const PaymentCallbackPage: React.FC = () => {
         console.log('Payment callback received:', { sessionId, paymentId, transactionId });
 
         if (paymentId) {
-          // Check payment and booking status using new API
-          const bookingCheck = await checkBookingStatus(parseInt(paymentId));
+          // First, check payment and booking status using new API
+          let bookingCheck = await checkBookingStatus(parseInt(paymentId));
           
           if (bookingCheck) {
             setPaymentStatus(bookingCheck.payment_status as 'SUCCESS' | 'FAILED' | 'PENDING');
             setBookingCreated(bookingCheck.booking_created);
             
+            // If payment is successful but booking not created, try to create it
+            if (bookingCheck.payment_status === 'SUCCESS' && !bookingCheck.booking_created) {
+              console.log('Payment successful but booking not created. Attempting to create booking...');
+              
+              // Try to create booking from payment
+              const bookingCreationResult = await checkPaymentAndCreateBooking(parseInt(paymentId));
+              
+              if (bookingCreationResult) {
+                // Re-check booking status after creation attempt
+                bookingCheck = await checkBookingStatus(parseInt(paymentId));
+                if (bookingCheck) {
+                  setBookingCreated(bookingCheck.booking_created);
+                }
+              }
+            }
+            
             // Handle based on payment status and booking creation
             setTimeout(async () => {
-              if (bookingCheck.payment_status === 'SUCCESS') {
+              if (bookingCheck && bookingCheck.payment_status === 'SUCCESS') {
                 if (bookingCheck.booking_created && bookingCheck.booking) {
                   // Payment successful and booking created
                   try {
@@ -67,7 +83,27 @@ const PaymentCallbackPage: React.FC = () => {
                   toast.success('Payment successful! Your booking is being processed.');
                   router.push(`/confirmbooking?payment_id=${paymentId}&status=processing`);
                 }
-              } else {
+              } else if (bookingCheck && bookingCheck.payment_status === 'PENDING') {
+                // Payment still pending, try webhook retry
+                console.log('Payment still pending. Attempting webhook retry...');
+                
+                try {
+                  const retryResult = await retryWebhookForPayment(parseInt(paymentId));
+                  if (retryResult && retryResult.success) {
+                    // Re-check after retry
+                    const updatedCheck = await checkBookingStatus(parseInt(paymentId));
+                    if (updatedCheck && updatedCheck.payment_status === 'SUCCESS') {
+                      window.location.reload(); // Reload to process success
+                      return;
+                    }
+                  }
+                } catch (error) {
+                  console.error('Webhook retry failed:', error);
+                }
+                
+                // Still pending after retry
+                router.push(`/failedbooking?payment_id=${paymentId}&status=PENDING&message=Payment is still being processed. Please contact support if this persists.`);
+              } else if (bookingCheck) {
                 // Payment failed
                 router.push(`/failedbooking?payment_id=${paymentId}&status=${bookingCheck.payment_status}`);
               }

@@ -75,6 +75,10 @@ export interface PaymentState {
   checkPaymentStatus: (paymentId: number) => Promise<Payment | null>;
   checkBookingStatus: (paymentId: number) => Promise<PaymentBookingCheck | null>; // New method
   simulatePaymentSuccess: (paymentId: number) => Promise<any>; // Testing method
+  
+  // Webhook retry mechanisms
+  retryWebhookForPayment: (paymentId: number) => Promise<any>;
+  checkAndProcessPayment: (paymentId: number) => Promise<PaymentBookingCheck | null>;
   clearError: () => void;
   clearCurrentPayment: () => void;
 }
@@ -232,6 +236,28 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       return response.data;
     } catch (err: any) {
       console.error('Simulate payment success error:', err);
+      return null;
+    }
+  },
+
+  // Webhook retry mechanism for failed webhooks
+  retryWebhookForPayment: async (paymentId: number): Promise<any> => {
+    try {
+      const response = await apiClient.post(`/payments/payments/${paymentId}/retry-webhook/`);
+      return response.data;
+    } catch (err: any) {
+      console.error('Retry webhook error:', err);
+      return null;
+    }
+  },
+
+  // Check payment status and auto-create booking if payment is successful
+  checkAndProcessPayment: async (paymentId: number): Promise<PaymentBookingCheck | null> => {
+    try {
+      const response = await apiClient.post(`/payments/payments/${paymentId}/check-and-process/`);
+      return response.data;
+    } catch (err: any) {
+      console.error('Check and process payment error:', err);
       return null;
     }
   },

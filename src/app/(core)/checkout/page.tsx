@@ -260,42 +260,42 @@ const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 min-w-0">
               <button
                 onClick={() => router.push('/cart')}
-                className="text-gray-600 hover:text-orange-600 transition-colors p-2 -ml-2"
+                className="text-gray-600 hover:text-orange-600 transition-colors p-1 sm:p-2 -ml-1 sm:-ml-2 flex-shrink-0"
               >
-                <FaArrowLeft className="text-lg sm:text-xl" />
+                <FaArrowLeft className="text-base sm:text-lg lg:text-xl" />
               </button>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Checkout</h1>
-                <p className="text-sm sm:text-base text-gray-600 hidden sm:block">Complete your booking</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 truncate">Checkout</h1>
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">Complete your booking</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0 ml-2">
               <p className="text-xs sm:text-sm text-gray-600">Total</p>
-              <p className="text-lg sm:text-2xl font-bold text-orange-600">{formatPrice(totalAmount)}</p>
+              <p className="text-base sm:text-lg lg:text-2xl font-bold text-orange-600 break-words">{formatPrice(totalAmount)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Side - Address & Cart */}
-          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Delivery Address Section */}
-            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center">
-                  <FaMapMarkerAlt className="text-orange-500 mr-2 sm:mr-3" />
-                  Delivery Address
+            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 lg:mb-6 space-y-2 sm:space-y-0">
+                <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 flex items-center">
+                  <FaMapMarkerAlt className="text-orange-500 mr-2 sm:mr-3 flex-shrink-0" />
+                  <span className="truncate">Delivery Address</span>
                 </h2>
                 <button
                   onClick={() => setShowAddressForm(true)}

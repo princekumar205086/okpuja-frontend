@@ -91,6 +91,10 @@ export interface CartState {
   // UI Actions
   clearError: () => void;
   
+  // Webhook retry mechanisms
+  checkPaymentAndCreateBooking: (paymentId: number) => Promise<boolean>;
+  createBookingFromPayment: (paymentId: number) => Promise<boolean>;
+  
   // Local storage helpers
   getLocalCartCount: () => number;
   syncWithLocal: () => void;
@@ -370,6 +374,51 @@ export const useCartStore = create<CartState>()(
         }
         
         return true;
+      },
+
+      // Add webhook retry mechanism for payment completion
+      checkPaymentAndCreateBooking: async (paymentId: number): Promise<boolean> => {
+        try {
+          const response = await apiClient.post(`/payments/payments/${paymentId}/check-and-create-booking/`);
+          
+          if (response.data.booking_created) {
+            // Refresh cart after successful booking creation
+            await get().fetchCartItems();
+            toast.success('Booking created successfully!');
+            return true;
+          }
+          
+          return false;
+        } catch (err: any) {
+          console.error('Check payment and create booking error:', err);
+          return false;
+        }
+      },
+
+      // Manual booking creation for failed webhook scenarios  
+      createBookingFromPayment: async (paymentId: number): Promise<boolean> => {
+        try {
+          const response = await apiClient.post(`/payments/payments/${paymentId}/create-booking/`);
+          
+          if (response.data.success) {
+            // Clear cart after successful booking
+            await get().fetchCartItems();
+            toast.success('Booking created successfully!');
+            return true;
+          }
+          
+          return false;
+        } catch (err: any) {
+          console.error('Create booking from payment error:', err);
+          let errorMessage = 'Failed to create booking from payment';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          }
+          
+          toast.error(errorMessage);
+          return false;
+        }
       },
 
       // Clear error

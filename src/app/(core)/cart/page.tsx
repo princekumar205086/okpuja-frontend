@@ -154,17 +154,17 @@ const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <FaShoppingCart className="text-orange-500" />
-                Shopping Cart
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+                <FaShoppingCart className="text-orange-500 flex-shrink-0" />
+                <span className="truncate">Shopping Cart</span>
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
                 {cartItems.length > 0 ? `${cartItems.length} item${cartItems.length > 1 ? 's' : ''} in your cart` : 'Your cart is currently empty'}
               </p>
             </div>
@@ -172,10 +172,11 @@ const CartPage: React.FC = () => {
               <button
                 onClick={handleClearCart}
                 disabled={loading}
-                className="text-red-600 hover:text-red-800 font-medium flex items-center gap-2 hover:bg-red-50 px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50"
+                className="text-red-600 hover:text-red-800 font-medium flex items-center gap-1 sm:gap-2 hover:bg-red-50 px-2 sm:px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50 text-sm sm:text-base ml-2"
               >
-                <FaTrash className="text-sm" />
-                Clear Cart
+                <FaTrash className="text-xs sm:text-sm" />
+                <span className="hidden sm:inline">Clear Cart</span>
+                <span className="sm:hidden">Clear</span>
               </button>
             )}
           </div>
@@ -202,25 +203,25 @@ const CartPage: React.FC = () => {
       )}
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {!user ? (
-          <div className="min-h-[60vh] flex items-center justify-center p-4">
+          <div className="min-h-[60vh] flex items-center justify-center p-3 sm:p-4">
             <motion.div 
-              className="bg-white p-8 max-w-md mx-auto rounded-2xl shadow-xl text-center"
+              className="bg-white p-6 sm:p-8 max-w-sm sm:max-w-md mx-auto rounded-2xl shadow-xl text-center"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-20 h-20 mx-auto mb-6 bg-orange-100 rounded-full flex items-center justify-center">
-                <FaLock className="text-3xl text-orange-500" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-orange-100 rounded-full flex items-center justify-center">
+                <FaLock className="text-2xl sm:text-3xl text-orange-500" />
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Account Required</h3>
-              <p className="text-gray-600 mb-8 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">Account Required</h3>
+              <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
                 Please sign in to your account to view your cart and proceed with checkout.
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3 px-8 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3 px-6 sm:px-8 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
               >
                 Sign In <FaArrowRight className="ml-2" />
               </Link>
@@ -254,9 +255,9 @@ const CartPage: React.FC = () => {
             </div>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="flex flex-col xl:grid xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {/* Cart Items */}
-            <div className="xl:col-span-2 space-y-6">
+            <div className="xl:col-span-2 space-y-4 sm:space-y-6">
               <AnimatePresence>
                 {cartItems.map((item) => (
                   <motion.div
@@ -265,12 +266,12 @@ const CartPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300"
+                    className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100 hover:shadow-xl transition-all duration-300"
                   >
-                    <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                       {/* Service Image */}
-                      <div className="lg:w-48 flex-shrink-0">
-                        <div className="relative w-full h-40 lg:h-32 rounded-xl overflow-hidden bg-gray-100">
+                      <div className="w-full sm:w-48 flex-shrink-0">
+                        <div className="relative w-full h-40 sm:h-32 rounded-xl overflow-hidden bg-gray-100">
                           <Image
                             src={item.puja_service?.image_url || item.astrology_service?.image_url || '/placeholder-service.jpg'}
                             alt={item.puja_service?.title || item.astrology_service?.title || 'Service'}
@@ -281,10 +282,10 @@ const CartPage: React.FC = () => {
                       </div>
 
                       {/* Service Details */}
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-3 sm:mb-4">
+                          <div className="min-w-0 flex-1 mr-2">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 break-words">
                               {item.puja_service?.title || item.astrology_service?.title}
                             </h3>
                             <p className="text-gray-600 text-sm mb-2">
@@ -294,31 +295,31 @@ const CartPage: React.FC = () => {
                           <button
                             onClick={() => handleRemoveItem(item.id)}
                             disabled={loading}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50"
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 flex-shrink-0"
                           >
                             <FaTrash className="text-sm" />
                           </button>
                         </div>
 
                         {/* Service Info Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <FaCalendarAlt className="text-orange-500" />
-                            <span>{formatDate(item.selected_date)}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                            <FaCalendarAlt className="text-orange-500 flex-shrink-0" />
+                            <span className="truncate">{formatDate(item.selected_date)}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <FaClock className="text-orange-500" />
-                            <span>{item.selected_time}</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                            <FaClock className="text-orange-500 flex-shrink-0" />
+                            <span className="truncate">{item.selected_time}</span>
                           </div>
                           {item.package && (
                             <>
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <FaMapMarkerAlt className="text-orange-500" />
-                                <span>{item.package.location}</span>
+                              <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                                <FaMapMarkerAlt className="text-orange-500 flex-shrink-0" />
+                                <span className="truncate">{item.package.location}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <FaLanguage className="text-orange-500" />
-                                <span>{item.package.language}</span>
+                              <div className="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                                <FaLanguage className="text-orange-500 flex-shrink-0" />
+                                <span className="truncate">{item.package.language}</span>
                               </div>
                             </>
                           )}
@@ -326,11 +327,11 @@ const CartPage: React.FC = () => {
 
                         {/* Package Details for Puja */}
                         {item.package && (
-                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                            <h4 className="font-semibold text-gray-900 mb-2">Package Details</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                              <div>
-                                <span className="font-medium">Type:</span> {item.package.package_type}
+                          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                            <h4 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Package Details</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs sm:text-sm">
+                              <div className="min-w-0">
+                                <span className="font-medium">Type:</span> <span className="break-words">{item.package.package_type}</span>
                               </div>
                               <div>
                                 <span className="font-medium">Priests:</span> {item.package.priest_count}
@@ -340,32 +341,32 @@ const CartPage: React.FC = () => {
                                 {item.package.includes_materials ? ' Included' : ' Not Included'}
                               </div>
                             </div>
-                            <p className="text-gray-600 text-sm mt-2">{item.package.description}</p>
+                            <p className="text-gray-600 text-xs sm:text-sm mt-2 break-words">{item.package.description}</p>
                           </div>
                         )}
 
                         {/* Promo Code Section */}
-                        <div className="border-t pt-4">
+                        <div className="border-t pt-3 sm:pt-4">
                           {item.promo_code ? (
-                            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
-                              <div className="flex items-center gap-2">
-                                <FaCheckCircle className="text-green-500" />
-                                <span className="text-green-800 font-medium">
+                            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3 flex-wrap gap-2 sm:gap-0">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <FaCheckCircle className="text-green-500 flex-shrink-0" />
+                                <span className="text-green-800 font-medium truncate">
                                   {item.promo_code.code} Applied
                                 </span>
-                                <span className="text-green-600 text-sm">
+                                <span className="text-green-600 text-xs sm:text-sm whitespace-nowrap">
                                   ({item.promo_code.discount_type === 'PERCENTAGE' ? item.promo_code.discount + '%' : formatPrice(item.promo_code.discount)} off)
                                 </span>
                               </div>
                               <button
                                 onClick={() => handleRemovePromo(item.id)}
-                                className="text-green-600 hover:text-green-800 text-sm"
+                                className="text-green-600 hover:text-green-800 text-xs sm:text-sm whitespace-nowrap"
                               >
                                 Remove
                               </button>
                             </div>
                           ) : (
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                               <input
                                 type="text"
                                 placeholder="Enter promo code"
@@ -375,25 +376,25 @@ const CartPage: React.FC = () => {
                                   setPromoCode(e.target.value);
                                   setPromoError('');
                                 }}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm min-w-0"
                               />
                               <button
                                 onClick={() => handleApplyPromo(item.id)}
                                 disabled={isApplying && selectedCartId === item.id}
-                                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 text-sm font-medium"
+                                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 text-sm font-medium whitespace-nowrap"
                               >
                                 {isApplying && selectedCartId === item.id ? 'Applying...' : 'Apply'}
                               </button>
                             </div>
                           )}
                           {promoError && selectedCartId === item.id && (
-                            <p className="text-red-500 text-sm mt-1">{promoError}</p>
+                            <p className="text-red-500 text-xs sm:text-sm mt-1 break-words">{promoError}</p>
                           )}
                         </div>
 
                         {/* Price */}
-                        <div className="flex justify-between items-center mt-4 pt-4 border-t">
-                          <span className="text-lg font-bold text-gray-900">
+                        <div className="flex justify-between items-center mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
+                          <span className="text-lg sm:text-xl font-bold text-gray-900">
                             {formatPrice(item.total_price)}
                           </span>
                         </div>
@@ -406,21 +407,21 @@ const CartPage: React.FC = () => {
 
             {/* Order Summary */}
             <div className="xl:col-span-1">
-              <div className="sticky top-32">
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+              <div className="sticky top-24 sm:top-32">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Order Summary</h2>
                   
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between text-gray-600">
+                  <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+                    <div className="flex justify-between text-gray-600 text-sm sm:text-base">
                       <span>Items ({totalCount})</span>
-                      <span>{formatPrice(totalAmount)}</span>
+                      <span className="font-medium">{formatPrice(totalAmount)}</span>
                     </div>
                     
                     {/* Calculate discount if any promo codes are applied */}
                     {cartItems.some(item => item.promo_code) && (
-                      <div className="flex justify-between text-green-600">
+                      <div className="flex justify-between text-green-600 text-sm sm:text-base">
                         <span>Discount Applied</span>
-                        <span>
+                        <span className="font-medium">
                           -{formatPrice(
                             cartItems.reduce((total, item) => {
                               if (item.promo_code) {
@@ -438,8 +439,8 @@ const CartPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="border-t pt-4 mb-6">
-                    <div className="flex justify-between text-lg font-bold text-gray-900">
+                  <div className="border-t pt-3 sm:pt-4 mb-4 sm:mb-6">
+                    <div className="flex justify-between text-lg sm:text-xl font-bold text-gray-900">
                       <span>Total</span>
                       <span>{formatPrice(totalAmount)}</span>
                     </div>
@@ -447,16 +448,16 @@ const CartPage: React.FC = () => {
 
                   <button 
                     onClick={handleCheckout}
-                    className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-3"
+                    className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3 sm:py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
                   >
-                    <FaCreditCard />
-                    Proceed to Checkout
-                    <FaArrowRight />
+                    <FaCreditCard className="flex-shrink-0" />
+                    <span className="truncate">Proceed to Checkout</span>
+                    <FaArrowRight className="flex-shrink-0" />
                   </button>
 
-                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
-                    <FaShieldAlt className="text-green-500" />
-                    Secure and encrypted payment
+                  <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-500">
+                    <FaShieldAlt className="text-green-500 flex-shrink-0" />
+                    <span>Secure and encrypted payment</span>
                   </div>
                 </div>
               </div>
