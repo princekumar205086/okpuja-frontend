@@ -85,6 +85,9 @@ export interface CartState {
   applyPromoCode: (cartId: number, promoCode: string) => Promise<boolean>;
   removePromoCode: (cartId: number) => Promise<boolean>;
   
+  // Checkout related
+  proceedToCheckout: () => boolean;
+  
   // UI Actions
   clearError: () => void;
   
@@ -348,6 +351,25 @@ export const useCartStore = create<CartState>()(
           toast.error('Failed to remove promo code');
           return false;
         }
+      },
+
+      // Proceed to checkout
+      proceedToCheckout: (): boolean => {
+        const { items, totalCount } = get();
+        
+        if (totalCount === 0) {
+          toast.error('Your cart is empty');
+          return false;
+        }
+        
+        // Validate cart items
+        const invalidItems = items.filter(item => !item.selected_date || !item.selected_time);
+        if (invalidItems.length > 0) {
+          toast.error('Please ensure all items have date and time selected');
+          return false;
+        }
+        
+        return true;
       },
 
       // Clear error

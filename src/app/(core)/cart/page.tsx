@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FaShoppingCart, 
@@ -28,6 +29,7 @@ import { toast } from "react-hot-toast";
 import moment from "moment";
 
 const CartPage: React.FC = () => {
+  const router = useRouter();
   const { user } = useAuthStore();
   const {
     items: cartItems,
@@ -40,7 +42,8 @@ const CartPage: React.FC = () => {
     clearCart,
     applyPromoCode,
     removePromoCode,
-    clearError
+    clearError,
+    proceedToCheckout
   } = useCartStore();
 
   const [promoCode, setPromoCode] = useState("");
@@ -106,6 +109,19 @@ const CartPage: React.FC = () => {
     const success = await removePromoCode(cartId);
     if (success) {
       // Promo removed successfully
+    }
+  };
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast.error('Please login to proceed with checkout');
+      router.push('/login');
+      return;
+    }
+
+    const canProceed = proceedToCheckout();
+    if (canProceed) {
+      router.push('/checkout');
     }
   };
 
@@ -429,7 +445,10 @@ const CartPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-3">
+                  <button 
+                    onClick={handleCheckout}
+                    className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-3"
+                  >
                     <FaCreditCard />
                     Proceed to Checkout
                     <FaArrowRight />

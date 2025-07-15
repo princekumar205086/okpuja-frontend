@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
 import {
   FaCheckCircle,
   FaDownload,
@@ -16,11 +17,13 @@ import {
   FaEnvelopeOpen,
   FaLocationArrow,
   FaMapPin,
+  FaSpinner,
 } from "react-icons/fa";
-import { fetchBookingDetails } from "./action";
+import { usePaymentStore } from '../../stores/paymentStore';
 import { jsPDF } from "jspdf";
 import Loader from "@/app/utils/loader";
 import Link from "next/link";
+import { toast } from 'react-hot-toast';
 
 const BookingSuccess = () => {
   interface BookingDetails {
@@ -61,45 +64,97 @@ const BookingSuccess = () => {
     };
   }
 
+  const searchParams = useSearchParams();
+  const { checkBookingStatus } = usePaymentStore();
+  
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState<string>('');
+  const [bookingCreated, setBookingCreated] = useState(false);
 
-  const urlParams =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : new URLSearchParams("");
-
-  const userId = Number(urlParams?.get("userId"));
-  const cartId = urlParams?.get("cartId");
+  // Get payment_id and booking_id from URL parameters
+  const paymentId = searchParams.get('payment_id');
+  const bookingId = searchParams.get('booking_id');
+  const status = searchParams.get('status');
 
   useEffect(() => {
-    if (!userId || !cartId) {
-      setLoading(false);
-      return;
-    }
+    const fetchBookingStatus = async () => {
+      if (!paymentId) {
+        toast.error('Invalid payment reference');
+        setLoading(false);
+        return;
+      }
 
-    const fetchDetails = async () => {
       try {
-        const data = await fetchBookingDetails(userId, cartId);
-        if (data) {
-          setBookingDetails(data);
+        setLoading(true);
+        
+        // Check if payment resulted in booking creation
+        const bookingCheck = await checkBookingStatus(parseInt(paymentId));
+        
+        if (bookingCheck) {
+          setPaymentStatus(bookingCheck.payment_status);
+          setBookingCreated(bookingCheck.booking_created);
+          
+          if (bookingCheck.booking_created && bookingCheck.booking) {
+            // Map the booking data to our interface format
+            const mappedBooking: BookingDetails = {
+              id: bookingCheck.booking.id,
+              BookId: bookingCheck.booking.book_id,
+              payments: [{
+                transactionId: paymentId,
+                status: bookingCheck.payment_status,
+                amount: parseFloat(bookingCheck.booking.total_amount),
+                method: 'PhonePe',
+                createdAt: bookingCheck.booking.created_at
+              }],
+              cart: {
+                pujaService: {
+                  title: bookingCheck.booking.cart?.puja_service?.title || 'Puja Service'
+                },
+                selected_date: bookingCheck.booking.selected_date,
+                selected_time: bookingCheck.booking.selected_time,
+                package: {
+                  location: bookingCheck.booking.cart?.package?.location || '',
+                  language: bookingCheck.booking.cart?.package?.language || '',
+                  type: bookingCheck.booking.cart?.package?.package_type || '',
+                  description: bookingCheck.booking.cart?.package?.description || ''
+                }
+              },
+              user: {
+                username: bookingCheck.booking.user?.username || bookingCheck.booking.user?.email || '',
+                email: bookingCheck.booking.user?.email || '',
+                contact: bookingCheck.booking.user?.phone || ''
+              },
+              addresses: {
+                addressline: bookingCheck.booking.address?.address_line1 || '',
+                addressline2: bookingCheck.booking.address?.address_line2,
+                city: bookingCheck.booking.address?.city || '',
+                state: bookingCheck.booking.address?.state || '',
+                country: bookingCheck.booking.address?.country || '',
+                postalCode: bookingCheck.booking.address?.postal_code || ''
+              }
+            };
+            
+            setBookingDetails(mappedBooking);
+            toast.success('Booking confirmed successfully!');
+          } else if (bookingCheck.payment_status === 'SUCCESS' && !bookingCheck.booking_created) {
+            toast.success('Payment successful! Booking is being processed...');
+          } else {
+            toast.error('Payment was not successful');
+          }
+        } else {
+          toast.error('Unable to fetch booking status');
         }
       } catch (error) {
-        console.error("Error fetching booking details:", error);
+        console.error('Error fetching booking status:', error);
+        toast.error('Error loading booking details');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDetails();
-
-    // Remove userId and cartId from the URL (without reloading the page)
-    if (typeof window !== "undefined") {
-      window.history.replaceState({}, document.title, window.location.pathname);
-      // Remove the cart item from localStorage
-      window.localStorage.removeItem("cart");
-    }
-  }, [userId, cartId]);
+    fetchBookingStatus();
+  }, [paymentId, checkBookingStatus]);
 
   const handleDownloadReceipt = () => {
     const doc = new jsPDF();
