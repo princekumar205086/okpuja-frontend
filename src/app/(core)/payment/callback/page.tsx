@@ -134,7 +134,7 @@ const PaymentCallbackPage: React.FC = () => {
     };
 
     handlePaymentCallback();
-  }, [searchParams, checkBookingStatus, router, clearCart, clearCheckoutSession, setBookingId]);
+  }, [searchParams, checkBookingStatus, router, clearCart, clearCheckoutSession, setBookingId, checkPaymentAndCreateBooking, retryWebhookForPayment]);
 
   const getStatusIcon = () => {
     switch (paymentStatus) {

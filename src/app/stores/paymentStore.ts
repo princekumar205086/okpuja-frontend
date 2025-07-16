@@ -197,6 +197,22 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
         }
       } else if (err.response?.status === 401) {
         errorMessage = 'Please login to make payment';
+      } else if (err.response?.status === 500) {
+        // Enhanced handling for production gateway issues
+        const errorData = err.response.data;
+        if (typeof errorData === 'string' && errorData.includes('Payment initiation failed')) {
+          errorMessage = 'Payment gateway connection issue. Please try again or contact support if this persists.';
+        } else if (typeof errorData === 'object' && errorData.detail && errorData.detail.includes('Payment initiation failed')) {
+          errorMessage = 'Payment service temporarily unavailable. Please try again in a few minutes.';
+        } else {
+          errorMessage = 'Server error occurred. Please try again.';
+        }
+      } else if (err.response?.status === 502 || err.response?.status === 504) {
+        errorMessage = 'Payment gateway connection timeout. Please try again.';
+      } else if (err.response?.status === 503) {
+        errorMessage = 'Payment service temporarily unavailable. Please try again later.';
+      } else if (err.code === 'NETWORK_ERROR' || !err.response) {
+        errorMessage = 'Network connection issue. Please check your internet connection.';
       }
       
       set({ 

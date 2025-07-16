@@ -190,23 +190,73 @@ const CheckoutPage: React.FC = () => {
 
     } catch (error: any) {
       console.error('Checkout error:', error);
+      
+      // Enhanced error handling for production payment gateway issues
+      let errorMessage = 'Failed to proceed to payment';
+      
       if (error.response?.data) {
         console.error('Error response data:', error.response.data);
         
         // Handle specific error cases
         if (error.response.data.error) {
-          toast.error(error.response.data.error);
+          errorMessage = error.response.data.error;
         } else if (error.response.data.details) {
-          toast.error(error.response.data.details);
+          errorMessage = error.response.data.details;
         } else if (error.response.data.cart_id) {
-          toast.error('Invalid cart selected. Please refresh and try again.');
+          errorMessage = 'Invalid cart selected. Please refresh and try again.';
           await fetchCartItems(); // Refresh cart
+        } else if (error.response.data.detail) {
+          errorMessage = error.response.data.detail;
+        } else if (Array.isArray(Object.values(error.response.data)[0])) {
+          errorMessage = (Object.values(error.response.data)[0] as string[])[0];
         } else {
-          toast.error(error.response.data.detail || Object.values(error.response.data)[0] || 'Failed to proceed to payment');
+          const firstValue = Object.values(error.response.data)[0];
+          errorMessage = typeof firstValue === 'string' ? firstValue : errorMessage;
         }
-      } else {
-        toast.error(error.message || 'Failed to proceed to payment');
+        
+        // Special handling for production payment gateway connectivity issues
+        if (error.response.status === 500) {
+          if (errorMessage.includes('Payment initiation failed') || 
+              errorMessage.includes('gateway') || 
+              errorMessage.includes('PhonePe')) {
+            errorMessage = 'Payment service is temporarily unavailable. Our team has been notified. Please try again in a few minutes or contact support.';
+            
+            // Show additional help for production issues
+            setTimeout(() => {
+              toast.error('If this issue persists, please contact support with error code: GATEWAY_CONN_ERROR', {
+                duration: 8000,
+              });
+            }, 2000);
+          } else {
+            errorMessage = 'Server error occurred. Please try again in a moment.';
+          }
+        } else if (error.response.status === 503) {
+          errorMessage = 'Payment service is temporarily down for maintenance. Please try again later.';
+        } else if (error.response.status === 502 || error.response.status === 504) {
+          errorMessage = 'Payment gateway connection issue. Please try again in a moment.';
+        }
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        errorMessage = 'Network connection issue. Please check your internet connection and try again.';
+      } else if (error.message) {
+        if (error.message.includes('Payment initiation failed')) {
+          errorMessage = 'Unable to connect to payment gateway. Please try again or contact support if this persists.';
+        } else {
+          errorMessage = error.message;
+        }
       }
+      
+      toast.error(errorMessage, {
+        duration: 6000,
+      });
+      
+      // Log error for debugging
+      console.error('Payment initiation error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        code: error.code
+      });
     } finally {
       setProcessingPayment(false);
     }
