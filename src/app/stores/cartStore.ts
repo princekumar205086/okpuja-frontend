@@ -123,6 +123,10 @@ export interface CartState {
   // Cleanup old payments
   cleanupOldPayments: (cartId: number) => Promise<boolean>;
   
+  // Payment and booking related
+  checkPaymentAndCreateBooking: (paymentId: number) => Promise<boolean>;
+  createBookingFromPayment: (paymentId: number) => Promise<boolean>;
+  
   // Local storage helpers
   getLocalCartCount: () => number;
   syncWithLocal: () => void;
