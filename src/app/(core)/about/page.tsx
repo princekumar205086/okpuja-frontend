@@ -73,17 +73,17 @@ const AboutPage = () => {
   };
 
   const profiles = [
-    {
-      name: "Shri Rohan Shree",
-      title: "Founder & CEO",
-      image: "/image/rohan.jpg",
-      bio: "With over 15 years of experience in traditional Hindu rituals and ceremonies, Shri Rohan brings exceptional knowledge and leadership to our organization.",
-      social: {
-        linkedin: "https://linkedin.com/in/rohanshree",
-        twitter: "https://twitter.com/rohanshree",
-        github: "https://github.com/rohanshree",
-      },
-    },
+    // {
+    //   name: "Shri Rohan Shree",
+    //   title: "Founder & CEO",
+    //   image: "/image/rohan.jpg",
+    //   bio: "With over 15 years of experience in traditional Hindu rituals and ceremonies, Shri Rohan brings exceptional knowledge and leadership to our organization.",
+    //   social: {
+    //     linkedin: "https://linkedin.com/in/rohanshree",
+    //     twitter: "https://twitter.com/rohanshree",
+    //     github: "https://github.com/rohanshree",
+    //   },
+    // },
     {
       name: "Pandit Suraj Bhardwaj",
       title: "Managing Director",
