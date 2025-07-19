@@ -83,6 +83,25 @@ export const useAuthStore = create<AuthState>()(
             return;
           }
 
+          // Add listeners for cross-tab synchronization
+          const handleTokenUpdate = (event: CustomEvent) => {
+            const { access, refresh } = event.detail;
+            set({ access, refresh });
+          };
+
+          const handleLogout = () => {
+            set({
+              user: null,
+              access: null,
+              refresh: null,
+              loading: false,
+              error: null,
+            });
+          };
+
+          window.addEventListener('token-updated', handleTokenUpdate as EventListener);
+          window.addEventListener('logout', handleLogout);
+
           const access = localStorage.getItem("access");
           const refresh = localStorage.getItem("refresh");
           const userStr = localStorage.getItem("user");
@@ -176,6 +195,13 @@ export const useAuthStore = create<AuthState>()(
           localStorage.setItem("refresh", refresh);
           localStorage.setItem("user", JSON.stringify(user));
 
+          // Notify other tabs about token update
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('token-updated', { 
+              detail: { access, refresh } 
+            }));
+          }
+
           // Update store
           set({
             user,
@@ -249,6 +275,13 @@ export const useAuthStore = create<AuthState>()(
           // Update localStorage
           localStorage.setItem("access", access);
           localStorage.setItem("refresh", refresh);
+
+          // Notify other tabs about token update
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('token-updated', { 
+              detail: { access, refresh } 
+            }));
+          }
 
           // Update store
           set({
@@ -336,6 +369,11 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem("refresh");
         localStorage.removeItem("user");
         
+        // Notify other tabs about logout
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('logout'));
+        }
+        
         toast.success("Logged out successfully");
       },
 
@@ -351,13 +389,35 @@ export const useAuthStore = create<AuthState>()(
         }
 
         try {
-          const response = await apiClient.post('/auth/token/refresh/', {
+          const response = await apiClient.post('/auth/refresh/', {
             refresh,
           });
 
-          const { access } = response.data;
+          const { access, refresh: newRefresh } = response.data;
           localStorage.setItem("access", access);
-          set({ access });
+          
+          // Handle token rotation - update refresh token if provided
+          if (newRefresh) {
+            localStorage.setItem("refresh", newRefresh);
+            set({ access, refresh: newRefresh });
+            
+            // Notify other tabs about token update
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('token-updated', { 
+                detail: { access, refresh: newRefresh } 
+              }));
+            }
+          } else {
+            set({ access });
+            
+            // Notify other tabs about token update
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('token-updated', { 
+                detail: { access, refresh } 
+              }));
+            }
+          }
+          
           return true;
         } catch (err) {
           console.error("Token refresh failed:", err);
@@ -371,17 +431,36 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem("access");
           localStorage.removeItem("refresh");
           localStorage.removeItem("user");
+          
+          // Notify other tabs about logout
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('logout'));
+          }
+          
           return false;
         }
       },
     }),
     {
       name: 'auth-storage',
+      // Disable persistence for tokens - handle manually to avoid conflicts
       partialize: (state) => ({
+        // Only persist user data, not tokens
         user: state.user,
-        access: state.access,
-        refresh: state.refresh,
       }),
+      // Custom storage handling
+      merge: (persistedState: any, currentState: any) => {
+        // Merge persisted state but get tokens fresh from localStorage
+        const access = typeof window !== 'undefined' ? localStorage.getItem('access') : null;
+        const refresh = typeof window !== 'undefined' ? localStorage.getItem('refresh') : null;
+        
+        return {
+          ...currentState,
+          ...persistedState,
+          access,
+          refresh,
+        };
+      },
     }
   )
 );

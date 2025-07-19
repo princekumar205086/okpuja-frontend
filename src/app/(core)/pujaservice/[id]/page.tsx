@@ -295,18 +295,18 @@ export default function ServiceDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 w-full max-w-full overflow-x-hidden">
       {/* Navigation */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40"
+        className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40 w-full"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="flex items-center justify-between py-4 gap-2 w-full min-w-0">
             <Link
               href="/pujaservice"
-              className="flex items-center text-gray-600 hover:text-orange-600 transition-colors group text-sm sm:text-base"
+              className="flex items-center text-gray-600 hover:text-orange-600 transition-colors group text-sm sm:text-base min-w-0 flex-1"
             >
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-2 group-hover:-translate-x-1 transition-transform" />
               <span className="hidden sm:inline">Back to Services</span>

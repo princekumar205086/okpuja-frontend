@@ -310,40 +310,40 @@ const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 min-w-0">
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10 w-full">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6 w-full">
+          <div className="flex items-center justify-between gap-2 w-full min-w-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 min-w-0 flex-1">
               <button
                 onClick={() => router.push('/cart')}
                 className="text-gray-600 hover:text-orange-600 transition-colors p-1 sm:p-2 -ml-1 sm:-ml-2 flex-shrink-0"
               >
                 <FaArrowLeft className="text-base sm:text-lg lg:text-xl" />
               </button>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 truncate">Checkout</h1>
-                <p className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block">Complete your booking</p>
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600 hidden sm:block truncate">Complete your booking</p>
               </div>
             </div>
             <div className="text-right flex-shrink-0 ml-2">
               <p className="text-xs sm:text-sm text-gray-600">Total</p>
-              <p className="text-base sm:text-lg lg:text-2xl font-bold text-orange-600 break-words">{formatPrice(totalAmount)}</p>
+              <p className="text-sm sm:text-lg lg:text-2xl font-bold text-orange-600 break-words">{formatPrice(totalAmount)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-8">
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-8 w-full">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full">
           {/* Left Side - Address & Cart */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8 w-full min-w-0">
             {/* Delivery Address Section */}
-            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 lg:mb-6 space-y-2 sm:space-y-0">
-                <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 flex items-center">
+            <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 lg:mb-6 space-y-2 sm:space-y-0 gap-2 w-full min-w-0">
+                <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-800 flex items-center min-w-0 flex-1">
                   <FaMapMarkerAlt className="text-orange-500 mr-2 sm:mr-3 flex-shrink-0" />
                   <span className="truncate">Delivery Address</span>
                 </h2>

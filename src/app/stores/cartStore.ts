@@ -16,12 +16,34 @@ export interface CartItem {
     category_detail?: {
       id: number;
       name: string;
+      created_at: string;
+      updated_at: string;
     };
     type: string;
     duration_minutes: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
   };
   package?: {
     id: number;
+    puja_service_detail?: {
+      id: number;
+      title: string;
+      image_url?: string;
+      description: string;
+      category_detail?: {
+        id: number;
+        name: string;
+        created_at: string;
+        updated_at: string;
+      };
+      type: string;
+      duration_minutes: number;
+      is_active: boolean;
+      created_at: string;
+      updated_at: string;
+    };
     location: string;
     language: string;
     package_type: string;
@@ -29,6 +51,9 @@ export interface CartItem {
     description: string;
     includes_materials: boolean;
     priest_count: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
   };
   astrology_service?: {
     id: number;
@@ -38,7 +63,7 @@ export interface CartItem {
     image_url?: string;
     price: string;
     duration_minutes: number;
-  };
+  } | null;
   selected_date: string;
   selected_time: string;
   promo_code?: {
@@ -51,18 +76,19 @@ export interface CartItem {
     max_discount_amount?: string;
     is_valid: boolean;
     validity_message: string;
-  };
+  } | null;
   status: 'ACTIVE' | 'CHECKOUT' | 'CANCELLED' | 'EXPIRED';
   created_at: string;
   updated_at: string;
   total_price: string;
+  can_delete: boolean;
 }
 
 export interface AddToCartRequest {
   service_type: 'PUJA' | 'ASTROLOGY';
   puja_service?: number;
-  package_id?: number;
-  astrology_service_id?: number;
+  package?: number; // Changed from package_id to package to match your backend
+  astrology_service?: number; // Changed from astrology_service_id to astrology_service
   selected_date: string;
   selected_time: string;
   promo_code?: string;
@@ -91,9 +117,11 @@ export interface CartState {
   // UI Actions
   clearError: () => void;
   
-  // Webhook retry mechanisms
-  checkPaymentAndCreateBooking: (paymentId: number) => Promise<boolean>;
-  createBookingFromPayment: (paymentId: number) => Promise<boolean>;
+  // Check deletion status for detailed timing info
+  checkDeletionStatus: (cartId: number) => Promise<any>;
+  
+  // Cleanup old payments
+  cleanupOldPayments: (cartId: number) => Promise<boolean>;
   
   // Local storage helpers
   getLocalCartCount: () => number;
@@ -114,8 +142,39 @@ export const useCartStore = create<CartState>()(
       fetchCartItems: async () => {
         set({ loading: true, error: null });
         try {
-          const response = await apiClient.get('/cart/carts/active/');
-          const items = response.data.results || response.data || [];
+          // Try the active cart endpoint first, then fallback to list all carts
+          let response;
+          try {
+            response = await apiClient.get('/cart/carts/active/');
+          } catch (activeError: any) {
+            if (activeError.response?.status === 404) {
+              // No active cart, try getting all carts and filter active ones
+              response = await apiClient.get('/cart/carts/');
+            } else {
+              throw activeError;
+            }
+          }
+          
+          // Handle different response structures
+          let allCarts = [];
+          if (response.data) {
+            if (Array.isArray(response.data)) {
+              allCarts = response.data;
+            } else if (response.data.results && Array.isArray(response.data.results)) {
+              allCarts = response.data.results;
+            } else if (typeof response.data === 'object' && response.data.id) {
+              // Single cart object
+              allCarts = [response.data];
+            }
+          }
+
+          // Filter only active cart items and ensure they're valid cart items
+          const items = allCarts.filter((cart: any) => 
+            cart && 
+            cart.id && 
+            cart.status === 'ACTIVE' && 
+            cart.total_price
+          );
           
           const totalAmount = items.reduce((sum: number, item: CartItem) => 
             sum + parseFloat(item.total_price || '0'), 0
@@ -140,10 +199,26 @@ export const useCartStore = create<CartState>()(
           
           if (err.response?.status === 401) {
             errorMessage = 'Please login to view your cart';
+          } else if (err.response?.status === 404) {
+            // No cart items found - this is normal, set empty state
+            set({
+              items: [],
+              totalCount: 0,
+              totalAmount: 0,
+              loading: false,
+              error: null,
+            });
+            
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('cart_count', '0');
+            }
+            return;
           } else if (err.response?.status >= 500) {
             errorMessage = 'Server error. Please try again later.';
           } else if (err.code === 'NETWORK_ERROR' || !err.response) {
             errorMessage = 'Network error. Please check your connection.';
+          } else if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
           }
           
           set({ 
@@ -251,10 +326,35 @@ export const useCartStore = create<CartState>()(
           console.error('Remove from cart error:', err);
           let errorMessage = 'Failed to remove item from cart';
           
-          if (err.response?.status === 404) {
+          if (err.response?.status === 400) {
+            const errorData = err.response.data;
+            
+            // Handle the new detailed timing messages
+            if (errorData?.error) {
+              errorMessage = errorData.error;
+              
+              // If there's wait time info, add it to the message
+              if (errorData?.wait_minutes) {
+                errorMessage += ` (${errorData.wait_minutes} minute(s) remaining)`;
+              }
+              
+              // If auto-cleanup is available, mention it
+              if (errorData?.can_cleanup) {
+                errorMessage += ' You can try cleanup old payments.';
+              }
+            } else if (errorData?.detail) {
+              errorMessage = errorData.detail;
+            } else if (errorData?.message) {
+              errorMessage = errorData.message;
+            }
+          } else if (err.response?.status === 404) {
             errorMessage = 'Cart item not found';
           } else if (err.response?.status >= 500) {
             errorMessage = 'Server error. Please try again later.';
+          } else if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+          } else if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
           }
           
           set({ error: errorMessage, loading: false });
@@ -269,12 +369,29 @@ export const useCartStore = create<CartState>()(
         set({ loading: true, error: null });
         
         try {
-          // Delete all cart items
-          const deletePromises = items.map(item => 
-            apiClient.delete(`/cart/carts/${item.id}/`)
-          );
-          
-          await Promise.all(deletePromises);
+          // Use the new clear converted carts endpoint or delete individual items
+          if (items.length === 0) {
+            set({
+              items: [],
+              totalCount: 0,
+              totalAmount: 0,
+              loading: false,
+              error: null,
+            });
+            return true;
+          }
+
+          // Try to use the bulk clear endpoint first
+          try {
+            await apiClient.post('/cart/carts/clear_converted/');
+          } catch (clearError) {
+            // If bulk clear fails, fallback to individual deletion
+            console.warn('Bulk clear failed, falling back to individual deletion');
+            const deletePromises = items.map(item => 
+              apiClient.delete(`/cart/carts/${item.id}/`)
+            );
+            await Promise.all(deletePromises);
+          }
           
           set({
             items: [],
@@ -294,8 +411,25 @@ export const useCartStore = create<CartState>()(
           
         } catch (err: any) {
           console.error('Clear cart error:', err);
-          set({ error: 'Failed to clear cart', loading: false });
-          toast.error('Failed to clear cart');
+          let errorMessage = 'Failed to clear cart';
+          
+          if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+          } else if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          } else if (err.response?.status === 400) {
+            const errorData = err.response.data;
+            if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            } else if (errorData?.message) {
+              errorMessage = errorData.message;
+            } else {
+              errorMessage = 'Cannot clear cart. Some items may have pending payments.';
+            }
+          }
+          
+          set({ error: errorMessage, loading: false });
+          toast.error(errorMessage);
           return false;
         }
       },
@@ -374,6 +508,40 @@ export const useCartStore = create<CartState>()(
         }
         
         return true;
+      },
+
+      // Check deletion status with timing info
+      checkDeletionStatus: async (cartId: number) => {
+        try {
+          const response = await apiClient.get(`/cart/carts/${cartId}/deletion_status/`);
+          return response.data;
+        } catch (err: any) {
+          console.error('Check deletion status error:', err);
+          return null;
+        }
+      },
+
+      // Cleanup old payments for a cart
+      cleanupOldPayments: async (cartId: number): Promise<boolean> => {
+        try {
+          await apiClient.post(`/cart/carts/${cartId}/cleanup_old_payments/`);
+          toast.success('Old payments cleaned up successfully!');
+          // Refresh cart after cleanup
+          await get().fetchCartItems();
+          return true;
+        } catch (err: any) {
+          console.error('Cleanup old payments error:', err);
+          let errorMessage = 'Failed to cleanup old payments';
+          
+          if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+          } else if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          }
+          
+          toast.error(errorMessage);
+          return false;
+        }
       },
 
       // Add webhook retry mechanism for payment completion
