@@ -96,10 +96,10 @@ const CancellationRefundPolicy = () => {
     {
       id: 3,
       title: "Refund Processing",
-      content: "Refunds will be processed within 7-10 business days after the cancellation is confirmed. The refund amount will be credited to the original payment method used during booking. Please note that depending on your financial institution, it may take additional time for the refund to appear in your account. For international transactions, processing may take up to 14 business days. If you haven't received your refund after this period, please contact our support team.",
+      content: "Refunds will be credited within 7-10 business days after the cancellation is confirmed. The refund amount will be credited to the original payment method used during booking. Please note that depending on your financial institution, it may take additional time for the refund to appear in your account. For international transactions, credit may take up to 14 business days. If you haven't received your refund after this period, please contact our support team.",
       icon: <FaMoneyBillWave />,
       category: "refund",
-      highlights: ["7-10 business days processing time", "Refund to original payment method", "International transactions may take longer"],
+      highlights: ["7-10 business days credit time", "Refund to original payment method", "International transactions may take longer"],
     },
     {
       id: 4,
