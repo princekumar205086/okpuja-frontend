@@ -64,14 +64,14 @@ export const getSidebarItems = (userType: "admin" | "employee" | "user") => {
 
   const userItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/user/dashboard" },
-    { text: "Book Puja", icon: <PujaIcon />, path: "/user/book-puja" },
-    { text: "Astrology", icon: <AstrologyIcon />, path: "/user/astrology" },
+    { text: "Book Puja", icon: <PujaIcon />, path: "/pujaservice" },
+    { text: "Astrology", icon: <AstrologyIcon />, path: "/astrology" },
     { text: "My Bookings", icon: <BookingIcon />, path: "/user/bookings" },
     { text: "Payments", icon: <PaymentIcon />, path: "/user/payments" },
     { text: "My Promo Codes", icon: <PromoIcon />, path: "/user/promos" },
-    { text: "Blog", icon: <BlogIcon />, path: "/user/blog" },
-    { text: "Gallery", icon: <GalleryIcon />, path: "/user/gallery" },
-    { text: "Events", icon: <EventIcon />, path: "/user/events" },
+    { text: "Blog", icon: <BlogIcon />, path: "/blog" },
+    { text: "Gallery", icon: <GalleryIcon />, path: "/gallery" },
+    { text: "Events", icon: <EventIcon />, path: "/events" },
     { text: "Support", icon: <SupportIcon />, path: "/user/support" },
     { text: "Profile", icon: <ProfileIcon />, path: "/user/profile" },
   ];
