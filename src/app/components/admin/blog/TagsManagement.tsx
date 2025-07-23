@@ -382,40 +382,94 @@ const TagsManagement: React.FC<TagsManagementProps> = ({ className }) => {
           </Box>
 
           {/* Form Content */}
-          <Box className="flex-1 overflow-auto p-4">
-            <Box className="max-w-2xl mx-auto space-y-4">
-              <TextField
-                fullWidth
-                label="Tag Name *"
-                value={formData.name}
-                onChange={handleInputChange('name')}
-                variant="outlined"
-                placeholder="e.g., Astrology, Spirituality, Meditation"
-              />
+          <Box className="flex-1 overflow-auto p-6">
+            <Box className="max-w-2xl mx-auto space-y-6">
+              <Paper 
+                elevation={1} 
+                className="p-6 space-y-6"
+                sx={{ 
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: 'grey.200'
+                }}
+              >
+                <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+                  Tag Information
+                </Typography>
 
-              <TextField
-                fullWidth
-                label="Description"
-                value={formData.description}
-                onChange={handleInputChange('description')}
-                multiline
-                rows={3}
-                variant="outlined"
-                placeholder="Brief description of this tag..."
-              />
+                <TextField
+                  fullWidth
+                  label="Tag Name *"
+                  value={formData.name}
+                  onChange={handleInputChange('name')}
+                  variant="outlined"
+                  placeholder="e.g., Astrology, Spirituality, Meditation"
+                  sx={{
+                    mb: 3,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover fieldset': {
+                        borderColor: '#f97316',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#f97316',
+                    },
+                  }}
+                />
 
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={formData.status}
-                  label="Status"
-                  onChange={handleInputChange('status')}
-                >
-                  <MenuItem value="DRAFT">Draft</MenuItem>
-                  <MenuItem value="PUBLISHED">Published</MenuItem>
-                  <MenuItem value="ARCHIVED">Archived</MenuItem>
-                </Select>
-              </FormControl>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={formData.description}
+                  onChange={handleInputChange('description')}
+                  multiline
+                  rows={4}
+                  variant="outlined"
+                  placeholder="Brief description of this tag..."
+                  helperText="Describe what content this tag represents"
+                  sx={{
+                    mb: 3,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover fieldset': {
+                        borderColor: '#f97316',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#f97316',
+                    },
+                  }}
+                />
+
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={formData.status}
+                    label="Status"
+                    onChange={handleInputChange('status')}
+                    sx={{
+                      borderRadius: 2,
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#f97316',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#f97316',
+                      },
+                    }}
+                  >
+                    <MenuItem value="DRAFT">Draft</MenuItem>
+                    <MenuItem value="PUBLISHED">Published</MenuItem>
+                    <MenuItem value="ARCHIVED">Archived</MenuItem>
+                  </Select>
+                </FormControl>
+              </Paper>
             </Box>
           </Box>
         </Box>
