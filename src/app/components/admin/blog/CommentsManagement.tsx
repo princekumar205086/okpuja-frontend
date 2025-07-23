@@ -70,12 +70,12 @@ const CommentsManagement: React.FC<CommentsManagementProps> = ({ className }) =>
   useEffect(() => {
     if (selectedPost) {
       // Find the post slug from the title
-      const post = posts.find(p => p.title === selectedPost);
+      const post = (posts || []).find(p => p.title === selectedPost);
       if (post) {
         fetchComments(post.slug);
       }
     }
-  }, [selectedPost]);
+  }, [selectedPost, posts, fetchComments]);
 
   useEffect(() => {
     if (editComment) {
@@ -87,7 +87,7 @@ const CommentsManagement: React.FC<CommentsManagementProps> = ({ className }) =>
     }
   }, [editComment]);
 
-  const filteredComments = comments.filter(comment =>
+  const filteredComments = (comments || []).filter(comment =>
     comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
     comment.user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -116,7 +116,7 @@ const CommentsManagement: React.FC<CommentsManagementProps> = ({ className }) =>
       setEditComment(null);
       // Refresh comments
       if (selectedPost) {
-        const post = posts.find(p => p.title === selectedPost);
+        const post = (posts || []).find(p => p.title === selectedPost);
         if (post) {
           fetchComments(post.slug);
         }
@@ -131,7 +131,7 @@ const CommentsManagement: React.FC<CommentsManagementProps> = ({ className }) =>
     
     // Refresh comments
     if (selectedPost) {
-      const post = posts.find(p => p.title === selectedPost);
+      const post = (posts || []).find(p => p.title === selectedPost);
       if (post) {
         fetchComments(post.slug);
       }
@@ -160,7 +160,7 @@ const CommentsManagement: React.FC<CommentsManagementProps> = ({ className }) =>
             className="flex-1 min-w-[250px]"
           >
             <option value="">Select a post to view comments</option>
-            {posts.map((post) => (
+            {(posts || []).map((post) => (
               <option key={post.id} value={post.title}>
                 {post.title}
               </option>

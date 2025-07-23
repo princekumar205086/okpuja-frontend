@@ -84,19 +84,22 @@ const BlogStats: React.FC<BlogStatsProps> = ({ className }) => {
   }, []);
 
   useEffect(() => {
-    // Calculate total views
-    const views = posts.reduce((total, post) => total + post.view_count, 0);
-    setTotalViews(views);
+    // Calculate total views only when posts array exists and has data
+    if (posts && Array.isArray(posts)) {
+      const views = posts.reduce((total, post) => total + post.view_count, 0);
+      setTotalViews(views);
+    }
   }, [posts]);
 
-  const publishedPosts = posts.filter(post => post.status === 'PUBLISHED');
-  const draftPosts = posts.filter(post => post.status === 'DRAFT');
-  const featuredPosts = posts.filter(post => post.is_featured);
+  // Safely filter posts with fallback to empty arrays
+  const publishedPosts = posts ? posts.filter(post => post.status === 'PUBLISHED') : [];
+  const draftPosts = posts ? posts.filter(post => post.status === 'DRAFT') : [];
+  const featuredPosts = posts ? posts.filter(post => post.is_featured) : [];
 
   const stats = [
     {
       title: 'Total Posts',
-      value: posts.length,
+      value: posts ? posts.length : 0,
       icon: <Article />,
       color: 'blue',
       trend: 12,
@@ -110,14 +113,14 @@ const BlogStats: React.FC<BlogStatsProps> = ({ className }) => {
     },
     {
       title: 'Categories',
-      value: categories.length,
+      value: categories ? categories.length : 0,
       icon: <Category />,
       color: 'purple',
       trend: 5,
     },
     {
       title: 'Tags',
-      value: tags.length,
+      value: tags ? tags.length : 0,
       icon: <LocalOffer />,
       color: 'orange',
       trend: 15,

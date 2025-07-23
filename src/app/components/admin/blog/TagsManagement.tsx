@@ -81,7 +81,7 @@ const TagsManagement: React.FC<TagsManagementProps> = ({ className }) => {
     }
   }, [editTag]);
 
-  const filteredTags = tags.filter(tag =>
+  const filteredTags = (tags || []).filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tag.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );

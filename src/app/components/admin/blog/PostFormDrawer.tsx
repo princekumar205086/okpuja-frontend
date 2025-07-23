@@ -240,7 +240,7 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                     label="Category *"
                     onChange={handleInputChange('category')}
                   >
-                    {categories.map((category) => (
+                    {(categories || []).map((category) => (
                       <MenuItem key={category.id} value={category.id}>
                         {category.name}
                       </MenuItem>
@@ -250,7 +250,7 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
 
                 <Autocomplete
                   multiple
-                  options={tags}
+                  options={tags || []}
                   value={selectedTags}
                   onChange={handleTagsChange}
                   getOptionLabel={(option) => option.name}

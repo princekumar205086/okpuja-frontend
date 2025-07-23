@@ -136,6 +136,10 @@ interface BlogStore {
   updateComment: (id: number, data: { content?: string; is_approved?: boolean }) => Promise<boolean>;
   deleteComment: (id: number) => Promise<boolean>;
   
+  // Bulk actions
+  bulkUpdatePosts: (postIds: number[], action: string, value?: any) => Promise<boolean>;
+  bulkDeletePosts: (postIds: number[]) => Promise<boolean>;
+  
   // Utility
   clearError: () => void;
   setSelectedPost: (post: BlogPost | null) => void;
@@ -169,19 +173,26 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       if (status) params.append('status', status);
 
       const response = await apiClient.get(`/blog/posts/?${params.toString()}`);
-      const { results, next, count } = response.data;
+      const data = response.data;
+      
+      // Handle both paginated and non-paginated responses
+      const results = data.results || data || [];
+      const next = data.next || null;
+      const count = data.count || results.length;
       
       set({
-        posts: page === 1 ? results : [...get().posts, ...results],
+        posts: page === 1 ? results : [...(get().posts || []), ...results],
         postsPage: page,
         postsHasNext: !!next,
         totalPosts: count,
         loading: false
       });
     } catch (error: any) {
+      console.error('Fetch posts error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch posts',
-        loading: false 
+        loading: false,
+        posts: [] // Ensure posts is always an array
       });
     }
   },
@@ -191,11 +202,15 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.get('/blog/categories/');
-      set({ categories: response.data.results || response.data, loading: false });
+      const data = response.data;
+      const results = data.results || data || [];
+      set({ categories: results, loading: false });
     } catch (error: any) {
+      console.error('Fetch categories error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch categories',
-        loading: false 
+        loading: false,
+        categories: [] // Ensure categories is always an array
       });
     }
   },
@@ -205,11 +220,15 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.get('/blog/tags/');
-      set({ tags: response.data.results || response.data, loading: false });
+      const data = response.data;
+      const results = data.results || data || [];
+      set({ tags: results, loading: false });
     } catch (error: any) {
+      console.error('Fetch tags error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch tags',
-        loading: false 
+        loading: false,
+        tags: [] // Ensure tags is always an array
       });
     }
   },
@@ -219,11 +238,15 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.get(`/blog/posts/${postSlug}/comments/`);
-      set({ comments: response.data.results || response.data, loading: false });
+      const data = response.data;
+      const results = data.results || data || [];
+      set({ comments: results, loading: false });
     } catch (error: any) {
+      console.error('Fetch comments error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch comments',
-        loading: false 
+        loading: false,
+        comments: [] // Ensure comments is always an array
       });
     }
   },
@@ -483,6 +506,73 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
     } catch (error: any) {
       set({ 
         error: error.response?.data?.message || 'Failed to delete comment',
+        loading: false 
+      });
+      return false;
+    }
+  },
+
+  // Bulk actions
+  bulkUpdatePosts: async (postIds: number[], action: string, value?: any) => {
+    set({ loading: true, error: null });
+    try {
+      const data: any = { post_ids: postIds };
+      
+      switch (action) {
+        case 'publish':
+          data.status = 'PUBLISHED';
+          break;
+        case 'draft':
+          data.status = 'DRAFT';
+          break;
+        case 'archive':
+          data.status = 'ARCHIVED';
+          break;
+        case 'feature':
+          data.is_featured = true;
+          break;
+        case 'unfeature':
+          data.is_featured = false;
+          break;
+        default:
+          if (value !== undefined) {
+            data[action] = value;
+          }
+      }
+
+      await apiClient.patch('/blog/posts/bulk-update/', data);
+      
+      // Refresh posts after bulk update
+      await get().fetchPosts(get().postsPage);
+      
+      set({ loading: false });
+      toast.success('Posts updated successfully!');
+      return true;
+    } catch (error: any) {
+      set({ 
+        error: error.response?.data?.message || 'Failed to update posts',
+        loading: false 
+      });
+      return false;
+    }
+  },
+
+  bulkDeletePosts: async (postIds: number[]) => {
+    set({ loading: true, error: null });
+    try {
+      await apiClient.delete('/blog/posts/bulk-delete/', {
+        data: { post_ids: postIds }
+      });
+      
+      // Refresh posts after bulk delete
+      await get().fetchPosts(get().postsPage);
+      
+      set({ loading: false });
+      toast.success('Posts deleted successfully!');
+      return true;
+    } catch (error: any) {
+      set({ 
+        error: error.response?.data?.message || 'Failed to delete posts',
         loading: false 
       });
       return false;

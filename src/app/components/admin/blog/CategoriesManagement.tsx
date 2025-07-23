@@ -89,7 +89,7 @@ const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ className }
     }
   }, [editCategory]);
 
-  const filteredCategories = categories.filter(category =>
+  const filteredCategories = (categories || []).filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
