@@ -65,7 +65,7 @@ const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ className }
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   useEffect(() => {
     if (editCategory) {
@@ -315,181 +315,72 @@ const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ className }
           </Box>
 
           {/* Form Content */}
-          <Box className="flex-1 overflow-auto p-6">
-            <Box className="max-w-2xl mx-auto space-y-6">
-              {/* Basic Information */}
-              <Paper 
-                elevation={1} 
-                className="p-6 space-y-6"
-                sx={{ 
-                  borderRadius: 3,
-                  border: '1px solid',
-                  borderColor: 'grey.200'
-                }}
-              >
-                <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
-                  Basic Information
-                </Typography>
+          <Box className="flex-1 overflow-auto p-4">
+            <Box className="max-w-2xl mx-auto space-y-4">
+              <TextField
+                fullWidth
+                label="Category Name *"
+                value={formData.name}
+                onChange={handleInputChange('name')}
+                variant="outlined"
+              />
 
-                <TextField
-                  fullWidth
-                  label="Category Name *"
-                  value={formData.name}
-                  onChange={handleInputChange('name')}
-                  variant="outlined"
-                  sx={{
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#f97316',
-                    },
-                  }}
-                />
+              <TextField
+                fullWidth
+                label="Description"
+                value={formData.description}
+                onChange={handleInputChange('description')}
+                multiline
+                rows={3}
+                variant="outlined"
+              />
 
-                <TextField
-                  fullWidth
-                  label="Description"
-                  value={formData.description}
-                  onChange={handleInputChange('description')}
-                  multiline
-                  rows={4}
-                  variant="outlined"
-                  helperText="Brief description of the category"
-                  sx={{
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#f97316',
-                    },
-                  }}
-                />
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={formData.status}
+                  label="Status"
+                  onChange={handleInputChange('status')}
+                >
+                  <MenuItem value="DRAFT">Draft</MenuItem>
+                  <MenuItem value="PUBLISHED">Published</MenuItem>
+                  <MenuItem value="ARCHIVED">Archived</MenuItem>
+                </Select>
+              </FormControl>
 
-                <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={formData.status}
-                    label="Status"
-                    onChange={handleInputChange('status')}
-                    sx={{
-                      borderRadius: 2,
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f97316',
-                      },
-                    }}
-                  >
-                    <MenuItem value="DRAFT">Draft</MenuItem>
-                    <MenuItem value="PUBLISHED">Published</MenuItem>
-                    <MenuItem value="ARCHIVED">Archived</MenuItem>
-                  </Select>
-                </FormControl>
-              </Paper>
+              {/* SEO Fields */}
+              <Typography variant="h6" className="font-medium text-gray-800 pt-4">
+                SEO Settings
+              </Typography>
 
-              {/* SEO Settings */}
-              <Paper 
-                elevation={1} 
-                className="p-6 space-y-6"
-                sx={{ 
-                  borderRadius: 3,
-                  border: '1px solid',
-                  borderColor: 'grey.200'
-                }}
-              >
-                <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
-                  SEO Settings
-                </Typography>
+              <TextField
+                fullWidth
+                label="Meta Title"
+                value={formData.meta_title}
+                onChange={handleInputChange('meta_title')}
+                variant="outlined"
+                helperText="SEO title for search engines"
+              />
 
-                <TextField
-                  fullWidth
-                  label="Meta Title"
-                  value={formData.meta_title}
-                  onChange={handleInputChange('meta_title')}
-                  variant="outlined"
-                  helperText="SEO title for search engines"
-                  sx={{
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#f97316',
-                    },
-                  }}
-                />
+              <TextField
+                fullWidth
+                label="Meta Keywords"
+                value={formData.meta_keywords}
+                onChange={handleInputChange('meta_keywords')}
+                variant="outlined"
+                helperText="Comma-separated keywords"
+              />
 
-                <TextField
-                  fullWidth
-                  label="Meta Keywords"
-                  value={formData.meta_keywords}
-                  onChange={handleInputChange('meta_keywords')}
-                  variant="outlined"
-                  helperText="Comma-separated keywords"
-                  sx={{
-                    mb: 3,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#f97316',
-                    },
-                  }}
-                />
-
-                <TextField
-                  fullWidth
-                  label="Meta Description"
-                  value={formData.meta_description}
-                  onChange={handleInputChange('meta_description')}
-                  multiline
-                  rows={4}
-                  variant="outlined"
-                  helperText="SEO description for search engines"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#f97316',
-                    },
-                  }}
-                />
-              </Paper>
+              <TextField
+                fullWidth
+                label="Meta Description"
+                value={formData.meta_description}
+                onChange={handleInputChange('meta_description')}
+                multiline
+                rows={3}
+                variant="outlined"
+                helperText="SEO description for search engines"
+              />
             </Box>
           </Box>
         </Box>

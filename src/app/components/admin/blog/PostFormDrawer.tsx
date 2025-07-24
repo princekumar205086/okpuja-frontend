@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { useBlogStore, BlogPost, CreatePostData } from '@/app/stores/blogStore';
 import RichTextEditor from '@/app/components/ui/RichTextEditor';
+import Image from 'next/image';
 
 interface PostFormDrawerProps {
   open: boolean;
@@ -69,7 +70,7 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
       fetchTags();
       clearError();
     }
-  }, [open]);
+  }, [open, fetchCategories, fetchTags, clearError]);
 
   useEffect(() => {
     if (editPost) {
@@ -197,32 +198,17 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
 
         {/* Content */}
         <Box className="flex-1 overflow-auto">
-          <Box className="max-w-4xl mx-auto p-6 space-y-8">
+          <Box className="max-w-4xl mx-auto p-4 space-y-6">
             {/* Error Alert */}
             {error && (
-              <Alert 
-                severity="error" 
-                onClose={clearError}
-                sx={{ 
-                  borderRadius: 2,
-                  mb: 3
-                }}
-              >
+              <Alert severity="error" onClose={clearError}>
                 {error}
               </Alert>
             )}
 
             {/* Basic Information */}
-            <Paper 
-              elevation={2} 
-              className="p-6 space-y-6"
-              sx={{ 
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'grey.200'
-              }}
-            >
-              <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+            <Paper className="p-4 space-y-4">
+              <Typography variant="h6" className="font-medium text-gray-800">
                 Basic Information
               </Typography>
 
@@ -233,21 +219,6 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                 onChange={handleInputChange('title')}
                 variant="outlined"
                 className="bg-white"
-                sx={{
-                  mb: 3,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: '#f97316',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#f97316',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#f97316',
-                  },
-                }}
               />
 
               <TextField
@@ -256,43 +227,19 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                 value={formData.excerpt}
                 onChange={handleInputChange('excerpt')}
                 multiline
-                rows={3}
+                rows={2}
                 variant="outlined"
                 helperText="A brief summary of the post (optional)"
                 className="bg-white"
-                sx={{
-                  mb: 4,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: '#f97316',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#f97316',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#f97316',
-                  },
-                }}
               />
 
-              <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Box className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <FormControl fullWidth>
                   <InputLabel>Category *</InputLabel>
                   <Select
                     value={formData.category}
                     label="Category *"
                     onChange={handleInputChange('category')}
-                    sx={{
-                      borderRadius: 2,
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f97316',
-                      },
-                    }}
                   >
                     {(categories || []).map((category) => (
                       <MenuItem key={category.id} value={category.id}>
@@ -315,8 +262,7 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                         label={option.name}
                         {...getTagProps({ index })}
                         key={option.id}
-                        className="border-orange-200 text-orange-600 bg-orange-50"
-                        sx={{ borderRadius: 2 }}
+                        className="border-orange-200 text-orange-600"
                       />
                     ))
                   }
@@ -325,20 +271,6 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                       {...params}
                       label="Tags"
                       placeholder="Select tags..."
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          '&:hover fieldset': {
-                            borderColor: '#f97316',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#f97316',
-                          },
-                        },
-                        '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#f97316',
-                        },
-                      }}
                     />
                   )}
                 />
@@ -346,45 +278,27 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
             </Paper>
 
             {/* Content Editor */}
-            <Paper 
-              elevation={2} 
-              className="p-6 space-y-6"
-              sx={{ 
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'grey.200'
-              }}
-            >
-              <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+            <Paper className="p-4 space-y-4">
+              <Typography variant="h6" className="font-medium text-gray-800">
                 Content *
               </Typography>
-              <Box sx={{ mt: 3 }}>
-                <RichTextEditor
-                  value={formData.content}
-                  onChange={handleContentChange}
-                  placeholder="Write your blog post content here..."
-                  minHeight={400}
-                />
-              </Box>
+              <RichTextEditor
+                value={formData.content}
+                onChange={handleContentChange}
+                placeholder="Write your blog post content here..."
+                minHeight={400}
+              />
             </Paper>
 
             {/* Media */}
-            <Paper 
-              elevation={2} 
-              className="p-6 space-y-6"
-              sx={{ 
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'grey.200'
-              }}
-            >
-              <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+            <Paper className="p-4 space-y-4">
+              <Typography variant="h6" className="font-medium text-gray-800">
                 Media
               </Typography>
 
               {/* Featured Image */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="subtitle1" className="mb-3 font-medium text-gray-700">
+              <Box>
+                <Typography variant="subtitle1" className="mb-2 font-medium">
                   Featured Image
                 </Typography>
                 <Box className="flex flex-col sm:flex-row gap-4 items-start">
@@ -392,16 +306,7 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                     variant="outlined"
                     component="label"
                     startIcon={<ImageIcon />}
-                    className="border-gray-300 hover:border-orange-500"
-                    sx={{
-                      borderRadius: 2,
-                      px: 3,
-                      py: 1.5,
-                      '&:hover': {
-                        borderColor: '#f97316',
-                        backgroundColor: '#fff7ed',
-                      },
-                    }}
+                    className="border-gray-300"
                   >
                     Choose Image
                     <input
@@ -413,19 +318,20 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                   </Button>
                   {imagePreview && (
                     <Box className="relative">
-                      <img
+                      <Image
                         src={imagePreview}
                         alt="Preview"
-                        className="w-32 h-24 object-cover rounded-lg border-2 border-gray-200"
+                        className="w-32 h-24 object-cover rounded border"
+                        width={128}
+                        height={96}
                       />
                       <IconButton
                         size="small"
-                        className="absolute -top-2 -right-2 bg-red-500 text-white hover:bg-red-600 shadow-lg"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white hover:bg-red-600"
                         onClick={() => {
                           setImagePreview('');
                           setFeaturedImage(null);
                         }}
-                        sx={{ borderRadius: '50%' }}
                       >
                         <Close fontSize="small" />
                       </IconButton>
@@ -445,75 +351,35 @@ const PostFormDrawer: React.FC<PostFormDrawerProps> = ({ open, onClose, editPost
                   startAdornment: <YouTube className="text-red-500 mr-2" />,
                 }}
                 helperText="Embed a YouTube video in your post (optional)"
-                sx={{
-                  mt: 3,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': {
-                      borderColor: '#f97316',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#f97316',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#f97316',
-                  },
-                }}
               />
             </Paper>
 
             {/* Settings */}
-            <Paper 
-              elevation={2} 
-              className="p-6 space-y-6"
-              sx={{ 
-                borderRadius: 3,
-                border: '1px solid',
-                borderColor: 'grey.200'
-              }}
-            >
-              <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+            <Paper className="p-4 space-y-4">
+              <Typography variant="h6" className="font-medium text-gray-800">
                 Publishing Settings
               </Typography>
 
-              <Box className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormControl fullWidth>
                   <InputLabel>Status</InputLabel>
                   <Select
                     value={formData.status}
                     label="Status"
                     onChange={handleInputChange('status')}
-                    sx={{
-                      borderRadius: 2,
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f97316',
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f97316',
-                      },
-                    }}
                   >
                     <MenuItem value="DRAFT">Draft</MenuItem>
                     <MenuItem value="PUBLISHED">Published</MenuItem>
                   </Select>
                 </FormControl>
 
-                <Box className="flex items-center justify-center">
+                <Box className="flex items-center">
                   <FormControlLabel
                     control={
                       <Switch
                         checked={formData.is_featured}
                         onChange={handleInputChange('is_featured')}
                         color="warning"
-                        sx={{
-                          '& .MuiSwitch-switchBase.Mui-checked': {
-                            color: '#f97316',
-                          },
-                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                            backgroundColor: '#f97316',
-                          },
-                        }}
                       />
                     }
                     label="Featured Post"

@@ -65,6 +65,7 @@ import {
 } from '@mui/icons-material';
 import { useBlogStore, BlogPost } from '@/app/stores/blogStore';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 interface BlogPostsTableProps {
   onEdit: (post: BlogPost) => void;
@@ -234,10 +235,12 @@ const BlogPostsTable: React.FC<BlogPostsTableProps> = ({ onEdit, onAdd, onView }
 
         {post.featured_image_thumbnail_url && (
           <Box className="mb-3">
-            <img
+            <Image
               src={post.featured_image_thumbnail_url}
               alt={post.title}
               className="w-full h-32 object-cover rounded-lg"
+              width={500}
+              height={200}
             />
           </Box>
         )}

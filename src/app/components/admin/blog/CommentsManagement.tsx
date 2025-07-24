@@ -65,7 +65,7 @@ const CommentsManagement: React.FC<CommentsManagementProps> = ({ className }) =>
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
   useEffect(() => {
     if (selectedPost) {

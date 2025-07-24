@@ -81,7 +81,7 @@ const BlogStats: React.FC<BlogStatsProps> = ({ className }) => {
     fetchPosts();
     fetchCategories();
     fetchTags();
-  }, []);
+  }, [fetchPosts, fetchCategories, fetchTags]);
 
   useEffect(() => {
     // Calculate total views only when posts array exists and has data
