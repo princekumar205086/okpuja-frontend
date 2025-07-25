@@ -2,7 +2,7 @@ import axios from 'axios';
 import { trackLogoutReason, debugTokenStatus } from '../utils/tokenUtils';
 
 // Base API configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.okpuja.com/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.okpuja.com/api' || 'https://backend.okpuja.com/api';
 
 // Create axios instance with default config
 const apiClient = axios.create({
