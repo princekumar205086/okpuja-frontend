@@ -115,7 +115,7 @@ const BookingFailed = () => {
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [paymentId, bookId, checkPaymentStatus, getBookingByBookId, fetchCartItems]);
+  }, [paymentId, bookId, merchantOrderId, checkPaymentStatus, getBookingByBookId, fetchCartItems]);
 
   const formatAmount = (amount: string | number) => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;

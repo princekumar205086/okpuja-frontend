@@ -12,14 +12,16 @@ const TestPaymentPage: React.FC = () => {
   const [simulating, setSimulating] = useState(false);
 
   const handleTestPayment = async () => {
-    if (!paymentId || isNaN(parseInt(paymentId))) {
-      toast.error('Please enter a valid payment ID');
+    if (!paymentId) {
+      toast.error('Please enter a payment ID or merchant order ID');
       return;
     }
 
     setLoading(true);
     try {
-      const result = await checkBookingStatus(parseInt(paymentId));
+      // Since checkBookingStatus now expects a merchant order ID (string), 
+      // we'll use the paymentId directly as a string
+      const result = await checkBookingStatus(paymentId);
       setResults(result);
       
       if (result) {
@@ -102,14 +104,14 @@ const TestPaymentPage: React.FC = () => {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Payment ID
+                Merchant Order ID
               </label>
               <input
-                type="number"
+                type="text"
                 value={paymentId}
                 onChange={(e) => setPaymentId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Enter Payment ID (e.g., 1, 2, 3...)"
+                placeholder="Enter Merchant Order ID (e.g., CART_xxx_xxx)"
               />
             </div>
 

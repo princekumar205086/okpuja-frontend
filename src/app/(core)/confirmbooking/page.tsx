@@ -186,7 +186,7 @@ const BookingSuccess = () => {
     };
 
     fetchBookingDetails();
-  }, [bookId, merchantOrderId, statusParam, getBookingByBookId]);
+  }, [bookId, merchantOrderId, statusParam, bookIdParam, paymentIdParam, merchantOrderIdParam, emptyKeyValue, allKeys, getBookingByBookId, getLatestBooking]);
 
   const handleDownloadReceipt = () => {
     if (!bookingDetails) return;
