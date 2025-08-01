@@ -123,9 +123,9 @@ export interface CartState {
   // Cleanup old payments
   cleanupOldPayments: (cartId: number) => Promise<boolean>;
   
-  // Payment and booking related
-  checkPaymentAndCreateBooking: (paymentId: number) => Promise<boolean>;
-  createBookingFromPayment: (paymentId: number) => Promise<boolean>;
+  // Payment and booking related - Updated for new API
+  checkPaymentAndCreateBooking: (merchantOrderId: string) => Promise<boolean>;
+  createBookingFromPayment: (merchantOrderId: string) => Promise<boolean>;
   
   // Local storage helpers
   getLocalCartCount: () => number;
@@ -548,34 +548,35 @@ export const useCartStore = create<CartState>()(
         }
       },
 
-      // Add webhook retry mechanism for payment completion
-      checkPaymentAndCreateBooking: async (paymentId: number): Promise<boolean> => {
+      // Check payment status using merchant order ID
+      checkPaymentAndCreateBooking: async (merchantOrderId: string): Promise<boolean> => {
         try {
-          const response = await apiClient.post(`/payments/payments/${paymentId}/check-and-create-booking/`);
+          const response = await apiClient.get(`/payments/status/${merchantOrderId}/`);
           
-          if (response.data.booking_created) {
-            // Refresh cart after successful booking creation
+          if (response.data.status === 'SUCCESS') {
+            // Refresh cart after successful payment (booking auto-created by backend)
             await get().fetchCartItems();
-            toast.success('Booking created successfully!');
+            toast.success('Payment successful! Booking created automatically.');
             return true;
           }
           
           return false;
         } catch (err: any) {
-          console.error('Check payment and create booking error:', err);
+          console.error('Check payment status error:', err);
           return false;
         }
       },
 
-      // Manual booking creation for failed webhook scenarios  
-      createBookingFromPayment: async (paymentId: number): Promise<boolean> => {
+      // Manual booking creation for failed webhook scenarios - Updated for new API  
+      createBookingFromPayment: async (merchantOrderId: string): Promise<boolean> => {
         try {
-          const response = await apiClient.post(`/payments/payments/${paymentId}/create-booking/`);
+          // Since new API auto-creates bookings, this just checks status
+          const response = await apiClient.get(`/payments/status/${merchantOrderId}/`);
           
-          if (response.data.success) {
+          if (response.data.status === 'SUCCESS') {
             // Clear cart after successful booking
             await get().fetchCartItems();
-            toast.success('Booking created successfully!');
+            toast.success('Booking confirmed successfully!');
             return true;
           }
           

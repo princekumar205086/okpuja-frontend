@@ -159,33 +159,34 @@ const CheckoutPage: React.FC = () => {
       console.log('Created checkout session:', sessionId);
 
       // Step 2: Process payment for cart (Payment-First Flow)
-      // We'll use the first cart item for payment processing
+      // Use the cart_id from the first cart item
       const firstCartItem = cartItems[0];
       
-      console.log('Processing payment for cart:', firstCartItem.id);
+      console.log('Processing payment for cart_id:', firstCartItem.cart_id);
       const paymentResponse = await processCartPayment({
-        cart_id: firstCartItem.id,
-        method: 'PHONEPE',
-        callback_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/callback`,
-        redirect_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/redirect`
+        cart_id: firstCartItem.cart_id, // Use cart_id instead of id
       });
 
       console.log('Payment creation result:', paymentResponse);
 
       if (paymentResponse && paymentResponse.success) {
+        // Extract the payment URL and IDs from the new response structure
+        const { payment_order } = paymentResponse.data;
+        
         // Store payment info and redirect
-        setPaymentUrl(sessionId, paymentResponse.payment_url);
-        setPaymentId(sessionId, paymentResponse.payment_id);
+        setPaymentUrl(sessionId, payment_order.phonepe_payment_url);
+        setPaymentId(sessionId, payment_order.id);
         updateSessionStatus(sessionId, 'PAYMENT_INITIATED');
         
-        console.log('Redirecting to payment URL:', paymentResponse.payment_url);
+        console.log('Redirecting to payment URL:', payment_order.phonepe_payment_url);
         
         // Store callback info in session storage for payment completion tracking
         sessionStorage.setItem('checkout_session_id', sessionId);
-        sessionStorage.setItem('payment_id', paymentResponse.payment_id);
+        sessionStorage.setItem('payment_id', payment_order.id);
+        sessionStorage.setItem('merchant_order_id', payment_order.merchant_order_id);
         
         // Redirect to payment gateway
-        window.location.href = paymentResponse.payment_url;
+        window.location.href = payment_order.phonepe_payment_url;
       } else {
         throw new Error('Failed to create payment');
       }

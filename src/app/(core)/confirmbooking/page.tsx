@@ -29,7 +29,7 @@ import { toast } from 'react-hot-toast';
 
 const BookingSuccess = () => {
   const searchParams = useSearchParams();
-  const { getBookingByBookId } = useBookingStore();
+  const { getBookingByBookId, getLatestBooking } = useBookingStore();
   
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -38,14 +38,21 @@ const BookingSuccess = () => {
   // Get book_id from URL parameters - support multiple formats
   const bookIdParam = searchParams.get('book_id');
   const paymentIdParam = searchParams.get('payment_id');
+  const statusParam = searchParams.get('status');
+  const merchantOrderIdParam = searchParams.get('order_id') || searchParams.get('merchant_order_id');
   
   // Also check if URL has malformed parameter like ?=BK-072D32E4
   const urlParams = new URLSearchParams(window.location.search);
   const allKeys = Array.from(urlParams.keys());
   const emptyKeyValue = urlParams.get(''); // Check for malformed ?=value
   
+  // Get merchant order ID from session storage or URL params for backup lookup
+  const sessionMerchantOrderId = typeof window !== 'undefined' ? 
+    sessionStorage.getItem('merchant_order_id') : null;
+  
   // Determine the booking ID from various sources
   const bookId = bookIdParam || emptyKeyValue || paymentIdParam;
+  const merchantOrderId = merchantOrderIdParam || sessionMerchantOrderId;
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -53,41 +60,133 @@ const BookingSuccess = () => {
       console.log('All URL keys:', allKeys);
       console.log('book_id param:', bookIdParam);
       console.log('payment_id param:', paymentIdParam);
+      console.log('status param:', statusParam);
+      console.log('merchant_order_id param:', merchantOrderIdParam);
       console.log('empty key value:', emptyKeyValue);
       console.log('Final bookId:', bookId);
+      console.log('merchantOrderId:', merchantOrderId);
 
+      // If we have a booking ID, fetch it directly
+      if (bookId) {
+        try {
+          setLoading(true);
+          setError('');
+          
+          console.log('Calling API with bookId:', bookId);
+          const booking = await getBookingByBookId(bookId);
+          console.log('API response:', booking);
+          
+          if (booking) {
+            setBookingDetails(booking);
+            toast.success('Booking details loaded successfully!');
+          } else {
+            setError(`Booking with ID "${bookId}" not found or could not be retrieved`);
+            toast.error('Failed to load booking details');
+          }
+        } catch (error) {
+          console.error('Error fetching booking details:', error);
+          setError(`Error loading booking details: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          toast.error('Error loading booking details');
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
+      // If we have status=completed but no booking ID, try to find booking using merchant order ID
+      if (statusParam === 'completed' && !bookId) {
+        try {
+          setLoading(true);
+          setError('Payment completed! Searching for your booking...');
+          
+          console.log('Payment completed - searching for booking...');
+          
+          // First, try to get booking from latest payment
+          const token = localStorage.getItem('access_token');
+          if (!token) {
+            setError('Please login to view your booking details');
+            setLoading(false);
+            return;
+          }
+
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/payments/latest/`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (response.ok) {
+            const latestPayment = await response.json();
+            console.log('Latest payment:', latestPayment);
+            
+            // If the latest payment has a booking, use it
+            if (latestPayment.booking) {
+              console.log('Found booking from latest payment:', latestPayment.booking.book_id);
+              setBookingDetails(latestPayment.booking);
+              toast.success('Booking found! Loading details...');
+              
+              // Update URL to include booking ID for future reference
+              const newUrl = `/confirmbooking?book_id=${latestPayment.booking.book_id}&order_id=${latestPayment.merchant_order_id || 'N/A'}`;
+              window.history.replaceState({}, '', newUrl);
+              setLoading(false);
+              return;
+            }
+            
+            // If payment exists but no booking, check if payment is successful
+            if (latestPayment.status === 'SUCCESS' || latestPayment.status === 'COMPLETED') {
+              // Payment successful but no booking - this indicates backend issue
+              setError('Payment was successful but booking was not created automatically. Please contact support with your payment ID: ' + (latestPayment.merchant_order_id || latestPayment.id));
+              toast.error('Booking creation failed - please contact support');
+              setLoading(false);
+              return;
+            }
+          }
+          
+          // Fallback: Try to get any recent successful booking using latest booking API
+          console.log('Trying latest booking API as final fallback...');
+          const latestBooking = await getLatestBooking();
+          if (latestBooking) {
+            console.log('Found latest booking:', latestBooking.book_id);
+            setBookingDetails(latestBooking);
+            toast.success('Found your latest booking!');
+            
+            // Update URL to include booking ID
+            const newUrl = `/confirmbooking?book_id=${latestBooking.book_id}`;
+            window.history.replaceState({}, '', newUrl);
+            setLoading(false);
+            return;
+          }
+          
+          // If we still haven't found a booking, show helpful error
+          setError('Payment completed successfully, but we need a moment to process your booking. Please refresh this page in a few seconds, or visit the debug page to find your booking.');
+          toast.error('Booking processing - please refresh in a moment');
+          
+          // Auto-refresh after 5 seconds
+          setTimeout(() => {
+            window.location.reload();
+          }, 5000);
+          
+        } catch (error) {
+          console.error('Error finding booking after payment completion:', error);
+          setError('Payment completed but unable to retrieve booking details. Please visit the payment debug page or contact support.');
+          toast.error('Error retrieving booking details');
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
+      // If no booking ID and no status=completed, show error
       if (!bookId) {
         setError('Booking ID not found in URL. Please check the URL format.');
         setLoading(false);
         return;
       }
-
-      try {
-        setLoading(true);
-        setError('');
-        
-        console.log('Calling API with bookId:', bookId);
-        const booking = await getBookingByBookId(bookId);
-        console.log('API response:', booking);
-        
-        if (booking) {
-          setBookingDetails(booking);
-          toast.success('Booking details loaded successfully!');
-        } else {
-          setError(`Booking with ID "${bookId}" not found or could not be retrieved`);
-          toast.error('Failed to load booking details');
-        }
-      } catch (error) {
-        console.error('Error fetching booking details:', error);
-        setError(`Error loading booking details: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        toast.error('Error loading booking details');
-      } finally {
-        setLoading(false);
-      }
     };
 
     fetchBookingDetails();
-  }, [bookId, getBookingByBookId]);
+  }, [bookId, merchantOrderId, statusParam, getBookingByBookId]);
 
   const handleDownloadReceipt = () => {
     if (!bookingDetails) return;
@@ -252,6 +351,29 @@ const BookingSuccess = () => {
       {/* Header Space */}
       <div className="h-20"></div>
       
+      {/* Status=completed detection banner */}
+      {statusParam === 'completed' && !bookingDetails && (
+        <div className="max-w-4xl mx-auto px-4 mb-6">
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700">
+                  <strong>Payment Completed!</strong> We're automatically searching for your booking details...
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  If this takes too long, visit <a href="/payment-debug" className="underline font-medium">payment debug page</a> to find your booking.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <main className="container mx-auto px-4 py-6 md:py-8 max-w-6xl">
         {/* Success Header */}
         <div className="text-center mb-8 md:mb-12">
@@ -260,7 +382,7 @@ const BookingSuccess = () => {
             <div className="absolute inset-0 bg-green-200 rounded-full scale-125 opacity-30 animate-ping"></div>
             <FaCheckCircle className="text-green-600 text-6xl md:text-7xl mx-auto relative z-10" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">
             Booking Confirmed!
           </h1>
           <p className="text-gray-600 text-lg md:text-xl px-4 mb-6">

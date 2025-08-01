@@ -70,6 +70,7 @@ export interface BookingState {
   createBooking: (bookingData: CreateBookingRequest) => Promise<Booking | null>;
   getBookingById: (id: number) => Promise<Booking | null>;
   getBookingByBookId: (bookId: string) => Promise<Booking | null>;
+  getLatestBooking: () => Promise<Booking | null>;
   updateBookingStatus: (id: number, status: string, reason?: string) => Promise<boolean>;
   clearError: () => void;
   clearCurrentBooking: () => void;
@@ -186,6 +187,20 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       return null;
     } catch (err: any) {
       console.error('Get booking by book_id error:', err);
+      return null;
+    }
+  },
+
+  // Get latest booking (fallback for when book_id is not available)
+  getLatestBooking: async (): Promise<Booking | null> => {
+    try {
+      const response = await apiClient.get('/booking/bookings/latest/');
+      if (response.data.success) {
+        return response.data.data;
+      }
+      return null;
+    } catch (err: any) {
+      console.error('Get latest booking error:', err);
       return null;
     }
   },

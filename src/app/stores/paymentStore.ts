@@ -32,23 +32,31 @@ export interface CreatePaymentRequest {
 }
 
 export interface ProcessCartPaymentRequest {
-  cart_id: number;
-  method?: string;
-  callback_url?: string;
-  redirect_url?: string;
+  cart_id: string; // Changed to string to match API
 }
 
-// PhonePe V2 Response Interface
+// PhonePe V2 Response Interface - Updated for new API
 export interface PaymentResponse {
   success: boolean;
-  payment_id: string;
-  merchant_transaction_id: string;
-  transaction_id: string;
-  amount: string;
-  currency: string;
-  payment_url: string;
-  status: string;
-  message?: string;
+  message: string;
+  data: {
+    payment_order: {
+      id: string;
+      merchant_order_id: string;
+      amount: number; // amount in paise
+      amount_in_rupees: number; // amount in rupees
+      cart_id: string;
+      status: string;
+      phonepe_payment_url: string;
+      created_at: string;
+    };
+  };
+  // Legacy fields for backward compatibility
+  payment_id?: string;
+  merchant_transaction_id?: string;
+  transaction_id?: string;
+  payment_url?: string;
+  currency?: string;
   timestamp?: string;
   cart_id?: number;
   // PhonePe V2 specific fields
@@ -110,14 +118,15 @@ export interface PaymentState {
   fetchPayments: () => Promise<void>;
   createPayment: (paymentData: CreatePaymentRequest) => Promise<PaymentResponse | null>;
   processCartPayment: (paymentData: ProcessCartPaymentRequest) => Promise<PaymentResponse | null>;
-  checkPaymentStatus: (paymentId: number) => Promise<Payment | null>;
+  checkPaymentStatus: (merchantOrderId: string) => Promise<Payment | null>;
+  checkCartPaymentStatus: (cartId: string) => Promise<any | null>;
   
   // PhonePe V2 Specific Actions
   handlePhonePeCallback: (callbackData: any) => Promise<PaymentBookingCheck | null>;
   verifyPaymentWithPhonePe: (merchantTransactionId: string) => Promise<Payment | null>;
   
   // Booking Integration
-  checkBookingStatus: (paymentId: number) => Promise<PaymentBookingCheck | null>;
+  checkBookingStatus: (merchantOrderId: string) => Promise<PaymentBookingCheck | null>;
   createBookingFromPayment: (paymentId: number) => Promise<PaymentBookingCheck | null>;
   
   // Testing & Development
@@ -141,7 +150,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
   fetchPayments: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.get('/payments/payments/');
+      const response = await apiClient.get('/payments/list/');
       const payments = response.data?.results || response.data || [];
       set({ 
         payments,
@@ -174,7 +183,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
         redirect_url: paymentData.redirect_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/redirect`
       };
       
-      const response = await apiClient.post('/payments/payments/', requestData);
+      const response = await apiClient.post('/payments/create/', requestData);
       const paymentResponse: PaymentResponse = response.data;
       
       set({ 
@@ -211,18 +220,18 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // PhonePe V2 Payment Processing
+  // PhonePe V2 Payment Processing - Updated for new API
   processCartPayment: async (paymentData: ProcessCartPaymentRequest): Promise<PaymentResponse | null> => {
     set({ loading: true, error: null });
     try {
       const requestData = {
-        cart_id: paymentData.cart_id,
-        method: paymentData.method || 'PHONEPE',
-        callback_url: paymentData.callback_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/callback`,
-        redirect_url: paymentData.redirect_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/redirect`
+        cart_id: paymentData.cart_id
       };
       
-      const response = await apiClient.post('/payments/payments/', requestData);
+      console.log('Making payment request to /payments/cart/ with data:', requestData);
+      const response = await apiClient.post('/payments/cart/', requestData);
+      console.log('Payment API response:', response.data);
+      
       const paymentResponse: PaymentResponse = response.data;
       
       set({ 
@@ -246,6 +255,8 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
             errorMessage = firstError;
           }
         }
+      } else if (err.response?.status === 404) {
+        errorMessage = 'Cart not found. Please refresh and try again.';
       } else if (err.response?.status === 401) {
         errorMessage = 'Please login to make payment';
       } else if (err.response?.status === 500) {
@@ -274,9 +285,9 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  checkPaymentStatus: async (paymentId: number): Promise<Payment | null> => {
+  checkPaymentStatus: async (merchantOrderId: string): Promise<Payment | null> => {
     try {
-      const response = await apiClient.get(`/payments/payments/${paymentId}/status/`);
+      const response = await apiClient.get(`/payments/status/${merchantOrderId}/`);
       return response.data;
     } catch (err: any) {
       console.error('Check payment status error:', err);
@@ -284,10 +295,21 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // PhonePe V2 Callback Handler
+  // Check cart payment status using cart_id
+  checkCartPaymentStatus: async (cartId: string): Promise<any | null> => {
+    try {
+      const response = await apiClient.get(`/payments/cart/status/${cartId}/`);
+      return response.data;
+    } catch (err: any) {
+      console.error('Check cart payment status error:', err);
+      return null;
+    }
+  },
+
+  // PhonePe V2 Callback Handler - Updated for new API
   handlePhonePeCallback: async (callbackData: any): Promise<PaymentBookingCheck | null> => {
     try {
-      const response = await apiClient.post('/payment/webhook/phonepe/v2/', callbackData);
+      const response = await apiClient.post('/payments/webhook/phonepe/', callbackData);
       return response.data;
     } catch (err: any) {
       console.error('Handle PhonePe callback error:', err);
@@ -308,10 +330,10 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // Booking Status and Creation
-  checkBookingStatus: async (paymentId: number): Promise<PaymentBookingCheck | null> => {
+  // Booking Status and Creation - Updated for new API
+  checkBookingStatus: async (merchantOrderId: string): Promise<PaymentBookingCheck | null> => {
     try {
-      const response = await apiClient.get(`/payments/payments/${paymentId}/status/`);
+      const response = await apiClient.get(`/payments/status/${merchantOrderId}/`);
       return response.data;
     } catch (err: any) {
       console.error('Check booking status error:', err);
@@ -329,10 +351,10 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // Testing method for development
-  simulatePaymentSuccess: async (paymentId: number): Promise<any> => {
+  // Testing method for development - Updated for new API
+  simulatePaymentSuccess: async (testData: any): Promise<any> => {
     try {
-      const response = await apiClient.post(`/payments/payments/${paymentId}/simulate-success/`);
+      const response = await apiClient.post('/payments/test/', testData);
       return response.data;
     } catch (err: any) {
       console.error('Simulate payment success error:', err);

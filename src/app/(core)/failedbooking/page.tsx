@@ -41,6 +41,11 @@ const BookingFailed = () => {
   const status = searchParams.get('status');
   const errorCode = searchParams.get('error_code') || searchParams.get('code');
   const message = searchParams.get('message');
+  
+  // Get merchant order ID from session storage or URL params
+  const merchantOrderId = searchParams.get('merchant_order_id') || 
+                          sessionStorage.getItem('merchant_order_id') || 
+                          null;
 
   useEffect(() => {
     const handleFailureCheck = async () => {
@@ -62,20 +67,27 @@ const BookingFailed = () => {
           }
         }
 
-        // If we have a payment_id, check payment status
-        if (paymentId) {
-          const payment = await checkPaymentStatus(parseInt(paymentId));
+        // If we have a merchant_order_id, check payment status with new API
+        if (merchantOrderId) {
+          const payment = await checkPaymentStatus(merchantOrderId);
           if (payment) {
             setPaymentData(payment);
             // If payment is actually successful, redirect to success page
             if (payment.status === 'SUCCESS') {
               toast.success('Payment was actually successful! Redirecting...');
               setTimeout(() => {
-                window.location.href = `/confirmbooking?payment_id=${paymentId}`;
+                window.location.href = `/confirmbooking?merchant_order_id=${merchantOrderId}`;
               }, 2000);
               return;
             }
           }
+        }
+        // Fallback: If we have a payment_id but no merchant_order_id (old flow)
+        else if (paymentId) {
+          // For backward compatibility, we'll try to find payment info
+          // This might not work with the new API structure
+          console.warn('Using legacy payment_id without merchant_order_id');
+          // You might want to implement a migration strategy here
         }
 
         // Restore cart items (in case they were cleared prematurely)
@@ -221,7 +233,7 @@ const BookingFailed = () => {
             <div className="absolute inset-0 bg-red-200 rounded-full scale-125 opacity-30 animate-ping"></div>
             <FaTimesCircle className="text-red-600 text-6xl md:text-7xl mx-auto relative z-10" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold  mb-4 bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
             Booking Failed
           </h1>
           <p className="text-gray-600 text-lg md:text-xl px-4 mb-6 max-w-2xl mx-auto">
