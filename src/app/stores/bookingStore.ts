@@ -69,6 +69,7 @@ export interface BookingState {
   fetchBookings: () => Promise<void>;
   createBooking: (bookingData: CreateBookingRequest) => Promise<Booking | null>;
   getBookingById: (id: number) => Promise<Booking | null>;
+  getBookingByBookId: (bookId: string) => Promise<Booking | null>;
   updateBookingStatus: (id: number, status: string, reason?: string) => Promise<boolean>;
   clearError: () => void;
   clearCurrentBooking: () => void;
@@ -172,6 +173,19 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       return response.data;
     } catch (err: any) {
       console.error('Get booking error:', err);
+      return null;
+    }
+  },
+
+  getBookingByBookId: async (bookId: string): Promise<Booking | null> => {
+    try {
+      const response = await apiClient.get(`/booking/bookings/by-id/${bookId}/`);
+      if (response.data.success) {
+        return response.data.data;
+      }
+      return null;
+    } catch (err: any) {
+      console.error('Get booking by book_id error:', err);
       return null;
     }
   },

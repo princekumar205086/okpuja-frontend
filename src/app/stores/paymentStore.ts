@@ -2,10 +2,13 @@ import { create } from 'zustand';
 import apiClient from '../apiService/globalApiconfig';
 import { toast } from 'react-hot-toast';
 
+// PhonePe V2 Payment Interfaces
 export interface Payment {
   id: number;
   transaction_id: string;
-  booking_id: string;
+  merchant_transaction_id: string;
+  booking_id?: string;
+  cart_id?: number;
   amount: string;
   currency: string;
   method: string;
@@ -13,11 +16,14 @@ export interface Payment {
   status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'REFUNDED' | 'PARTIAL_REFUND';
   status_display: string;
   created_at: string;
+  updated_at: string;
+  phonepe_payment_id?: string;
+  phonepe_transaction_id?: string;
 }
 
 export interface CreatePaymentRequest {
-  booking?: number; // Optional now - for old flow compatibility
-  cart_id?: number; // New field for payment-first flow
+  booking?: number; // Optional - for old flow compatibility
+  cart_id?: number; // Required for payment-first flow
   amount?: string; // Optional - backend calculates from cart
   currency?: string;
   method?: string;
@@ -28,12 +34,38 @@ export interface CreatePaymentRequest {
 export interface ProcessCartPaymentRequest {
   cart_id: number;
   method?: string;
+  callback_url?: string;
+  redirect_url?: string;
+}
+
+// PhonePe V2 Response Interface
+export interface PaymentResponse {
+  success: boolean;
+  payment_id: string;
+  merchant_transaction_id: string;
+  transaction_id: string;
+  amount: string;
+  currency: string;
+  payment_url: string;
+  status: string;
+  message?: string;
+  timestamp?: string;
+  cart_id?: number;
+  // PhonePe V2 specific fields
+  phonepe_payment_id?: string;
+  phonepe_merchant_id?: string;
+  phonepe_response?: {
+    code: string;
+    message: string;
+    data?: any;
+  };
 }
 
 export interface PaymentBookingCheck {
   success: boolean;
   payment_status: string;
   booking_created: boolean;
+  payment?: Payment;
   booking?: {
     id: number;
     book_id: string;
@@ -49,17 +81,23 @@ export interface PaymentBookingCheck {
   message?: string;
 }
 
-export interface PaymentResponse {
+// PhonePe V2 Callback Response
+export interface PhonePeCallbackResponse {
   success: boolean;
-  payment_id: string;
-  merchant_transaction_id: string;
-  transaction_id: string;
-  amount: string;
-  currency: string;
-  payment_url: string;
-  status: string;
-  timestamp?: string;
-  cart_id?: number; // Added for new flow
+  code: string;
+  message: string;
+  data: {
+    merchantId: string;
+    merchantTransactionId: string;
+    transactionId: string;
+    amount: number;
+    state: 'COMPLETED' | 'FAILED' | 'PENDING';
+    responseCode: string;
+    paymentInstrument: {
+      type: string;
+      [key: string]: any;
+    };
+  };
 }
 
 export interface PaymentState {
@@ -68,17 +106,28 @@ export interface PaymentState {
   error: string | null;
   currentPayment: PaymentResponse | null;
   
-  // Actions
+  // Core Payment Actions
   fetchPayments: () => Promise<void>;
   createPayment: (paymentData: CreatePaymentRequest) => Promise<PaymentResponse | null>;
-  processCartPayment: (paymentData: ProcessCartPaymentRequest) => Promise<PaymentResponse | null>; // New method
+  processCartPayment: (paymentData: ProcessCartPaymentRequest) => Promise<PaymentResponse | null>;
   checkPaymentStatus: (paymentId: number) => Promise<Payment | null>;
-  checkBookingStatus: (paymentId: number) => Promise<PaymentBookingCheck | null>; // New method
-  simulatePaymentSuccess: (paymentId: number) => Promise<any>; // Testing method
   
-  // Webhook retry mechanisms
+  // PhonePe V2 Specific Actions
+  handlePhonePeCallback: (callbackData: any) => Promise<PaymentBookingCheck | null>;
+  verifyPaymentWithPhonePe: (merchantTransactionId: string) => Promise<Payment | null>;
+  
+  // Booking Integration
+  checkBookingStatus: (paymentId: number) => Promise<PaymentBookingCheck | null>;
+  createBookingFromPayment: (paymentId: number) => Promise<PaymentBookingCheck | null>;
+  
+  // Testing & Development
+  simulatePaymentSuccess: (paymentId: number) => Promise<any>;
+  
+  // Webhook & Retry Mechanisms
   retryWebhookForPayment: (paymentId: number) => Promise<any>;
   checkAndProcessPayment: (paymentId: number) => Promise<PaymentBookingCheck | null>;
+  
+  // Utility
   clearError: () => void;
   clearCurrentPayment: () => void;
 }
@@ -93,7 +142,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await apiClient.get('/payments/payments/');
-      const payments = response.data || [];
+      const payments = response.data?.results || response.data || [];
       set({ 
         payments,
         loading: false,
@@ -121,8 +170,8 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
         ...paymentData,
         currency: paymentData.currency || 'INR',
         method: paymentData.method || 'PHONEPE',
-        callback_url: paymentData.callback_url || `${window.location.origin}/payment/callback`,
-        redirect_url: paymentData.redirect_url || `${window.location.origin}/payment/redirect`
+        callback_url: paymentData.callback_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/callback`,
+        redirect_url: paymentData.redirect_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/redirect`
       };
       
       const response = await apiClient.post('/payments/payments/', requestData);
@@ -162,16 +211,18 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // New method for payment-first flow
+  // PhonePe V2 Payment Processing
   processCartPayment: async (paymentData: ProcessCartPaymentRequest): Promise<PaymentResponse | null> => {
     set({ loading: true, error: null });
     try {
       const requestData = {
         cart_id: paymentData.cart_id,
-        method: paymentData.method || 'PHONEPE'
+        method: paymentData.method || 'PHONEPE',
+        callback_url: paymentData.callback_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/callback`,
+        redirect_url: paymentData.redirect_url || `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/redirect`
       };
       
-      const response = await apiClient.post('/payments/payments/process-cart/', requestData);
+      const response = await apiClient.post('/payments/payments/', requestData);
       const paymentResponse: PaymentResponse = response.data;
       
       set({ 
@@ -198,7 +249,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       } else if (err.response?.status === 401) {
         errorMessage = 'Please login to make payment';
       } else if (err.response?.status === 500) {
-        // Enhanced handling for production gateway issues
         const errorData = err.response.data;
         if (typeof errorData === 'string' && errorData.includes('Payment initiation failed')) {
           errorMessage = 'Payment gateway connection issue. Please try again or contact support if this persists.';
@@ -226,7 +276,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
 
   checkPaymentStatus: async (paymentId: number): Promise<Payment | null> => {
     try {
-      const response = await apiClient.get(`/payments/payments/${paymentId}/`);
+      const response = await apiClient.get(`/payments/payments/${paymentId}/status/`);
       return response.data;
     } catch (err: any) {
       console.error('Check payment status error:', err);
@@ -234,10 +284,34 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // New method to check if payment resulted in booking creation
+  // PhonePe V2 Callback Handler
+  handlePhonePeCallback: async (callbackData: any): Promise<PaymentBookingCheck | null> => {
+    try {
+      const response = await apiClient.post('/payment/webhook/phonepe/v2/', callbackData);
+      return response.data;
+    } catch (err: any) {
+      console.error('Handle PhonePe callback error:', err);
+      return null;
+    }
+  },
+
+  // Verify Payment with PhonePe V2
+  verifyPaymentWithPhonePe: async (merchantTransactionId: string): Promise<Payment | null> => {
+    try {
+      const response = await apiClient.post(`/payments/payments/verify/phonepe/`, {
+        merchant_transaction_id: merchantTransactionId
+      });
+      return response.data;
+    } catch (err: any) {
+      console.error('Verify payment with PhonePe error:', err);
+      return null;
+    }
+  },
+
+  // Booking Status and Creation
   checkBookingStatus: async (paymentId: number): Promise<PaymentBookingCheck | null> => {
     try {
-      const response = await apiClient.get(`/payments/payments/${paymentId}/check-booking/`);
+      const response = await apiClient.get(`/payments/payments/${paymentId}/status/`);
       return response.data;
     } catch (err: any) {
       console.error('Check booking status error:', err);
@@ -245,7 +319,17 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // Testing method to simulate payment success (for development)
+  createBookingFromPayment: async (paymentId: number): Promise<PaymentBookingCheck | null> => {
+    try {
+      const response = await apiClient.post(`/payments/payments/${paymentId}/create-booking/`);
+      return response.data;
+    } catch (err: any) {
+      console.error('Create booking from payment error:', err);
+      return null;
+    }
+  },
+
+  // Testing method for development
   simulatePaymentSuccess: async (paymentId: number): Promise<any> => {
     try {
       const response = await apiClient.post(`/payments/payments/${paymentId}/simulate-success/`);
@@ -256,7 +340,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // Webhook retry mechanism for failed webhooks
+  // Webhook retry mechanism
   retryWebhookForPayment: async (paymentId: number): Promise<any> => {
     try {
       const response = await apiClient.post(`/payments/payments/${paymentId}/retry-webhook/`);
@@ -267,7 +351,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // Check payment status and auto-create booking if payment is successful
+  // Check payment and process booking automatically
   checkAndProcessPayment: async (paymentId: number): Promise<PaymentBookingCheck | null> => {
     try {
       const response = await apiClient.post(`/payments/payments/${paymentId}/check-and-process/`);

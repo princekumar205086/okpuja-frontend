@@ -165,7 +165,9 @@ const CheckoutPage: React.FC = () => {
       console.log('Processing payment for cart:', firstCartItem.id);
       const paymentResponse = await processCartPayment({
         cart_id: firstCartItem.id,
-        method: 'PHONEPE'
+        method: 'PHONEPE',
+        callback_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/callback`,
+        redirect_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/payment/redirect`
       });
 
       console.log('Payment creation result:', paymentResponse);
