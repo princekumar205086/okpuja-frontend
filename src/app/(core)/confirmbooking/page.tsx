@@ -251,7 +251,18 @@ const BookingSuccess = () => {
     };
 
     fetchBookingData();
-  }, [bookingId, cartId, bookId, retryCount, hasAttemptedFetch, bookingDetails]);
+  }, [
+    bookingId,
+    cartId,
+    bookId,
+    retryCount,
+    hasAttemptedFetch,
+    bookingDetails,
+    getBookingByBookId,
+    getBookingByCartId,
+    getLatestBooking,
+    checkCartPaymentStatus
+  ]);
 
   const handleDownloadReceipt = () => {
     if (!bookingDetails) return;
