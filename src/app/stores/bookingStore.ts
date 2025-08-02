@@ -70,6 +70,7 @@ export interface BookingState {
   createBooking: (bookingData: CreateBookingRequest) => Promise<Booking | null>;
   getBookingById: (id: number) => Promise<Booking | null>;
   getBookingByBookId: (bookId: string) => Promise<Booking | null>;
+  getBookingByCartId: (cartId: string) => Promise<Booking | null>;
   getLatestBooking: () => Promise<Booking | null>;
   updateBookingStatus: (id: number, status: string, reason?: string) => Promise<boolean>;
   clearError: () => void;
@@ -187,6 +188,17 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       return null;
     } catch (err: any) {
       console.error('Get booking by book_id error:', err);
+      return null;
+    }
+  },
+
+  // Get booking by cart ID (NEW - matches current backend API)
+  getBookingByCartId: async (cartId: string): Promise<Booking | null> => {
+    try {
+      const response = await apiClient.get(`/booking/bookings/by-cart/${cartId}/`);
+      return response.data; // Direct response according to Swagger
+    } catch (err: any) {
+      console.error('Get booking by cart_id error:', err);
       return null;
     }
   },

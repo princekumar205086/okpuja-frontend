@@ -18,7 +18,7 @@ const ProductionDebugHelper: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access')}`,
         },
         body: JSON.stringify({
           cart_id: 1, // Test with a dummy cart ID
@@ -54,7 +54,7 @@ const ProductionDebugHelper: React.FC = () => {
       // Test a simple API call to see if the backend is reachable
       const response = await fetch('/api/auth/users/me/', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('access')}`,
         }
       });
 

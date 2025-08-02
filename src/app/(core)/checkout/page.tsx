@@ -184,6 +184,7 @@ const CheckoutPage: React.FC = () => {
         sessionStorage.setItem('checkout_session_id', sessionId);
         sessionStorage.setItem('payment_id', payment_order.id);
         sessionStorage.setItem('merchant_order_id', payment_order.merchant_order_id);
+        sessionStorage.setItem('cart_id', firstCartItem.cart_id); // Store cart_id for booking lookup
         
         // Redirect to payment gateway
         window.location.href = payment_order.phonepe_payment_url;

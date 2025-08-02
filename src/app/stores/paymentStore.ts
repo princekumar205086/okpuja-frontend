@@ -121,6 +121,9 @@ export interface PaymentState {
   checkPaymentStatus: (merchantOrderId: string) => Promise<Payment | null>;
   checkCartPaymentStatus: (cartId: string) => Promise<any | null>;
   
+  // NEW: Manual verification for sandbox/webhook issues
+  verifyAndCompletePayment: (cartId: string) => Promise<PaymentBookingCheck | null>;
+  
   // PhonePe V2 Specific Actions
   handlePhonePeCallback: (callbackData: any) => Promise<PaymentBookingCheck | null>;
   verifyPaymentWithPhonePe: (merchantTransactionId: string) => Promise<Payment | null>;
@@ -302,6 +305,19 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       return response.data;
     } catch (err: any) {
       console.error('Check cart payment status error:', err);
+      return null;
+    }
+  },
+
+  // NEW: Manual payment verification for sandbox/webhook issues
+  verifyAndCompletePayment: async (cartId: string): Promise<PaymentBookingCheck | null> => {
+    try {
+      const response = await apiClient.post('/payments/verify-and-complete/', {
+        cart_id: cartId
+      });
+      return response.data;
+    } catch (err: any) {
+      console.error('Verify and complete payment error:', err);
       return null;
     }
   },

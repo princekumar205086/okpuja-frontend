@@ -87,8 +87,8 @@ export interface CartItem {
 export interface AddToCartRequest {
   service_type: 'PUJA' | 'ASTROLOGY';
   puja_service?: number;
-  package?: number; // Changed from package_id to package to match your backend
-  astrology_service?: number; // Changed from astrology_service_id to astrology_service
+  package_id?: number; // Fixed to match specification: package_id not package
+  astrology_service?: number;
   selected_date: string;
   selected_time: string;
   promo_code?: string;

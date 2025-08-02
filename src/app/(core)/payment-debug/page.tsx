@@ -33,7 +33,7 @@ const PaymentDebugPage = () => {
 
   const fetchLatestPayment = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access');
       if (!token) {
         console.log('No access token found');
         return;
@@ -59,7 +59,7 @@ const PaymentDebugPage = () => {
 
   const fetchRecentBookings = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access');
       if (!token) {
         console.log('No access token found');
         return;

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from 'next/navigation';
 import {
   FaCheckCircle,
@@ -22,6 +22,7 @@ import {
   FaHome,
 } from "react-icons/fa";
 import { useBookingStore } from '../../stores/bookingStore';
+import { usePaymentStore } from '../../stores/paymentStore';
 import { jsPDF } from "jspdf";
 import Loader from "@/app/utils/loader";
 import Link from "next/link";
@@ -29,164 +30,228 @@ import { toast } from 'react-hot-toast';
 
 const BookingSuccess = () => {
   const searchParams = useSearchParams();
-  const { getBookingByBookId, getLatestBooking } = useBookingStore();
+  const { getBookingByBookId, getBookingByCartId, getLatestBooking } = useBookingStore();
+  const { checkCartPaymentStatus, verifyAndCompletePayment } = usePaymentStore();
   
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
+  const [showManualVerification, setShowManualVerification] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Get book_id from URL parameters - support multiple formats
-  const bookIdParam = searchParams.get('book_id');
+  // Memoize URL parameter parsing to prevent recalculation on every render
+  const urlParams = useMemo(() => {
+    if (typeof window === 'undefined') return { allKeys: [], emptyKeyValue: null };
+    const params = new URLSearchParams(window.location.search);
+    return {
+      allKeys: Array.from(params.keys()),
+      emptyKeyValue: params.get('') // Check for malformed ?=value
+    };
+  }, []);
+
+  // Get parameters from URL - support multiple formats
+  const bookIdParam = searchParams.get('book_id'); // Old format
+  const bookingIdParam = searchParams.get('booking_id'); // NEW format (BK-DAFB33E3)
+  const cartIdParam = searchParams.get('cart_id'); // Cart format
   const paymentIdParam = searchParams.get('payment_id');
   const statusParam = searchParams.get('status');
   const merchantOrderIdParam = searchParams.get('order_id') || searchParams.get('merchant_order_id');
   
-  // Also check if URL has malformed parameter like ?=BK-072D32E4
-  const urlParams = new URLSearchParams(window.location.search);
-  const allKeys = Array.from(urlParams.keys());
-  const emptyKeyValue = urlParams.get(''); // Check for malformed ?=value
-  
-  // Get merchant order ID from session storage or URL params for backup lookup
+  // Get merchant order ID and cart ID from session storage for backup lookup
   const sessionMerchantOrderId = typeof window !== 'undefined' ? 
     sessionStorage.getItem('merchant_order_id') : null;
+  const sessionCartId = typeof window !== 'undefined' ? 
+    sessionStorage.getItem('cart_id') : null;
   
-  // Determine the booking ID from various sources
-  const bookId = bookIdParam || emptyKeyValue || paymentIdParam;
+  // Determine the booking lookup method from various sources (NEW: prioritize booking_id)
+  const bookingId = bookingIdParam; // Direct booking ID (BK-format)
+  const bookId = bookIdParam || urlParams.emptyKeyValue || paymentIdParam; // Legacy formats
+  const cartId = cartIdParam || sessionCartId;
   const merchantOrderId = merchantOrderIdParam || sessionMerchantOrderId;
 
   useEffect(() => {
-    const fetchBookingDetails = async () => {
-      console.log('URL search params:', window.location.search);
-      console.log('All URL keys:', allKeys);
-      console.log('book_id param:', bookIdParam);
-      console.log('payment_id param:', paymentIdParam);
-      console.log('status param:', statusParam);
-      console.log('merchant_order_id param:', merchantOrderIdParam);
-      console.log('empty key value:', emptyKeyValue);
-      console.log('Final bookId:', bookId);
-      console.log('merchantOrderId:', merchantOrderId);
+    // Prevent multiple API calls if we already have booking details or have attempted fetch
+    if (bookingDetails || hasAttemptedFetch) {
+      console.log('Skipping fetch - already have data or attempted:', { 
+        hasBookingDetails: !!bookingDetails, 
+        hasAttemptedFetch 
+      });
+      return;
+    }
 
-      // If we have a booking ID, fetch it directly
-      if (bookId) {
+    const fetchBookingData = async () => {
+      console.log('🚀 Starting booking data fetch...');
+      console.log('URL search params:', window.location.search);
+      console.log('bookingId:', bookingId, 'cartId:', cartId, 'bookId:', bookId);
+
+      // Mark that we've attempted to fetch
+      setHasAttemptedFetch(true);
+      setLoading(true);
+      setError('');
+
+      // PRIORITY 1: Direct booking ID fetch (NEW FORMAT: booking_id=BK-DAFB33E3)
+      if (bookingId) {
+        console.log('✅ Priority 1: Fetching by booking_id:', bookingId);
         try {
-          setLoading(true);
-          setError('');
-          
-          console.log('Calling API with bookId:', bookId);
-          const booking = await getBookingByBookId(bookId);
-          console.log('API response:', booking);
-          
+          const booking = await getBookingByBookId(bookingId);
           if (booking) {
+            console.log('🎉 Booking found by booking_id:', booking);
             setBookingDetails(booking);
             toast.success('Booking details loaded successfully!');
-          } else {
-            setError(`Booking with ID "${bookId}" not found or could not be retrieved`);
-            toast.error('Failed to load booking details');
+            setLoading(false);
+            return; // Success!
           }
         } catch (error) {
-          console.error('Error fetching booking details:', error);
-          setError(`Error loading booking details: ${error instanceof Error ? error.message : 'Unknown error'}`);
-          toast.error('Error loading booking details');
-        } finally {
+          console.error('Error fetching booking by booking_id:', error);
+          setError(`Unable to find booking with ID: ${bookingId}`);
           setLoading(false);
+          return;
         }
-        return;
       }
 
-      // If we have status=completed but no booking ID, try to find booking using merchant order ID
-      if (statusParam === 'completed' && !bookId) {
+      // PRIORITY 2: Cart ID fetch (for payment completion flow)
+      if (cartId) {
+        console.log('✅ Priority 2: Checking cart-based booking...');
         try {
-          setLoading(true);
-          setError('Payment completed! Searching for your booking...');
-          
-          console.log('Payment completed - searching for booking...');
-          
-          // First, try to get booking from latest payment
-          const token = localStorage.getItem('access_token');
-          if (!token) {
-            setError('Please login to view your booking details');
+          const booking = await getBookingByCartId(cartId);
+          if (booking) {
+            console.log('🎉 Booking found by cart_id:', booking);
+            setBookingDetails(booking);
+            toast.success('Booking details loaded successfully!');
             setLoading(false);
-            return;
+            return; // Success!
+          } else {
+            console.log('No booking found for cart_id, checking payment status...');
           }
-
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/payments/latest/`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-          
-          if (response.ok) {
-            const latestPayment = await response.json();
-            console.log('Latest payment:', latestPayment);
-            
-            // If the latest payment has a booking, use it
-            if (latestPayment.booking) {
-              console.log('Found booking from latest payment:', latestPayment.booking.book_id);
-              setBookingDetails(latestPayment.booking);
-              toast.success('Booking found! Loading details...');
-              
-              // Update URL to include booking ID for future reference
-              const newUrl = `/confirmbooking?book_id=${latestPayment.booking.book_id}&order_id=${latestPayment.merchant_order_id || 'N/A'}`;
-              window.history.replaceState({}, '', newUrl);
-              setLoading(false);
-              return;
-            }
-            
-            // If payment exists but no booking, check if payment is successful
-            if (latestPayment.status === 'SUCCESS' || latestPayment.status === 'COMPLETED') {
-              // Payment successful but no booking - this indicates backend issue
-              setError('Payment was successful but booking was not created automatically. Please contact support with your payment ID: ' + (latestPayment.merchant_order_id || latestPayment.id));
-              toast.error('Booking creation failed - please contact support');
-              setLoading(false);
-              return;
-            }
-          }
-          
-          // Fallback: Try to get any recent successful booking using latest booking API
-          console.log('Trying latest booking API as final fallback...');
-          const latestBooking = await getLatestBooking();
-          if (latestBooking) {
-            console.log('Found latest booking:', latestBooking.book_id);
-            setBookingDetails(latestBooking);
-            toast.success('Found your latest booking!');
-            
-            // Update URL to include booking ID
-            const newUrl = `/confirmbooking?book_id=${latestBooking.book_id}`;
-            window.history.replaceState({}, '', newUrl);
-            setLoading(false);
-            return;
-          }
-          
-          // If we still haven't found a booking, show helpful error
-          setError('Payment completed successfully, but we need a moment to process your booking. Please refresh this page in a few seconds, or visit the debug page to find your booking.');
-          toast.error('Booking processing - please refresh in a moment');
-          
-          // Auto-refresh after 5 seconds
-          setTimeout(() => {
-            window.location.reload();
-          }, 5000);
-          
         } catch (error) {
-          console.error('Error finding booking after payment completion:', error);
-          setError('Payment completed but unable to retrieve booking details. Please visit the payment debug page or contact support.');
-          toast.error('Error retrieving booking details');
-        } finally {
-          setLoading(false);
+          console.error('Error fetching booking by cart_id:', error);
         }
-        return;
+
+        // If no booking found for cart_id, check payment status for auto-completion
+        console.log('⏳ Checking payment status for automatic completion...');
+        try {
+          const paymentStatus = await checkCartPaymentStatus(cartId);
+          console.log('Payment status response:', paymentStatus);
+
+          if (paymentStatus?.success && paymentStatus?.data) {
+            const { payment_status, booking_created, booking_id } = paymentStatus.data;
+
+            if (payment_status === 'SUCCESS' && booking_created) {
+              // Payment completed and booking created automatically
+              console.log('🎊 Payment completed automatically with booking!');
+              
+              // Try to get the booking details again
+              try {
+                const booking = await getBookingByCartId(cartId);
+                if (booking) {
+                  setBookingDetails(booking);
+                  toast.success('Payment completed and booking created automatically!');
+                  setLoading(false);
+                  return;
+                }
+              } catch (bookingError) {
+                console.log('Booking created but fetching details failed, will retry...');
+              }
+            } else if (payment_status === 'SUCCESS' && !booking_created) {
+              console.log('💰 Payment completed, booking creation in progress...');
+              setError('Payment successful! Our system is automatically creating your booking...');
+              
+              if (retryCount < 3) {
+                setTimeout(() => {
+                  setRetryCount(prev => prev + 1);
+                  setHasAttemptedFetch(false);
+                }, 5000);
+                setLoading(false);
+                return;
+              }
+            } else if (payment_status === 'INITIATED') {
+              console.log('🔄 Payment being processed by automatic system...');
+              setError('Payment received! Our automated system is verifying and completing your booking...');
+              
+              if (retryCount < 8) {
+                const delay = Math.min(30000 + (retryCount * 10000), 60000);
+                setTimeout(() => {
+                  setRetryCount(prev => prev + 1);
+                  setHasAttemptedFetch(false);
+                }, delay);
+                setLoading(false);
+                return;
+              } else {
+                setShowManualVerification(true);
+                setError('Our automatic verification is taking longer than expected. You can verify manually below.');
+                setLoading(false);
+                return;
+              }
+            } else if (payment_status === 'FAILED') {
+              setError(`Payment failed. Please try again or contact support.`);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (paymentError) {
+          console.error('Error checking payment status:', paymentError);
+          setError('Unable to check payment status. Our background system may still be processing.');
+          
+          if (retryCount < 3) {
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+              setHasAttemptedFetch(false);
+            }, 10000);
+          } else {
+            setShowManualVerification(true);
+          }
+          setLoading(false);
+          return;
+        }
       }
 
-      // If no booking ID and no status=completed, show error
-      if (!bookId) {
-        setError('Booking ID not found in URL. Please check the URL format.');
-        setLoading(false);
-        return;
+      // PRIORITY 3: Legacy book_id fetch (OLD FORMAT)
+      if (bookId) {
+        console.log('✅ Priority 3: Fetching by legacy book_id:', bookId);
+        try {
+          const booking = await getBookingByBookId(bookId);
+          if (booking) {
+            console.log('🎉 Booking found by legacy book_id:', booking);
+            setBookingDetails(booking);
+            toast.success('Booking details loaded successfully!');
+            setLoading(false);
+            return; // Success!
+          }
+        } catch (error) {
+          console.error('Error fetching booking by legacy book_id:', error);
+        }
       }
+
+      // PRIORITY 4: Final fallback - try latest booking
+      console.log('🔍 Priority 4: Trying latest booking as fallback...');
+      try {
+        const latestBooking = await getLatestBooking();
+        if (latestBooking) {
+          console.log('Found latest booking:', latestBooking);
+          setBookingDetails(latestBooking);
+          toast.success('Found your latest booking!');
+          setLoading(false);
+          return;
+        }
+      } catch (latestError) {
+        console.error('Error getting latest booking:', latestError);
+      }
+
+      // If we reach here, no booking was found
+      if (bookingId) {
+        setError(`Booking not found with ID: ${bookingId}. Please check the booking ID or contact support.`);
+      } else if (cartId) {
+        setError('🤖 Payment processing... Our automated system is running and will complete your payment within 1-2 minutes.');
+        setShowManualVerification(true);
+      } else {
+        setError('No booking ID or cart ID provided. Please check the URL or contact support.');
+      }
+      setLoading(false);
     };
 
-    fetchBookingDetails();
-  }, [bookId, merchantOrderId, statusParam, bookIdParam, paymentIdParam, merchantOrderIdParam, emptyKeyValue, allKeys, getBookingByBookId, getLatestBooking]);
+    fetchBookingData();
+  }, [bookingId, cartId, bookId, retryCount, hasAttemptedFetch, bookingDetails]);
 
   const handleDownloadReceipt = () => {
     if (!bookingDetails) return;
@@ -258,6 +323,50 @@ const BookingSuccess = () => {
     doc.save(`OKPUJA_Booking_${bookingDetails.book_id}.pdf`);
   };
 
+  // Manual verification handler - backup for automatic system
+  const handleManualVerification = async (paymentSuccessful: boolean) => {
+    if (!paymentSuccessful) {
+      setError('Payment was not successful. Please try again or contact support.');
+      setShowManualVerification(false);
+      return;
+    }
+
+    if (!cartId) {
+      setError('Cart ID is missing. Cannot verify payment.');
+      setShowManualVerification(false);
+      return;
+    }
+
+    setLoading(true);
+    setShowManualVerification(false);
+    setError('🔄 Manually verifying payment with our automatic completion system...');
+    
+    try {
+      // Note: This now works with the backend's automatic completion system
+      // The server will automatically verify with PhonePe and complete the payment
+      const result = await verifyAndCompletePayment(cartId);
+      
+      if (result?.success && result?.booking) {
+        console.log('✅ Manual verification successful, payment completed automatically:', result);
+        setBookingDetails(result.booking);
+        toast.success('Payment verified and completed automatically by our system!');
+        setError('');
+      } else if (result && 'already_processed' in result && result.booking) {
+        // Handle the case where payment was already processed
+        setBookingDetails(result.booking);
+        toast.success('Booking already exists!');
+        setError('');
+      } else {
+        setError(`Manual verification completed: ${result?.message || 'Our automatic background system will continue processing your payment.'}`);
+      }
+    } catch (error: any) {
+      console.error('Manual verification error:', error);
+      setError(`Manual verification failed: ${error.message || 'Network error'}. Don't worry - our automatic background system is still processing your payment.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleShareDetails = () => {
     if (!bookingDetails) return;
 
@@ -307,8 +416,9 @@ const BookingSuccess = () => {
           <div className="relative inline-block mb-4">
             <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
           </div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Booking Details</h2>
-          <p className="text-gray-500">Please wait while we fetch your booking information...</p>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">🤖 Automatic Processing</h2>
+          <p className="text-gray-500">Our automated system is verifying your payment and creating your booking...</p>
+          <p className="text-sm text-gray-400 mt-2">⏰ This usually takes 30-60 seconds</p>
         </div>
       </div>
     );
@@ -320,27 +430,71 @@ const BookingSuccess = () => {
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
           <FaQuestionCircle className="text-orange-600 text-6xl mb-6 mx-auto" />
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
-            Booking Not Found
+            {showManualVerification ? 'Payment Verification' : 'Booking Not Found'}
           </h1>
           <p className="text-gray-600 text-md md:text-lg mb-6">
-            {error || "We couldn't retrieve your booking details. Please check your booking ID or contact our support team."}
+            {showManualVerification 
+              ? '🤖 Our automatic system is processing your payment in the background. If you completed payment on PhonePe, you can verify manually as a backup:' 
+              : (error || "We couldn't retrieve your booking details. Our automatic system may still be processing your payment.")
+            }
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/"
-              className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors text-center font-medium"
-            >
-              <FaHome className="inline mr-2" />
-              Return Home
-            </Link>
-            <a
-              href="tel:+91XXXXXXXXXX"
-              className="bg-white border-2 border-orange-600 text-orange-600 px-6 py-3 rounded-lg hover:bg-orange-50 transition-colors text-center font-medium"
-            >
-              <FaPhoneAlt className="inline mr-2" />
-              Contact Support
-            </a>
-          </div>
+          
+          {showManualVerification ? (
+            // Manual Verification UI (Backup for Automatic System)
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200">
+                <p className="text-sm text-blue-700">
+                  <strong>💡 Note:</strong> Our automatic background service is running and will complete your payment within 1-2 minutes. Manual verification is just a backup option.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => handleManualVerification(true)}
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center"
+                >
+                  <FaCheckCircle className="mr-2" />
+                  ✅ Yes, Payment Successful (Manual Verify)
+                </button>
+                <button
+                  onClick={() => handleManualVerification(false)}
+                  className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center"
+                >
+                  <FaQuestionCircle className="mr-2" />
+                  ❌ No, Payment Failed
+                </button>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  🔄 Refresh & Check Auto-Completion
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                ⏰ <strong>Automatic Processing:</strong> Our system checks every 30-60 seconds. You can also refresh this page to check if payment was completed automatically.
+              </p>
+            </div>
+          ) : (
+            // Regular Error UI
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/"
+                className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors text-center font-medium"
+              >
+                <FaHome className="inline mr-2" />
+                Return Home
+              </Link>
+              <a
+                href="tel:+91XXXXXXXXXX"
+                className="bg-white border-2 border-orange-600 text-orange-600 px-6 py-3 rounded-lg hover:bg-orange-50 transition-colors text-center font-medium"
+              >
+                <FaPhoneAlt className="inline mr-2" />
+                Contact Support
+              </a>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -363,10 +517,10 @@ const BookingSuccess = () => {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-blue-700">
-                  <strong>Payment Completed!</strong> We're automatically searching for your booking details...
+                  <strong>🤖 Automatic Payment Processing!</strong> Our automated system is verifying and completing your payment with PhonePe...
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
-                  If this takes too long, visit <a href="/payment-debug" className="underline font-medium">payment debug page</a> to find your booking.
+                  Background service runs every 30-60 seconds. No action needed from you!
                 </p>
               </div>
             </div>
