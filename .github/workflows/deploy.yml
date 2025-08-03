@@ -27,10 +27,20 @@ jobs:
           git pull origin master
         "
 
-    - name: Install dependencies
+    - name: Check for dependency changes
+      id: dependency-check
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
           cd ${{ secrets.VPS_PATH }} && \
+          git diff --quiet HEAD^ HEAD -- package.json pnpm-lock.yaml || echo 'dependencies-changed' > /tmp/dependency-status
+        "
+
+    - name: Install dependencies if changed
+      if: ${{ steps.dependency-check.outputs.result == 'dependencies-changed' }}
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+          cd ${{ secrets.VPS_PATH }} && \
+          rm -rf node_modules && \
           pnpm install
         "
 
