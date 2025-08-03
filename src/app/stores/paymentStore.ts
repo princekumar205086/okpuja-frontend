@@ -33,6 +33,7 @@ export interface CreatePaymentRequest {
 
 export interface ProcessCartPaymentRequest {
   cart_id: string; // Changed to string to match API
+  address_id: number; // NEW: Required for payment initiation with address
 }
 
 // PhonePe V2 Response Interface - Updated for new API
@@ -223,12 +224,13 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
     }
   },
 
-  // PhonePe V2 Payment Processing - Updated for new API
+  // PhonePe V2 Payment Processing - Updated for new API with address_id
   processCartPayment: async (paymentData: ProcessCartPaymentRequest): Promise<PaymentResponse | null> => {
     set({ loading: true, error: null });
     try {
       const requestData = {
-        cart_id: paymentData.cart_id
+        cart_id: paymentData.cart_id,
+        address_id: paymentData.address_id // NEW: Include address_id in payment initiation
       };
       
       console.log('Making payment request to /payments/cart/ with data:', requestData);

@@ -28,7 +28,8 @@ const TestPaymentNew = () => {
       console.log('Testing payment with cart_id:', firstCartItem.cart_id);
       
       const result = await processCartPayment({
-        cart_id: firstCartItem.cart_id
+        cart_id: firstCartItem.cart_id,
+        address_id: 1 // Test address_id - you may need to use a valid address_id from your backend
       });
       
       console.log('Payment result:', result);

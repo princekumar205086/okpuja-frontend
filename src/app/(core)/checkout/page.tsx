@@ -163,8 +163,10 @@ const CheckoutPage: React.FC = () => {
       const firstCartItem = cartItems[0];
       
       console.log('Processing payment for cart_id:', firstCartItem.cart_id);
+      console.log('Selected address_id:', selectedAddress);
       const paymentResponse = await processCartPayment({
         cart_id: firstCartItem.cart_id, // Use cart_id instead of id
+        address_id: selectedAddress // NEW: Include selected address_id in payment initiation
       });
 
       console.log('Payment creation result:', paymentResponse);
