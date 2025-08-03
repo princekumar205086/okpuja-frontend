@@ -21,9 +21,11 @@ import {
   FaRupeeSign,
   FaHome,
 } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { useBookingStore } from '../../stores/bookingStore';
 import { usePaymentStore } from '../../stores/paymentStore';
-import { jsPDF } from "jspdf";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import ProfessionalInvoiceDocument from "@/app/components/ProfessionalInvoice";
 import Loader from "@/app/utils/loader";
 import Link from "next/link";
 import { toast } from 'react-hot-toast';
@@ -264,75 +266,7 @@ const BookingSuccess = () => {
     checkCartPaymentStatus
   ]);
 
-  const handleDownloadReceipt = () => {
-    if (!bookingDetails) return;
-
-    const doc = new jsPDF();
-
-    // Title
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("OKPUJA Service Booking Invoice", 20, 20);
-
-    // Booking Details Section
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(`Booking ID: ${bookingDetails.book_id}`, 20, 40);
-    doc.text(`Transaction ID: ${bookingDetails.payment?.transaction_id || 'N/A'}`, 20, 50);
-    doc.text(`Payment Status: ${bookingDetails.payment?.status || 'N/A'}`, 20, 60);
-
-    // Payment Information Section
-    doc.setFont("helvetica", "bold");
-    doc.text("Payment Information", 20, 75);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Amount Paid: ₹${bookingDetails.total_amount}`, 20, 85);
-    doc.text(`Payment Method: ${bookingDetails.payment?.payment_method || "PhonePe"}`, 20, 95);
-    doc.text(`Payment Date: ${new Date(bookingDetails.created_at).toLocaleString()}`, 20, 105);
-
-    // Service Details Section
-    doc.setFont("helvetica", "bold");
-    doc.text("Service Details", 20, 120);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Puja Name: ${bookingDetails.cart?.puja_service?.title || 'N/A'}`, 20, 130);
-    doc.text(`Date & Time: ${new Date(bookingDetails.selected_date).toLocaleDateString()} | ${bookingDetails.selected_time}`, 20, 140);
-    doc.text(`Location: ${bookingDetails.cart?.package?.location || 'N/A'}`, 20, 150);
-    doc.text(`Language: ${bookingDetails.cart?.package?.language || 'N/A'}`, 20, 160);
-    
-    if (bookingDetails.cart?.package?.description) {
-      const div = document.createElement("div");
-      div.innerHTML = bookingDetails.cart.package.description;
-      doc.text("Package Details:", 20, 170);
-      doc.text(div.textContent || "", 20, 180);
-    }
-
-    // User Information Section
-    doc.setFont("helvetica", "bold");
-    doc.text("User Information", 110, 75);
-    doc.setFont("helvetica", "normal");
-    doc.text(`User Name: ${bookingDetails.user?.username || bookingDetails.user?.email || 'N/A'}`, 110, 85);
-    doc.text(`Email: ${bookingDetails.user?.email || 'N/A'}`, 110, 95);
-    doc.text(`Mobile: ${bookingDetails.user?.phone || 'N/A'}`, 110, 105);
-
-    // Address Information Section
-    doc.setFont("helvetica", "bold");
-    doc.text("Address Information", 110, 120);
-    doc.setFont("helvetica", "normal");
-    const address = bookingDetails.address;
-    if (address) {
-      doc.text(`Address: ${address.address_line1 || ''}, ${address.city || ''}, ${address.state || ''}, ${address.country || ''}, ${address.postal_code || ''}`, 110, 130);
-      if (address.address_line2) {
-        doc.text(`Landmark: ${address.address_line2}`, 110, 140);
-      }
-    }
-
-    // Footer Section
-    doc.setFont("helvetica", "italic");
-    doc.text("Thank you for choosing OKPUJA!", 20, 220);
-    doc.text("For any inquiries, please contact our support team.", 20, 230);
-
-    // Save the file
-    doc.save(`OKPUJA_Booking_${bookingDetails.book_id}.pdf`);
-  };
+  // This function is replaced by PDFDownloadLink in the UI
 
   // Manual verification handler - backup for automatic system
   const handleManualVerification = async (paymentSuccessful: boolean) => {
@@ -822,13 +756,23 @@ const BookingSuccess = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-8">
-          <button
+          <PDFDownloadLink
+            document={<ProfessionalInvoiceDocument bookingDetails={bookingDetails} />}
+            fileName={`OKPUJA_Invoice_${bookingDetails.book_id}.pdf`}
             className="flex items-center justify-center gap-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white px-8 py-4 rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
-            onClick={handleDownloadReceipt}
           >
-            <FaDownload className="text-lg" />
-            Download Receipt
-          </button>
+            {({ blob, url, loading, error }) => (
+              loading ? 
+                <>
+                  <Loader2 className="animate-spin text-lg" />
+                  🔄 Generating Professional Invoice...
+                </> :
+                <>
+                  <FaDownload className="text-lg" />
+                  📄 Download Professional Invoice
+                </>
+            )}
+          </PDFDownloadLink>
           <button
             className="flex items-center justify-center gap-3 bg-white border-2 border-orange-600 text-orange-600 px-8 py-4 rounded-xl hover:bg-orange-50 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold"
             onClick={handleShareDetails}
