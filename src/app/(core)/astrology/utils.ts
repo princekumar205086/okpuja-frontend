@@ -21,7 +21,7 @@ export function filterServices(
 
     // Price range filter
     if (filters.price_range && filters.price_range !== '') {
-      const price = service.price;
+      const price = typeof service.price === 'string' ? parseFloat(service.price) : service.price;
       switch (filters.price_range) {
         case '0-500':
           if (price >= 500) return false;
@@ -79,8 +79,8 @@ export function sortServices(
         bValue = b.title.toLowerCase();
         break;
       case 'price':
-        aValue = a.price;
-        bValue = b.price;
+        aValue = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
+        bValue = typeof b.price === 'string' ? parseFloat(b.price) : b.price;
         break;
       case 'duration_minutes':
         aValue = a.duration_minutes;
@@ -127,13 +127,14 @@ export function paginateServices(
   };
 }
 
-export function formatPrice(price: number): string {
+export function formatPrice(price: string | number): string {
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(price);
+  }).format(numPrice);
 }
 
 export function formatDuration(minutes: number): string {

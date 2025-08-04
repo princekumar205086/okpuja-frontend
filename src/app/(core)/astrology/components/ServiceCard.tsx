@@ -7,6 +7,12 @@ import { AstrologyService } from '../types';
 import { formatPrice, formatDuration, getServiceTypeLabel, getServiceTypeIcon } from '../utils';
 import { encryptId } from '../encryption';
 
+// Helper function to strip HTML tags and limit text
+const stripHtmlAndLimit = (html: string, limit: number = 150): string => {
+  const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  return text.length > limit ? text.substring(0, limit) + '...' : text;
+};
+
 interface ServiceCardProps {
   service: AstrologyService;
   index: number;
@@ -33,7 +39,7 @@ export default function ServiceCard({ service, index }: ServiceCardProps) {
         <div className="relative h-48 sm:h-52 lg:h-48 bg-gray-200 overflow-hidden">
           {!imageError ? (
             <Image
-              src={service.image_card || service.image}
+              src={service.image_card_url || service.image_url || '/placeholder-service.jpg'}
               alt={service.title}
               fill
               className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
@@ -89,7 +95,7 @@ export default function ServiceCard({ service, index }: ServiceCardProps) {
 
           {/* Description */}
           <p className="text-gray-600 text-sm sm:text-base mb-4 line-clamp-3 flex-1">
-            {service.description}
+            {stripHtmlAndLimit(service.description, 120)}
           </p>
 
           {/* Price and Actions */}

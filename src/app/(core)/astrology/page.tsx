@@ -2,19 +2,20 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AstrologyService, AstrologyServiceFilters, PaginationParams } from './types';
-import { mockAstrologyServices, mockServiceTypes } from './mockData';
+import { astrologyApiService, filterServices, sortServices, paginateServices } from './apiService';
+import { SERVICE_TYPES } from './types';
 import SearchFilter from './components/SearchFilter';
 import ServiceTypeTabs from './components/ServiceTypeTabs';
 import SortOptions from './components/SortOptions';
 import ServiceCard from './components/ServiceCard';
 import Pagination from './components/Pagination';
 import { ServiceGridSkeleton } from './components/LoadingSkeletons';
-import { filterServices, sortServices, paginateServices } from './utils';
 import './astrology.css';
 
 export default function AstrologyServicePage() {
   const [services, setServices] = useState<AstrologyService[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<AstrologyServiceFilters>({
     search: '',
     service_type: '',
@@ -30,14 +31,20 @@ export default function AstrologyServicePage() {
     totalPages: 0
   });
 
-  // Simulate API loading
+  // Load services from API
   useEffect(() => {
     const loadServices = async () => {
       setLoading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setServices(mockAstrologyServices);
-      setLoading(false);
+      setError(null);
+      try {
+        const fetchedServices = await astrologyApiService.fetchActiveServices();
+        setServices(fetchedServices);
+      } catch (err) {
+        console.error('Error loading astrology services:', err);
+        setError('Failed to load astrology services. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadServices();
@@ -161,7 +168,7 @@ export default function AstrologyServicePage() {
 
       {/* Service Type Tabs - Mobile Optimized */}
       <ServiceTypeTabs
-        serviceTypes={mockServiceTypes}
+        serviceTypes={SERVICE_TYPES}
         activeServiceType={filters.service_type || ''}
         onServiceTypeChange={handleServiceTypeFilter}
       />
@@ -180,6 +187,26 @@ export default function AstrologyServicePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {loading ? (
           <ServiceGridSkeleton count={12} />
+        ) : error ? (
+          <div className="text-center py-12 sm:py-16">
+            <div className="max-w-md mx-auto px-4">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Services</h3>
+              <p className="text-gray-500 mb-4 text-sm sm:text-base">
+                {error}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
         ) : processedData.services.length > 0 ? (
           <>
             {/* Results Summary - Mobile */}

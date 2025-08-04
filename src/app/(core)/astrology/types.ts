@@ -1,12 +1,12 @@
 export interface AstrologyService {
-  id: string;
+  id: number;
   title: string;
   service_type: 'HOROSCOPE' | 'MATCHING' | 'PREDICTION' | 'REMEDIES' | 'GEMSTONE' | 'VAASTU';
   description: string;
-  image: string;
-  image_thumbnail: string;
-  image_card: string;
-  price: number;
+  image_url?: string;
+  image_thumbnail_url?: string;
+  image_card_url?: string;
+  price: string;
   duration_minutes: number;
   is_active: boolean;
   created_at: string;
@@ -14,9 +14,9 @@ export interface AstrologyService {
 }
 
 export interface AstrologyBooking {
-  id?: string;
+  id?: number;
   user?: string;
-  service: string;
+  service: number;
   language: string;
   preferred_date: string;
   preferred_time: string;

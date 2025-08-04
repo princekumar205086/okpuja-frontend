@@ -74,7 +74,7 @@ export default function BookingForm({
     if (!validateForm()) return;
 
     const bookingData: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at'> = {
-      service: serviceId,
+      service: parseInt(serviceId, 10),
       status: 'PENDING',
       ...formData
     };

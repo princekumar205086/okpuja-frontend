@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
 import { AstrologyService, AstrologyBooking } from '../types';
-import { mockAstrologyServices } from '../mockData';
+import { astrologyApiService } from '../apiService';
 import { formatPrice, formatDuration, getServiceTypeLabel, getServiceTypeIcon } from '../utils';
 import { ServiceDetailSkeleton } from '../components/LoadingSkeletons';
 import { decryptId } from '../encryption';
@@ -32,21 +32,25 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
       
       try {
         // Decrypt the ID
-        const serviceId = decryptId(resolvedParams.id);
-        if (!serviceId) {
+        const serviceIdString = decryptId(resolvedParams.id);
+        if (!serviceIdString) {
           router.push('/astrology');
           return;
         }
         
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const serviceId = parseInt(serviceIdString, 10);
+        if (isNaN(serviceId)) {
+          router.push('/astrology');
+          return;
+        }
         
-        const foundService = mockAstrologyServices.find(s => s.id === serviceId);
-        if (!foundService) {
+        // Fetch service from API
+        const fetchedService = await astrologyApiService.fetchServiceById(serviceId);
+        if (!fetchedService) {
           notFound();
         }
         
-        setService(foundService);
+        setService(fetchedService);
         
         // Check if URL has booking hash to auto-open booking form
         if (window.location.hash === '#booking') {
@@ -54,7 +58,7 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
         }
       } catch (error) {
         console.error('Error loading service:', error);
-        router.push('/astrology');
+        notFound();
       } finally {
         setLoading(false);
       }
@@ -124,7 +128,7 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
             <div className="relative h-64 sm:h-80 lg:h-96 rounded-lg overflow-hidden mb-6">
               {!imageError ? (
                 <Image
-                  src={service.image}
+                  src={service.image_url || '/placeholder-service.jpg'}
                   alt={service.title}
                   fill
                   className="object-cover"
@@ -176,9 +180,10 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
               </div>
 
               <div className="prose prose-gray max-w-none">
-                <p className="text-gray-700 leading-relaxed text-lg">
-                  {service.description}
-                </p>
+                <div 
+                  className="text-gray-700 leading-relaxed text-lg"
+                  dangerouslySetInnerHTML={{ __html: service.description }}
+                />
               </div>
             </div>
 
@@ -359,9 +364,9 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
             ) : (
               <div className="sticky top-6">
                 <BookingForm
-                  serviceId={service.id}
+                  serviceId={service.id.toString()}
                   serviceTitle={service.title}
-                  servicePrice={service.price}
+                  servicePrice={parseFloat(service.price)}
                   onBookingSubmit={handleBookingSubmit}
                   isLoading={bookingLoading}
                 />
