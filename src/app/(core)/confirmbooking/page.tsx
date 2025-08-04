@@ -24,6 +24,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useBookingStore } from '../../stores/bookingStore';
 import { usePaymentStore } from '../../stores/paymentStore';
+import { processAstrologyBookingAfterPayment } from '../astrology/bookingApiService';
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import ProfessionalInvoiceDocument from "@/app/components/ProfessionalInvoice";
 import Loader from "@/app/utils/loader";
@@ -100,6 +101,17 @@ const BookingSuccess = () => {
           if (booking) {
             console.log('🎉 Booking found by booking_id:', booking);
             setBookingDetails(booking);
+            
+            // Process astrology booking details if this is an astrology service
+            if (booking.cart?.service_type === 'ASTROLOGY') {
+              try {
+                await processAstrologyBookingAfterPayment(booking.id);
+              } catch (error) {
+                console.error('Error processing astrology booking details:', error);
+                // Don't fail the whole process for this
+              }
+            }
+            
             toast.success('Booking details loaded successfully!');
             setLoading(false);
             return; // Success!
@@ -120,6 +132,17 @@ const BookingSuccess = () => {
           if (booking) {
             console.log('🎉 Booking found by cart_id:', booking);
             setBookingDetails(booking);
+            
+            // Process astrology booking details if this is an astrology service
+            if (booking.cart?.service_type === 'ASTROLOGY') {
+              try {
+                await processAstrologyBookingAfterPayment(booking.id);
+              } catch (error) {
+                console.error('Error processing astrology booking details:', error);
+                // Don't fail the whole process for this
+              }
+            }
+            
             toast.success('Booking details loaded successfully!');
             setLoading(false);
             return; // Success!
@@ -148,6 +171,17 @@ const BookingSuccess = () => {
                 const booking = await getBookingByCartId(cartId);
                 if (booking) {
                   setBookingDetails(booking);
+                  
+                  // Process astrology booking details if this is an astrology service
+                  if (booking.cart?.service_type === 'ASTROLOGY') {
+                    try {
+                      await processAstrologyBookingAfterPayment(booking.id);
+                    } catch (error) {
+                      console.error('Error processing astrology booking details:', error);
+                      // Don't fail the whole process for this
+                    }
+                  }
+                  
                   toast.success('Payment completed and booking created automatically!');
                   setLoading(false);
                   return;
@@ -216,6 +250,17 @@ const BookingSuccess = () => {
           if (booking) {
             console.log('🎉 Booking found by legacy book_id:', booking);
             setBookingDetails(booking);
+            
+            // Process astrology booking details if this is an astrology service
+            if (booking.cart?.service_type === 'ASTROLOGY') {
+              try {
+                await processAstrologyBookingAfterPayment(booking.id);
+              } catch (error) {
+                console.error('Error processing astrology booking details:', error);
+                // Don't fail the whole process for this
+              }
+            }
+            
             toast.success('Booking details loaded successfully!');
             setLoading(false);
             return; // Success!
@@ -232,6 +277,17 @@ const BookingSuccess = () => {
         if (latestBooking) {
           console.log('Found latest booking:', latestBooking);
           setBookingDetails(latestBooking);
+          
+          // Process astrology booking details if this is an astrology service
+          if (latestBooking.cart?.service_type === 'ASTROLOGY') {
+            try {
+              await processAstrologyBookingAfterPayment(latestBooking.id);
+            } catch (error) {
+              console.error('Error processing astrology booking details:', error);
+              // Don't fail the whole process for this
+            }
+          }
+          
           toast.success('Found your latest booking!');
           setLoading(false);
           return;

@@ -313,12 +313,12 @@ export default function BookingForm({
               Processing...
             </div>
           ) : (
-            `Book Now - ₹${servicePrice.toLocaleString('en-IN')}`
+            `Proceed to Payment - ₹${servicePrice.toLocaleString('en-IN')}`
           )}
         </button>
 
         <p className="text-xs text-gray-500 text-center">
-          By booking, you agree to our terms and conditions. You will receive a confirmation email shortly.
+          You will be redirected to secure payment gateway. No payment will be charged until you confirm the booking.
         </p>
       </form>
     </div>

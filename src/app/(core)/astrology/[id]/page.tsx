@@ -3,12 +3,16 @@
 import React, { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { AstrologyService, AstrologyBooking } from '../types';
 import { astrologyApiService } from '../apiService';
 import { formatPrice, formatDuration, getServiceTypeLabel, getServiceTypeIcon } from '../utils';
 import { ServiceDetailSkeleton } from '../components/LoadingSkeletons';
 import { decryptId } from '../encryption';
+import { useCartStore } from '../../../stores/cartStore';
+import { useAuthStore } from '../../../stores/authStore';
+import { toast } from 'react-hot-toast';
 import BookingForm from './BookingForm';
 
 interface ServiceDetailPageProps {
@@ -20,6 +24,8 @@ interface ServiceDetailPageProps {
 export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const { user } = useAuthStore();
+  const { addToCart, loading: cartLoading } = useCartStore();
   const [service, setService] = useState<AstrologyService | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -68,28 +74,55 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
   }, [resolvedParams.id, router]);
 
   const handleBookingSubmit = async (bookingData: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!user) {
+      toast.error('Please login to book a service');
+      router.push('/login');
+      return;
+    }
+
+    if (!service) {
+      toast.error('Service not found');
+      return;
+    }
+
     setBookingLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Add to cart with astrology service
+      const cartItem = {
+        service_type: 'ASTROLOGY' as const,
+        astrology_service: service.id,
+        selected_date: bookingData.preferred_date,
+        selected_time: bookingData.preferred_time,
+      };
+
+      const success = await addToCart(cartItem);
       
-      console.log('Booking submitted:', bookingData);
-      
-      // In a real app, you would:
-      // 1. Send booking data to your API
-      // 2. Handle payment processing
-      // 3. Send confirmation emails
-      // 4. Redirect to confirmation page
-      
-      alert('Booking submitted successfully! You will receive a confirmation email shortly.');
-      setShowBookingForm(false);
-      
-      // Remove hash from URL
-      window.history.replaceState(null, '', window.location.pathname);
+      if (success) {
+        toast.success('Service added to cart! Redirecting to checkout...');
+        
+        // Store additional booking details in session storage for checkout
+        const additionalDetails = {
+          language: bookingData.language,
+          birth_place: bookingData.birth_place,
+          birth_date: bookingData.birth_date,
+          birth_time: bookingData.birth_time,
+          gender: bookingData.gender,
+          questions: bookingData.questions,
+          contact_email: bookingData.contact_email,
+          contact_phone: bookingData.contact_phone
+        };
+        
+        sessionStorage.setItem('astrology_booking_details', JSON.stringify(additionalDetails));
+        
+        // Redirect to checkout
+        setTimeout(() => {
+          router.push('/checkout');
+        }, 1500);
+      }
     } catch (error) {
       console.error('Booking failed:', error);
-      alert('Failed to submit booking. Please try again.');
+      toast.error('Failed to add service to cart. Please try again.');
     } finally {
       setBookingLoading(false);
     }
