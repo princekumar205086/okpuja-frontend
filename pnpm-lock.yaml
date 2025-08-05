@@ -107,6 +107,9 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.1.0
+      react-confetti:
+        specifier: ^6.4.0
+        version: 6.4.0(react@19.1.0)
       react-countup:
         specifier: ^6.5.3
         version: 6.5.3(react@19.1.0)
@@ -3099,6 +3102,12 @@ packages:
   raf@3.4.1:
     resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==, tarball: https://registry.npmjs.org/raf/-/raf-3.4.1.tgz}
 
+  react-confetti@6.4.0:
+    resolution: {integrity: sha512-5MdGUcqxrTU26I2EU7ltkWPwxvucQTuqMm8dUz72z2YMqTD6s9vMcDUysk7n9jnC+lXuCPeJJ7Knf98VEYE9Rg==, tarball: https://registry.npmjs.org/react-confetti/-/react-confetti-6.4.0.tgz}
+    engines: {node: '>=16'}
+    peerDependencies:
+      react: ^16.3.0 || ^17.0.1 || ^18.0.0 || ^19.0.0
+
   react-countup@6.5.3:
     resolution: {integrity: sha512-udnqVQitxC7QWADSPDOxVWULkLvKUWrDapn5i53HE4DPRVgs+Y5rr4bo25qEl8jSh+0l2cToJgGMx+clxPM3+w==, tarball: https://registry.npmjs.org/react-countup/-/react-countup-6.5.3.tgz}
     peerDependencies:
@@ -3507,6 +3516,9 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==, tarball: https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz}
+
+  tween-functions@1.2.0:
+    resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==, tarball: https://registry.npmjs.org/tween-functions/-/tween-functions-1.2.0.tgz}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==, tarball: https://registry.npmjs.org/type-check/-/type-check-0.4.0.tgz}
@@ -6887,6 +6899,11 @@ snapshots:
       performance-now: 2.1.0
     optional: true
 
+  react-confetti@6.4.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      tween-functions: 1.2.0
+
   react-countup@6.5.3(react@19.1.0):
     dependencies:
       countup.js: 2.9.0
@@ -7367,6 +7384,8 @@ snapshots:
       strip-bom: 3.0.0
 
   tslib@2.8.1: {}
+
+  tween-functions@1.2.0: {}
 
   type-check@0.4.0:
     dependencies:

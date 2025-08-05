@@ -7,7 +7,7 @@ interface BookingFormProps {
   serviceId: string;
   serviceTitle: string;
   servicePrice: number;
-  onBookingSubmit: (booking: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at'>) => void;
+  onBookingSubmit: (booking: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at' | 'status'> & { redirect_url: string }) => void;
   isLoading?: boolean;
 }
 
@@ -73,9 +73,12 @@ export default function BookingForm({
     
     if (!validateForm()) return;
 
-    const bookingData: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at'> = {
+    // Get current origin for redirect URL
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+    const bookingData = {
       service: parseInt(serviceId, 10),
-      status: 'PENDING',
+      redirect_url: origin,
       ...formData
     };
 

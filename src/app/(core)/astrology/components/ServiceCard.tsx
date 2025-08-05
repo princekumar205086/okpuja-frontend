@@ -89,54 +89,15 @@ export default function ServiceCard({ service, index }: ServiceCardProps) {
         {/* Service Content */}
         <div className="p-4 sm:p-5 flex-1 flex flex-col">
           {/* Title */}
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors text-center">
             {service.title}
           </h3>
 
-          {/* Description */}
-          <p className="text-gray-600 text-sm sm:text-base mb-4 line-clamp-3 flex-1">
-            {stripHtmlAndLimit(service.description, 120)}
-          </p>
+          {/* No Description */}
+          
+          {/* No Price or Book Button */}
 
-          {/* Price and Actions */}
-          <div className="flex items-center justify-between mt-auto">
-            <div>
-              <div className="text-2xl sm:text-3xl font-bold text-orange-600">
-                {formatPrice(service.price)}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-500">
-                per session
-              </div>
-            </div>
-
-            <div className="flex flex-col space-y-2">
-              {/* Book Now Button */}
-              <button
-                onClick={handleBookNow}
-                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm font-medium"
-              >
-                Book & Pay
-              </button>
-            </div>
-          </div>
-
-          {/* Features */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-              <span className="flex items-center">
-                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Expert Astrologer
-              </span>
-              <span className="flex items-center">
-                <svg className="w-4 h-4 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Instant Booking
-              </span>
-            </div>
-          </div>
+          {/* No features section */}
         </div>
       </div>
     </Link>

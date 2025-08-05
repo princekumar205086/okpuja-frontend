@@ -1,5 +1,5 @@
 import apiClient from '../../apiService/globalApiconfig';
-import { AstrologyService, AstrologyServiceFilters } from './types';
+import { AstrologyService, AstrologyServiceFilters, AstrologyBooking } from './types';
 
 export interface AstrologyServiceListResponse {
   results: AstrologyService[];
@@ -69,6 +69,50 @@ export const astrologyApiService = {
   // Get active services only
   fetchActiveServices: async (params: Omit<FetchServicesParams, 'is_active'> = {}): Promise<AstrologyService[]> => {
     return astrologyApiService.fetchServices({ ...params, is_active: true });
+  },
+
+  // Book a service with payment integration
+  bookServiceWithPayment: async (bookingData: Omit<AstrologyBooking, 'id'> & { redirect_url: string }): Promise<{
+    payment: {
+      payment_url: string;
+      merchant_order_id: string;
+      amount: number;
+      amount_in_rupees: string;
+    };
+    service: AstrologyService;
+    redirect_urls: {
+      success: string;
+      failure: string;
+    }
+  }> => {
+    try {
+      const response = await apiClient.post('/astrology/bookings/book-with-payment/', bookingData);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to create booking');
+      }
+      
+      return response.data.data;
+    } catch (error) {
+      console.error('Error creating astrology booking with payment:', error);
+      throw error;
+    }
+  },
+
+  // Get booking details by astro_book_id (for confirmation page)
+  getBookingByAstroBookId: async (astroBookId: string) => {
+    try {
+      const response = await apiClient.get(`/astrology/bookings/confirmation/?astro_book_id=${astroBookId}`);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch booking details');
+      }
+      
+      return response.data.data.booking;
+    } catch (error) {
+      console.error('Error fetching booking details:', error);
+      throw error;
+    }
   }
 };
 

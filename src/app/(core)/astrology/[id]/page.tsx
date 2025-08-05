@@ -12,6 +12,7 @@ import { ServiceDetailSkeleton } from '../components/LoadingSkeletons';
 import { decryptId } from '../encryption';
 import { useCartStore } from '../../../stores/cartStore';
 import { useAuthStore } from '../../../stores/authStore';
+import { useAstrologyServiceStore } from '../../../stores/astrologyServiceStore';
 import { toast } from 'react-hot-toast';
 import BookingForm from './BookingForm';
 
@@ -26,6 +27,7 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
   const router = useRouter();
   const { user } = useAuthStore();
   const { addToCart, loading: cartLoading } = useCartStore();
+  const { getServiceById } = useAstrologyServiceStore();
   const [service, setService] = useState<AstrologyService | null>(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -50,8 +52,14 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
           return;
         }
         
-        // Fetch service from API
-        const fetchedService = await astrologyApiService.fetchServiceById(serviceId);
+        // First try to get service from store
+        let fetchedService = await getServiceById(serviceId);
+        
+        // If not in store, fetch from API directly
+        if (!fetchedService) {
+          fetchedService = await astrologyApiService.fetchServiceById(serviceId);
+        }
+        
         if (!fetchedService) {
           notFound();
         }
@@ -61,6 +69,14 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
         // Check if URL has booking hash to auto-open booking form
         if (window.location.hash === '#booking') {
           setShowBookingForm(true);
+          
+          // Use a slight delay to ensure the component has been rendered
+          setTimeout(() => {
+            const bookingElement = document.getElementById('booking-section');
+            if (bookingElement) {
+              bookingElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 500);
         }
       } catch (error) {
         console.error('Error loading service:', error);
@@ -71,9 +87,20 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
     };
 
     loadService();
-  }, [resolvedParams.id, router]);
+  }, [resolvedParams.id, router, getServiceById]);
+  
+  // Handle smooth scrolling to booking form when "Book Now" is clicked
+  const scrollToBookingForm = () => {
+    setShowBookingForm(true);
+    setTimeout(() => {
+      const bookingElement = document.getElementById('booking-section');
+      if (bookingElement) {
+        bookingElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
 
-  const handleBookingSubmit = async (bookingData: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleBookingSubmit = async (bookingData: Omit<AstrologyBooking, 'id' | 'created_at' | 'updated_at' | 'status'> & { redirect_url: string }) => {
     if (!user) {
       toast.error('Please login to book a service');
       router.push('/login');
@@ -88,41 +115,23 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
     setBookingLoading(true);
     
     try {
-      // Add to cart with astrology service
-      const cartItem = {
-        service_type: 'ASTROLOGY' as const,
-        astrology_service: service.id,
-        selected_date: bookingData.preferred_date,
-        selected_time: bookingData.preferred_time,
+      // Add required status property before sending to API
+      const bookingDataWithStatus = {
+        ...bookingData,
+        status: 'CONFIRMED' as const, // Use a valid status value
       };
-
-      const success = await addToCart(cartItem);
+      // Direct booking with payment integration using the new API
+      const response = await astrologyApiService.bookServiceWithPayment(bookingDataWithStatus);
       
-      if (success) {
-        toast.success('Service added to cart! Redirecting to checkout...');
-        
-        // Store additional booking details in session storage for checkout
-        const additionalDetails = {
-          language: bookingData.language,
-          birth_place: bookingData.birth_place,
-          birth_date: bookingData.birth_date,
-          birth_time: bookingData.birth_time,
-          gender: bookingData.gender,
-          questions: bookingData.questions,
-          contact_email: bookingData.contact_email,
-          contact_phone: bookingData.contact_phone
-        };
-        
-        sessionStorage.setItem('astrology_booking_details', JSON.stringify(additionalDetails));
-        
-        // Redirect to checkout
-        setTimeout(() => {
-          router.push('/checkout');
-        }, 1500);
+      if (response && response.payment && response.payment.payment_url) {
+        // Redirect to payment gateway
+        window.location.href = response.payment.payment_url;
+      } else {
+        toast.error('Failed to initiate payment. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Booking failed:', error);
-      toast.error('Failed to add service to cart. Please try again.');
+      toast.error(error.response?.data?.message || 'Failed to process booking. Please try again.');
     } finally {
       setBookingLoading(false);
     }
@@ -158,24 +167,28 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Service Image */}
-            <div className="relative h-64 sm:h-80 lg:h-96 rounded-lg overflow-hidden mb-6">
-              {!imageError ? (
-                <Image
-                  src={service.image_url || '/placeholder-service.jpg'}
-                  alt={service.title}
-                  fill
-                  className="object-cover"
-                  priority
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100">
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">{getServiceTypeIcon(service.service_type)}</div>
-                    <p className="text-gray-600 text-lg">{service.title}</p>
+            <div className="relative mb-6">
+              <div className="aspect-[16/9] rounded-lg overflow-hidden">
+                {!imageError ? (
+                  <Image
+                    src={service.image_url || '/placeholder-service.jpg'}
+                    alt={service.title}
+                    fill
+                    className="object-contain bg-gray-50"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
+                    priority
+                    quality={100}
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100">
+                    <div className="text-center">
+                      <div className="text-6xl mb-4">{getServiceTypeIcon(service.service_type)}</div>
+                      <p className="text-gray-600 text-lg">{service.title}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Service Info */}
@@ -352,7 +365,7 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
                 </div>
 
                 <button
-                  onClick={() => setShowBookingForm(true)}
+                  onClick={scrollToBookingForm}
                   className="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 transition-colors font-medium text-lg"
                 >
                   Book Now
@@ -395,7 +408,7 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
                 </div>
               </div>
             ) : (
-              <div className="sticky top-6">
+              <div id="booking-section" className="sticky top-6">
                 <BookingForm
                   serviceId={service.id.toString()}
                   serviceTitle={service.title}

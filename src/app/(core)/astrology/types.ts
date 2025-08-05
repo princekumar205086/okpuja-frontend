@@ -25,11 +25,13 @@ export interface AstrologyBooking {
   birth_time: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
   questions?: string;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'; // PENDING removed as per backend changes
   contact_email: string;
   contact_phone: string;
   created_at?: string;
   updated_at?: string;
+  astro_book_id?: string; // New field from backend
+  payment_id?: string; // New field from backend
 }
 
 export interface AstrologyServiceFilters {
