@@ -35,26 +35,7 @@ const AstrologyBookingManagementPage = () => {
     loadBookings();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [bookings, filterParams]);
-
-  const loadBookings = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await fetchAstrologyBookings();
-      setBookings(data);
-      setFilteredBookings(data);
-    } catch (err) {
-      console.error('Failed to fetch bookings:', err);
-      setError('Failed to load bookings. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const applyFilters = () => {
+  const applyFilters = React.useCallback(() => {
     let filtered = [...bookings];
 
     // Filter by status
@@ -94,7 +75,27 @@ const AstrologyBookingManagementPage = () => {
     }
 
     setFilteredBookings(filtered);
+  }, [bookings, filterParams]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  const loadBookings = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await fetchAstrologyBookings();
+      setBookings(data);
+      setFilteredBookings(data);
+    } catch (err) {
+      console.error('Failed to fetch bookings:', err);
+      setError('Failed to load bookings. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
 
   const handleFilterChange = (newFilters: any) => {
     setFilterParams(prev => ({

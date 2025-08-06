@@ -27,29 +27,6 @@ const UserAstrologyBookingPage = () => {
     }
   });
 
-  useEffect(() => {
-    loadBookings();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [bookings, filters]);
-
-  const loadBookings = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await fetchUserBookings();
-      setBookings(data);
-      setFilteredBookings(data);
-    } catch (err) {
-      console.error('Failed to fetch bookings:', err);
-      setError('Failed to load your bookings. Please try again later.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const applyFilters = () => {
     let filtered = [...bookings];
 
@@ -78,6 +55,31 @@ const UserAstrologyBookingPage = () => {
     }
 
     setFilteredBookings(filtered);
+  };
+
+  useEffect(() => {
+    loadBookings();
+  }, []);
+
+  // Removed duplicate applyFilters declaration to fix redeclaration error.
+
+  useEffect(() => {
+    applyFilters();
+  }, [bookings, filters, applyFilters]);
+
+  const loadBookings = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await fetchUserBookings();
+      setBookings(data);
+      setFilteredBookings(data);
+    } catch (err) {
+      console.error('Failed to fetch bookings:', err);
+      setError('Failed to load your bookings. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleViewDetails = (booking: UserAstrologyBooking) => {
