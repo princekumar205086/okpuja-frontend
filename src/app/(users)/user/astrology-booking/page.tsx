@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import BookingCard from './components/BookingCard';
 import BookingDetails from './components/BookingDetails';
@@ -27,7 +27,8 @@ const UserAstrologyBookingPage = () => {
     }
   });
 
-  const applyFilters = () => {
+
+  const applyFilters = useCallback(() => {
     let filtered = [...bookings];
 
     // Filter by status
@@ -55,7 +56,7 @@ const UserAstrologyBookingPage = () => {
     }
 
     setFilteredBookings(filtered);
-  };
+  }, [bookings, filters]);
 
   useEffect(() => {
     loadBookings();
