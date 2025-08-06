@@ -20,6 +20,7 @@
     "@mui/x-charts": "^8.7.0",
     "@mui/x-data-grid": "^8.7.0",
     "@mui/x-data-grid-generator": "^8.7.0",
+    "@mui/x-date-pickers": "^8.9.2",
     "@react-pdf/renderer": "^4.3.0",
     "@tiptap/extension-character-count": "^2.26.0",
     "@tiptap/extension-placeholder": "^2.26.0",
