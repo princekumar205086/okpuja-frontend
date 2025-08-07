@@ -5,765 +5,584 @@ import {
   Box,
   Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Chip,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Drawer,
-  Divider,
+  Chip,
+  Tabs,
+  Tab,
+  CircularProgress,
   Alert,
-  Snackbar,
-  useTheme,
-  useMediaQuery,
-  Avatar,
   Badge,
   Stack,
-  Switch,
-  FormControlLabel
 } from '@mui/material';
-import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar, GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import {
   Dashboard,
-  CalendarToday,
-  FilterList,
-  Search,
-  Refresh,
-  Download,
-  Upload,
-  Add,
-  Edit,
-  Delete,
-  Visibility,
-  CheckCircle,
-  Cancel,
-  Schedule,
-  Payment,
-  Person,
-  Phone,
-  Email,
-  LocationOn,
-  AttachMoney,
-  TrendingUp,
-  TrendingDown,
-  NotificationsActive,
-  Assignment,
-  Group,
-  Analytics,
-  Settings,
-  MoreVert,
-  Send,
-  Print,
-  Share,
-  Star,
-  Warning,
-  Info,
-  Error as ErrorIcon,
-  Pending,
-  EventBusy,
-  AccessTime,
-  MonetizationOn,
-  PersonAdd,
-  Business,
-  Home,
+  Psychology,
+  Groups,
   Spa,
-  Psychology
+  Refresh,
+  FilterList,
+  CalendarToday,
+  Download,
+  Visibility,
+  Edit,
 } from '@mui/icons-material';
 import { toast } from 'react-hot-toast';
 
+// Import store
+import { useAdminBookingStore } from '../../../stores/adminBookingStore';
+
 // Import custom components
 import AdminDashboardStats from './components/AdminDashboardStats';
-import BookingCalendarView from './components/BookingCalendarView';
-import AdvancedFilters from './components/AdvancedFilters';
-import BookingDetailsModal from './components/BookingDetailsModal';
-import BulkActionsToolbar from './components/BulkActionsToolbar';
-import StaffAssignmentModal from './components/StaffAssignmentModal';
-import PaymentManagementModal from './components/PaymentManagementModal';
-import CustomerCommunicationModal from './components/CustomerCommunicationModal';
-import ReportsAndAnalytics from './components/ReportsAndAnalytics';
 
-// Types
-interface Booking {
-  id: string;
-  bookingId: string;
-  serviceType: 'puja' | 'astrology';
-  serviceName: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  amount: number;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'refunded';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  scheduledDate: string;
-  scheduledTime: string;
-  assignedStaff?: string;
-  location?: string;
-  createdAt: string;
-  lastUpdated: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  notes?: string;
-  customerRating?: number;
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-interface FilterState {
-  serviceType: string;
-  status: string;
-  paymentStatus: string;
-  dateRange: [Date | null, Date | null];
-  assignedStaff: string;
-  location: string;
-  priority: string;
-  amountRange: [number, number];
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`booking-tabpanel-${index}`}
+      aria-labelledby={`booking-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
 }
 
-interface DashboardStats {
-  totalBookings: number;
-  pendingBookings: number;
-  confirmedBookings: number;
-  completedBookings: number;
-  cancelledBookings: number;
-  totalRevenue: number;
-  pendingPayments: number;
-  avgBookingValue: number;
-  customerSatisfaction: number;
-  staffUtilization: number;
-  conversionRate: number;
-  growthRate: number;
+function a11yProps(index: number) {
+  return {
+    id: `booking-tab-${index}`,
+    'aria-controls': `booking-tabpanel-${index}`,
+  };
 }
 
 const AdminBookingsPage: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
-  // State management
-  const [viewMode, setViewMode] = useState<'dashboard' | 'table' | 'calendar'>('dashboard');
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Filter and search state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<FilterState>({
-    serviceType: '',
-    status: '',
-    paymentStatus: '',
-    dateRange: [null, null],
-    assignedStaff: '',
-    location: '',
-    priority: '',
-    amountRange: [0, 100000]
-  });
-  
-  // Modal and drawer state
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
-  const [staffAssignmentOpen, setStaffAssignmentOpen] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [communicationModalOpen, setCommunicationModalOpen] = useState(false);
-  const [reportsModalOpen, setReportsModalOpen] = useState(false);
-  
-  // Bulk actions state
-  const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
-  const [bulkActionDialogOpen, setBulkActionDialogOpen] = useState(false);
-  const [bulkAction, setBulkAction] = useState<string>('');
-  
-  // Helper function to get selection count
-  const getSelectionCount = (selection: any): number => {
-    if (Array.isArray(selection)) {
-      return selection.length;
-    }
-    return 0;
-  };
-  
-  // Helper function to clear selection
-  const clearSelection = () => setSelectedRows([]);
-  
-  // Dashboard stats
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
-    totalBookings: 0,
-    pendingBookings: 0,
-    confirmedBookings: 0,
-    completedBookings: 0,
-    cancelledBookings: 0,
-    totalRevenue: 0,
-    pendingPayments: 0,
-    avgBookingValue: 0,
-    customerSatisfaction: 0,
-    staffUtilization: 0,
-    conversionRate: 0,
-    growthRate: 0
-  });
-  
-  // Notification state
-  const [notifications, setNotifications] = useState<Array<{
-    id: string;
-    type: 'info' | 'warning' | 'error' | 'success';
-    message: string;
-    timestamp: Date;
-  }>>([]);
+  // Zustand store
+  const {
+    // Data
+    astrologyBookings,
+    regularBookings,
+    pujaBookings,
+    astrologyDashboard,
+    regularDashboard,
+    pujaDashboard,
+    
+    // UI states
+    loading,
+    error,
+    
+    // Actions
+    fetchAstrologyBookings,
+    fetchRegularBookings,
+    fetchPujaBookings,
+    fetchAllBookings,
+    fetchAstrologyDashboard,
+    fetchRegularDashboard,
+    fetchPujaDashboard,
+    clearError,
+  } = useAdminBookingStore();
 
-  // Data fetching
+  // Local state
+  const [tabValue, setTabValue] = useState(0);
+
   useEffect(() => {
-    fetchBookings();
-    fetchDashboardStats();
-    setupRealTimeUpdates();
-  }, []);
+    // Load initial data
+    handleRefreshData();
+    
+    // Load dashboards
+    fetchAstrologyDashboard();
+    fetchRegularDashboard();
+    fetchPujaDashboard();
+  }, [fetchAstrologyDashboard, fetchRegularDashboard, fetchPujaDashboard]);
 
-  // Apply filters
   useEffect(() => {
-    applyFilters();
-  }, [bookings, searchTerm, filters]);
+    // Clear error after 5 seconds
+    if (error) {
+      const timer = setTimeout(() => {
+        clearError();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
 
-  const fetchBookings = async () => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const handleRefreshData = async () => {
     try {
-      setLoading(true);
-      // TODO: Replace with actual API call
-      const mockBookings: Booking[] = [
-        {
-          id: '1',
-          bookingId: 'BK-001',
-          serviceType: 'puja',
-          serviceName: 'Grah Shanti Puja',
-          customerName: 'Rajesh Kumar',
-          customerEmail: 'rajesh@example.com',
-          customerPhone: '+91-9876543210',
-          amount: 5000,
-          status: 'confirmed',
-          paymentStatus: 'paid',
-          scheduledDate: '2025-08-10',
-          scheduledTime: '10:00',
-          assignedStaff: 'Pandit Sharma',
-          location: 'Customer Home',
-          createdAt: '2025-08-07T10:00:00Z',
-          lastUpdated: '2025-08-07T11:00:00Z',
-          priority: 'medium',
-          customerRating: 4.5
-        }
-        // Add more mock data as needed
-      ];
-      
-      setBookings(mockBookings);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch bookings');
-      toast.error('Failed to load bookings');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDashboardStats = async () => {
-    try {
-      // TODO: Replace with actual API call
-      const mockStats: DashboardStats = {
-        totalBookings: 1250,
-        pendingBookings: 45,
-        confirmedBookings: 120,
-        completedBookings: 980,
-        cancelledBookings: 105,
-        totalRevenue: 2450000,
-        pendingPayments: 125000,
-        avgBookingValue: 3500,
-        customerSatisfaction: 4.7,
-        staffUtilization: 85,
-        conversionRate: 78,
-        growthRate: 12.5
-      };
-      
-      setDashboardStats(mockStats);
-    } catch (err) {
-      console.error('Failed to fetch dashboard stats:', err);
-    }
-  };
-
-  const setupRealTimeUpdates = () => {
-    // TODO: Setup WebSocket connection for real-time updates
-    const interval = setInterval(() => {
-      // Simulate real-time updates
-      fetchBookings();
-    }, 30000); // Update every 30 seconds
-
-    return () => clearInterval(interval);
-  };
-
-  const applyFilters = () => {
-    let filtered = [...bookings];
-
-    // Search filter
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(booking =>
-        booking.bookingId.toLowerCase().includes(searchLower) ||
-        booking.customerName.toLowerCase().includes(searchLower) ||
-        booking.customerEmail.toLowerCase().includes(searchLower) ||
-        booking.serviceName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Apply individual filters
-    if (filters.serviceType) {
-      filtered = filtered.filter(booking => booking.serviceType === filters.serviceType);
-    }
-    if (filters.status) {
-      filtered = filtered.filter(booking => booking.status === filters.status);
-    }
-    if (filters.paymentStatus) {
-      filtered = filtered.filter(booking => booking.paymentStatus === filters.paymentStatus);
-    }
-    if (filters.assignedStaff) {
-      filtered = filtered.filter(booking => booking.assignedStaff === filters.assignedStaff);
-    }
-    if (filters.location) {
-      filtered = filtered.filter(booking => booking.location?.includes(filters.location));
-    }
-    if (filters.priority) {
-      filtered = filtered.filter(booking => booking.priority === filters.priority);
-    }
-
-    // Date range filter
-    if (filters.dateRange[0] && filters.dateRange[1]) {
-      filtered = filtered.filter(booking => {
-        const bookingDate = new Date(booking.scheduledDate);
-        return bookingDate >= filters.dateRange[0]! && bookingDate <= filters.dateRange[1]!;
-      });
-    }
-
-    // Amount range filter
-    filtered = filtered.filter(booking =>
-      booking.amount >= filters.amountRange[0] && booking.amount <= filters.amountRange[1]
-    );
-
-    setFilteredBookings(filtered);
-  };
-
-  const handleBookingAction = async (action: string, bookingId: string) => {
-    try {
-      // TODO: Implement actual API calls
-      switch (action) {
-        case 'confirm':
-          await updateBookingStatus(bookingId, 'confirmed');
-          toast.success('Booking confirmed successfully');
-          break;
-        case 'cancel':
-          await updateBookingStatus(bookingId, 'cancelled');
-          toast.success('Booking cancelled successfully');
-          break;
-        case 'complete':
-          await updateBookingStatus(bookingId, 'completed');
-          toast.success('Booking marked as completed');
-          break;
-        default:
-          break;
+      if (tabValue === 0) {
+        await fetchAllBookings();
+      } else if (tabValue === 1) {
+        await fetchAstrologyBookings();
+      } else if (tabValue === 2) {
+        await fetchRegularBookings();
+      } else if (tabValue === 3) {
+        await fetchPujaBookings();
       }
-      fetchBookings();
-    } catch (err) {
-      toast.error('Failed to update booking');
+    } catch (error) {
+      console.error('Error refreshing data:', error);
     }
   };
 
-  const updateBookingStatus = async (bookingId: string, status: string) => {
-    // TODO: Implement actual API call
-    return new Promise(resolve => setTimeout(resolve, 1000));
+  // Column definitions for different booking types
+  const getAstrologyColumns = (): GridColDef[] => [
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 80,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant="body2" fontWeight="bold">
+          #{params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'astro_book_id',
+      headerName: 'Booking ID',
+      width: 150,
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip 
+          label={params.value || 'N/A'} 
+          size="small" 
+          variant="outlined" 
+          color="primary"
+        />
+      ),
+    },
+    {
+      field: 'customer_name',
+      headerName: 'Customer',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row;
+        return (
+          <Box>
+            <Typography variant="body2" fontWeight="medium">
+              {row.customer_name || row.user?.username || 'Unknown'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.contact_email || row.user?.email || 'No email'}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'service',
+      headerName: 'Service',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        const service = params.row.service;
+        return (
+          <Box>
+            <Typography variant="body2" fontWeight="medium">
+              {service?.title || 'Unknown Service'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              ₹{service?.price || '0'}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      renderCell: (params: GridRenderCellParams) => {
+        const status = params.value;
+        const getStatusColor = (status: string) => {
+          switch (status?.toUpperCase()) {
+            case 'PENDING': return 'warning';
+            case 'CONFIRMED': return 'info';
+            case 'COMPLETED': return 'success';
+            case 'CANCELLED': return 'error';
+            case 'REJECTED': return 'error';
+            default: return 'default';
+          }
+        };
+        
+        return (
+          <Chip
+            label={status || 'Unknown'}
+            size="small"
+            color={getStatusColor(status) as any}
+            variant="filled"
+          />
+        );
+      },
+    },
+    {
+      field: 'created_at',
+      headerName: 'Created',
+      width: 130,
+      renderCell: (params: GridRenderCellParams) => {
+        const date = params.value ? new Date(params.value).toLocaleDateString() : 'N/A';
+        return <Typography variant="body2">{date}</Typography>;
+      },
+    },
+  ];
+
+  const getRegularColumns = (): GridColDef[] => [
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 80,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant="body2" fontWeight="bold">
+          #{params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'book_id',
+      headerName: 'Booking ID',
+      width: 150,
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip 
+          label={params.value || 'N/A'} 
+          size="small" 
+          variant="outlined" 
+          color="primary"
+        />
+      ),
+    },
+    {
+      field: 'user_name',
+      headerName: 'Customer',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row;
+        return (
+          <Box>
+            <Typography variant="body2" fontWeight="medium">
+              {row.user_name || 'Unknown'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.user_email || 'No email'}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'total_amount',
+      headerName: 'Amount',
+      width: 120,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant="body2" fontWeight="medium">
+          ₹{params.value || 0}
+        </Typography>
+      ),
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      renderCell: (params: GridRenderCellParams) => {
+        const status = params.value;
+        const getStatusColor = (status: string) => {
+          switch (status?.toUpperCase()) {
+            case 'PENDING': return 'warning';
+            case 'CONFIRMED': return 'info';
+            case 'COMPLETED': return 'success';
+            case 'CANCELLED': return 'error';
+            case 'FAILED': return 'error';
+            case 'REJECTED': return 'error';
+            default: return 'default';
+          }
+        };
+        
+        return (
+          <Chip
+            label={params.row.status_display || status || 'Unknown'}
+            size="small"
+            color={getStatusColor(status) as any}
+            variant="filled"
+          />
+        );
+      },
+    },
+  ];
+
+  const getPujaColumns = (): GridColDef[] => [
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 80,
+      renderCell: (params: GridRenderCellParams) => (
+        <Typography variant="body2" fontWeight="bold">
+          #{params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: 'service_title',
+      headerName: 'Service',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row;
+        return (
+          <Box>
+            <Typography variant="body2" fontWeight="medium">
+              {row.service_title || 'Unknown Service'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.category_name || 'N/A'}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'contact_name',
+      headerName: 'Customer',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row;
+        return (
+          <Box>
+            <Typography variant="body2" fontWeight="medium">
+              {row.contact_name || 'Unknown'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {row.contact_email || 'No email'}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      renderCell: (params: GridRenderCellParams) => {
+        const status = params.value;
+        const getStatusColor = (status: string) => {
+          switch (status?.toUpperCase()) {
+            case 'PENDING': return 'warning';
+            case 'CONFIRMED': return 'info';
+            case 'COMPLETED': return 'success';
+            case 'CANCELLED': return 'error';
+            case 'FAILED': return 'error';
+            default: return 'default';
+          }
+        };
+        
+        return (
+          <Chip
+            label={params.row.status_display || status || 'Unknown'}
+            size="small"
+            color={getStatusColor(status) as any}
+            variant="filled"
+          />
+        );
+      },
+    },
+  ];
+
+  // Get current data based on tab
+  const getCurrentData = () => {
+    switch (tabValue) {
+      case 1: // Astrology
+        return astrologyBookings?.map(booking => ({ ...booking, id: booking.id.toString() })) || [];
+      case 2: // Regular
+        return regularBookings?.map(booking => ({ ...booking, id: booking.id.toString() })) || [];
+      case 3: // Puja
+        return pujaBookings?.map(booking => ({ ...booking, id: booking.id.toString() })) || [];
+      default: // All
+        const allBookings = [
+          ...(astrologyBookings?.map(b => ({ ...b, id: `astro-${b.id}`, type: 'astrology' })) || []),
+          ...(regularBookings?.map(b => ({ ...b, id: `regular-${b.id}`, type: 'regular' })) || []),
+          ...(pujaBookings?.map(b => ({ ...b, id: `puja-${b.id}`, type: 'puja' })) || []),
+        ];
+        return allBookings;
+    }
   };
 
-  const handleBulkAction = async () => {
-    try {
-      setLoading(true);
-      // TODO: Implement bulk actions
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success(`Bulk action "${bulkAction}" applied to ${getSelectionCount(selectedRows)} bookings`);
-      setBulkActionDialogOpen(false);
-      clearSelection();
-      fetchBookings();
-    } catch (err) {
-      toast.error('Failed to apply bulk action');
-    } finally {
-      setLoading(false);
+  const getCurrentColumns = () => {
+    switch (tabValue) {
+      case 1: // Astrology
+        return getAstrologyColumns();
+      case 2: // Regular
+        return getRegularColumns();
+      case 3: // Puja
+        return getPujaColumns();
+      default: // All - simplified columns
+        return [
+          { field: 'id', headerName: 'ID', width: 120 },
+          { field: 'type', headerName: 'Type', width: 100 },
+          { field: 'status', headerName: 'Status', width: 120 },
+          { field: 'created_at', headerName: 'Created', width: 130 },
+        ];
     }
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'grey.50', minHeight: '100vh', p: 3 }}>
+    <Box sx={{ width: '100%', height: '100%', p: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
-          Booking Management System
+        <Typography variant="h4" fontWeight="bold" gutterBottom>
+          Booking Management
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Comprehensive booking management for all services
+        <Typography variant="body2" color="text.secondary">
+          Manage all your bookings, track performance, and handle customer requests
         </Typography>
       </Box>
 
-      {/* View Mode Toggle */}
+      {/* Error Display */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Action Bar */}
       <Paper sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center" flexWrap="wrap">
+          <Stack direction="row" spacing={2}>
             <Button
-              variant={viewMode === 'dashboard' ? 'contained' : 'outlined'}
-              startIcon={<Dashboard />}
-              onClick={() => setViewMode('dashboard')}
-              size="small"
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefreshData}
+              disabled={loading}
             >
-              Dashboard
+              Refresh
             </Button>
             <Button
-              variant={viewMode === 'table' ? 'contained' : 'outlined'}
+              variant="outlined"
               startIcon={<FilterList />}
-              onClick={() => setViewMode('table')}
-              size="small"
             >
-              Table View
+              Filters
             </Button>
             <Button
-              variant={viewMode === 'calendar' ? 'contained' : 'outlined'}
+              variant="outlined"
               startIcon={<CalendarToday />}
-              onClick={() => setViewMode('calendar')}
-              size="small"
             >
               Calendar
             </Button>
-          </Box>
+          </Stack>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TextField
-              size="small"
-              placeholder="Search bookings..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />
-              }}
-              sx={{ minWidth: 250 }}
-            />
-            <IconButton onClick={() => setFiltersDrawerOpen(true)} color="primary">
-              <FilterList />
-            </IconButton>
-            <IconButton onClick={fetchBookings} color="primary">
-              <Refresh />
-            </IconButton>
+          <Stack direction="row" spacing={2}>
             <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => {/* TODO: Open new booking modal */}}
+              variant="outlined"
+              startIcon={<Download />}
             >
-              New Booking
+              Export
             </Button>
-          </Box>
-        </Box>
+          </Stack>
+        </Stack>
       </Paper>
 
+      {/* Dashboard Stats */}
+      <AdminDashboardStats 
+        astrologyData={astrologyDashboard}
+        regularData={regularDashboard}
+        pujaData={pujaDashboard}
+        loading={loading}
+      />
+
       {/* Main Content */}
-      {viewMode === 'dashboard' && (
-        <AdminDashboardStats stats={dashboardStats} />
-      )}
-
-      {viewMode === 'table' && (
-        <Box>
-          {/* Bulk Actions Toolbar */}
-          {getSelectionCount(selectedRows) > 0 && (
-            <BulkActionsToolbar
-              selectedCount={getSelectionCount(selectedRows)}
-              onBulkAction={(action) => {
-                setBulkAction(action);
-                setBulkActionDialogOpen(true);
-              }}
+      <Paper sx={{ flexGrow: 1, mt: 3 }}>
+        {/* Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange} 
+            aria-label="booking tabs"
+            sx={{ px: 2 }}
+          >
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Dashboard />
+                  All Bookings
+                </Box>
+              } 
+              {...a11yProps(0)} 
             />
-          )}
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Psychology />
+                  Astrology
+                  <Badge badgeContent={astrologyBookings?.length || 0} color="primary" />
+                </Box>
+              } 
+              {...a11yProps(1)} 
+            />
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Groups />
+                  Regular Services
+                  <Badge badgeContent={regularBookings?.length || 0} color="primary" />
+                </Box>
+              } 
+              {...a11yProps(2)} 
+            />
+            <Tab 
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Spa />
+                  Puja Services
+                  <Badge badgeContent={pujaBookings?.length || 0} color="primary" />
+                </Box>
+              } 
+              {...a11yProps(3)} 
+            />
+          </Tabs>
+        </Box>
 
-          {/* Data Grid */}
-          <Paper sx={{ height: 600, width: '100%' }}>
+        {/* Data Grid */}
+        <TabPanel value={tabValue} index={tabValue}>
+          {loading ? (
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: 400 
+            }}>
+              <CircularProgress />
+            </Box>
+          ) : (
             <DataGrid
-              rows={filteredBookings}
-              columns={getColumns()}
-              loading={loading}
-              checkboxSelection
-              disableRowSelectionOnClick
-              rowSelectionModel={selectedRows as unknown as GridRowSelectionModel}
-              onRowSelectionModelChange={(newSelection) => {
-                setSelectedRows(Array.isArray(newSelection) ? newSelection : []);
-              }}
+              rows={getCurrentData()}
+              columns={getCurrentColumns()}
               slots={{ toolbar: GridToolbar }}
               slotProps={{
                 toolbar: {
                   showQuickFilter: true,
-                  quickFilterProps: { debounceMs: 500 }
-                }
+                  quickFilterProps: { debounceMs: 500 },
+                },
               }}
               sx={{
-                border: 'none',
-                '& .MuiDataGrid-columnHeaders': {
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  fontSize: '0.875rem',
-                  fontWeight: 600
+                height: 600,
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: 'action.hover',
                 },
-                '& .MuiDataGrid-cell': {
-                  borderBottom: '1px solid',
-                  borderColor: 'grey.200'
-                }
               }}
+              initialState={{
+                pagination: {
+                  paginationModel: { page: 0, pageSize: 25 },
+                },
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
             />
-          </Paper>
-        </Box>
-      )}
-
-      {viewMode === 'calendar' && (
-        <BookingCalendarView
-          bookings={filteredBookings}
-          onBookingClick={(booking) => {
-            setSelectedBooking(booking);
-            setDetailsModalOpen(true);
-          }}
-        />
-      )}
-
-      {/* Modals and Drawers */}
-      <AdvancedFilters
-        open={filtersDrawerOpen}
-        onClose={() => setFiltersDrawerOpen(false)}
-        filters={filters}
-        onFiltersChange={setFilters}
-      />
-
-      <BookingDetailsModal
-        open={detailsModalOpen}
-        onClose={() => setDetailsModalOpen(false)}
-        booking={selectedBooking}
-        onAction={handleBookingAction}
-      />
-
-      {/* Bulk Action Confirmation Dialog */}
-      <Dialog open={bulkActionDialogOpen} onClose={() => setBulkActionDialogOpen(false)}>
-        <DialogTitle>Confirm Bulk Action</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to apply "{bulkAction}" to {getSelectionCount(selectedRows)} selected bookings?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setBulkActionDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleBulkAction} variant="contained" color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Error Snackbar */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={() => setError(null)} severity="error">
-          {error}
-        </Alert>
-      </Snackbar>
+          )}
+        </TabPanel>
+      </Paper>
     </Box>
   );
-
-  // DataGrid columns configuration
-  function getColumns(): GridColDef[] {
-    return [
-      {
-        field: 'bookingId',
-        headerName: 'Booking ID',
-        width: 120,
-        renderCell: (params: GridRenderCellParams) => (
-          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
-            {params.value}
-          </Typography>
-        )
-      },
-      {
-        field: 'serviceType',
-        headerName: 'Service',
-        width: 100,
-        renderCell: (params: GridRenderCellParams) => (
-          <Chip
-            icon={params.value === 'puja' ? <Spa /> : <Psychology />}
-            label={params.value === 'puja' ? 'Puja' : 'Astrology'}
-            size="small"
-            color={params.value === 'puja' ? 'primary' : 'secondary'}
-          />
-        )
-      },
-      {
-        field: 'serviceName',
-        headerName: 'Service Name',
-        flex: 1,
-        minWidth: 200
-      },
-      {
-        field: 'customerName',
-        headerName: 'Customer',
-        width: 150,
-        renderCell: (params: GridRenderCellParams) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
-              {params.row.customerName.charAt(0)}
-            </Avatar>
-            <Typography variant="body2">{params.value}</Typography>
-          </Box>
-        )
-      },
-      {
-        field: 'amount',
-        headerName: 'Amount',
-        width: 120,
-        renderCell: (params: GridRenderCellParams) => (
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            ₹{params.value.toLocaleString()}
-          </Typography>
-        )
-      },
-      {
-        field: 'status',
-        headerName: 'Status',
-        width: 130,
-        renderCell: (params: GridRenderCellParams) => {
-          const statusColors = {
-            pending: 'warning',
-            confirmed: 'info',
-            in_progress: 'primary',
-            completed: 'success',
-            cancelled: 'error',
-            refunded: 'default'
-          };
-          return (
-            <Chip
-              label={params.value.replace('_', ' ')}
-              size="small"
-              color={statusColors[params.value as keyof typeof statusColors] as any}
-            />
-          );
-        }
-      },
-      {
-        field: 'paymentStatus',
-        headerName: 'Payment',
-        width: 120,
-        renderCell: (params: GridRenderCellParams) => {
-          const paymentColors = {
-            pending: 'warning',
-            paid: 'success',
-            failed: 'error',
-            refunded: 'default'
-          };
-          return (
-            <Chip
-              label={params.value}
-              size="small"
-              color={paymentColors[params.value as keyof typeof paymentColors] as any}
-            />
-          );
-        }
-      },
-      {
-        field: 'scheduledDate',
-        headerName: 'Scheduled',
-        width: 150,
-        renderCell: (params: GridRenderCellParams) => (
-          <Box>
-            <Typography variant="body2">
-              {new Date(params.value).toLocaleDateString()}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {params.row.scheduledTime}
-            </Typography>
-          </Box>
-        )
-      },
-      {
-        field: 'priority',
-        headerName: 'Priority',
-        width: 100,
-        renderCell: (params: GridRenderCellParams) => {
-          const priorityColors = {
-            low: 'success',
-            medium: 'warning',
-            high: 'error',
-            urgent: 'error'
-          };
-          return (
-            <Chip
-              label={params.value}
-              size="small"
-              color={priorityColors[params.value as keyof typeof priorityColors] as any}
-              variant={params.value === 'urgent' ? 'filled' : 'outlined'}
-            />
-          );
-        }
-      },
-      {
-        field: 'actions',
-        headerName: 'Actions',
-        width: 200,
-        sortable: false,
-        filterable: false,
-        renderCell: (params: GridRenderCellParams) => (
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Tooltip title="View Details">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setSelectedBooking(params.row);
-                  setDetailsModalOpen(true);
-                }}
-              >
-                <Visibility />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Edit">
-              <IconButton size="small">
-                <Edit />
-              </IconButton>
-            </Tooltip>
-            {params.row.status === 'pending' && (
-              <Tooltip title="Confirm">
-                <IconButton
-                  size="small"
-                  color="success"
-                  onClick={() => handleBookingAction('confirm', params.row.id)}
-                >
-                  <CheckCircle />
-                </IconButton>
-              </Tooltip>
-            )}
-            {['pending', 'confirmed'].includes(params.row.status) && (
-              <Tooltip title="Cancel">
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleBookingAction('cancel', params.row.id)}
-                >
-                  <Cancel />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title="More Options">
-              <IconButton size="small">
-                <MoreVert />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )
-      }
-    ];
-  }
 };
 
 export default AdminBookingsPage;
