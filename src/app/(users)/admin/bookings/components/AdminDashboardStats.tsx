@@ -2,32 +2,20 @@
 
 import React from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Card,
-  CardContent,
-  IconButton,
-  Chip,
-  LinearProgress,
-  Avatar,
-  useTheme
-} from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown,
-  Schedule,
-  CheckCircle,
-  Cancel,
-  Payment,
-  Person,
-  Star,
-  AttachMoney,
-  Group,
-  Analytics,
-  Warning,
-  Pending
-} from '@mui/icons-material';
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  CreditCardIcon,
+  UserIcon,
+  StarIcon,
+  BanknotesIcon,
+  UsersIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  PauseCircleIcon
+} from '@heroicons/react/24/outline';
 
 interface DashboardStats {
   totalBookings: number;
@@ -57,8 +45,6 @@ const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
   pujaData, 
   loading = false 
 }) => {
-  const theme = useTheme();
-
   // Combine all dashboard data
   const combinedStats = {
     totalBookings: (astrologyData?.total_bookings || 0) + (regularData?.total_bookings || 0) + (pujaData?.total_bookings || 0),
@@ -84,99 +70,63 @@ const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
     subtitle?: string;
     progress?: number;
   }> = ({ title, value, icon, color, trend, subtitle, progress }) => (
-    <Card 
-      sx={{ 
-        height: '100%', 
-        background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
-        border: `1px solid ${color}30`,
-        borderRadius: 2,
-        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: `0 8px 25px ${color}20`
-        }
-      }}
-    >
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Avatar sx={{ bgcolor: color, width: 48, height: 48 }}>
-            {icon}
-          </Avatar>
-          {trend !== undefined && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {trend > 0 ? (
-                <TrendingUp sx={{ fontSize: 18, color: 'success.main' }} />
-              ) : (
-                <TrendingDown sx={{ fontSize: 18, color: 'error.main' }} />
-              )}
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: trend > 0 ? 'success.main' : 'error.main',
-                  fontWeight: 600 
-                }}
-              >
-                {Math.abs(trend)}%
-              </Typography>
-            </Box>
-          )}
-        </Box>
-        
-        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
+    <div className={`bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 ${color}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-lg ${color} bg-opacity-10`}>
+          {icon}
+        </div>
+        {trend !== undefined && (
+          <div className="flex items-center space-x-1">
+            {trend > 0 ? (
+              <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
+            ) : (
+              <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />
+            )}
+            <span className={`text-sm font-medium ${trend > 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {Math.abs(trend)}%
+            </span>
+          </div>
+        )}
+      </div>
+      
+      <div className="mb-2">
+        <div className="text-2xl font-bold text-gray-900">
           {typeof value === 'number' ? value.toLocaleString() : value}
-        </Typography>
-        
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-          {title}
-        </Typography>
-        
-        {subtitle && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {subtitle}
-          </Typography>
-        )}
-        
-        {progress !== undefined && (
-          <Box sx={{ mt: 2 }}>
-            <LinearProgress 
-              variant="determinate" 
-              value={progress} 
-              sx={{ 
-                height: 6, 
-                borderRadius: 3,
-                backgroundColor: `${color}20`,
-                '& .MuiLinearProgress-bar': {
-                  backgroundColor: color
-                }
-              }} 
-            />
-            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}>
-              {progress}% of target
-            </Typography>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+        <div className="text-sm text-gray-600">{title}</div>
+      </div>
+      
+      {subtitle && (
+        <div className="text-xs text-gray-500 mb-3">{subtitle}</div>
+      )}
+      
+      {progress !== undefined && (
+        <div>
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+            <div 
+              className={`h-2 rounded-full transition-all duration-300 ${color}`}
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <div className="text-xs text-gray-500">{progress}% of target</div>
+        </div>
+      )}
+    </div>
   );
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <div className="mb-8">
       {/* Key Metrics */}
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 3, color: 'text.primary' }}>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">
         Key Performance Metrics
-      </Typography>
+      </h2>
       
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
-        gap: 3, 
-        mb: 4 
-      }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Bookings"
           value={combinedStats.totalBookings}
-          icon={<Schedule />}
-          color={theme.palette.primary.main}
+          icon={<ClockIcon className="h-6 w-6 text-blue-600" />}
+          color="border-blue-200"
           trend={combinedStats.growthRate}
           subtitle="This month"
         />
@@ -184,16 +134,16 @@ const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
         <StatCard
           title="Pending Bookings"
           value={combinedStats.pendingBookings}
-          icon={<Pending />}
-          color={theme.palette.warning.main}
+          icon={<PauseCircleIcon className="h-6 w-6 text-yellow-600" />}
+          color="border-yellow-200"
           subtitle="Requires attention"
         />
         
         <StatCard
           title="Total Revenue"
           value={`₹${(combinedStats.totalRevenue / 100000).toFixed(1)}L`}
-          icon={<AttachMoney />}
-          color={theme.palette.success.main}
+          icon={<BanknotesIcon className="h-6 w-6 text-green-600" />}
+          color="border-green-200"
           trend={15.2}
           subtitle="This month"
         />
@@ -201,53 +151,48 @@ const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
         <StatCard
           title="Avg Booking Value"
           value={`₹${combinedStats.avgBookingValue.toLocaleString()}`}
-          icon={<Analytics />}
-          color={theme.palette.info.main}
+          icon={<ChartBarIcon className="h-6 w-6 text-indigo-600" />}
+          color="border-indigo-200"
           trend={8.5}
           subtitle="Per booking"
         />
-      </Box>
+      </div>
 
       {/* Status Distribution */}
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 3, color: 'text.primary' }}>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">
         Booking Status Overview
-      </Typography>
+      </h2>
       
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(5, 1fr)' }, 
-        gap: 3, 
-        mb: 4 
-      }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <StatCard
           title="Confirmed"
           value={combinedStats.confirmedBookings}
-          icon={<CheckCircle />}
-          color={theme.palette.info.main}
+          icon={<CheckCircleIcon className="h-6 w-6 text-blue-600" />}
+          color="border-blue-200"
           progress={combinedStats.totalBookings > 0 ? (combinedStats.confirmedBookings / combinedStats.totalBookings) * 100 : 0}
         />
         
         <StatCard
           title="Completed"
           value={combinedStats.completedBookings}
-          icon={<CheckCircle />}
-          color={theme.palette.success.main}
+          icon={<CheckCircleIcon className="h-6 w-6 text-green-600" />}
+          color="border-green-200"
           progress={combinedStats.totalBookings > 0 ? (combinedStats.completedBookings / combinedStats.totalBookings) * 100 : 0}
         />
         
         <StatCard
           title="Cancelled"
           value={combinedStats.cancelledBookings}
-          icon={<Cancel />}
-          color={theme.palette.error.main}
+          icon={<XCircleIcon className="h-6 w-6 text-red-600" />}
+          color="border-red-200"
           progress={combinedStats.totalBookings > 0 ? (combinedStats.cancelledBookings / combinedStats.totalBookings) * 100 : 0}
         />
         
         <StatCard
           title="Customer Rating"
           value={`${combinedStats.customerSatisfaction}/5`}
-          icon={<Star />}
-          color={theme.palette.warning.main}
+          icon={<StarIcon className="h-6 w-6 text-yellow-600" />}
+          color="border-yellow-200"
           progress={combinedStats.customerSatisfaction * 20}
           subtitle="Average rating"
         />
@@ -255,107 +200,105 @@ const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
         <StatCard
           title="Staff Utilization"
           value={`${combinedStats.staffUtilization}%`}
-          icon={<Group />}
-          color={theme.palette.secondary.main}
+          icon={<UsersIcon className="h-6 w-6 text-purple-600" />}
+          color="border-purple-200"
           progress={combinedStats.staffUtilization}
           subtitle="Resource usage"
         />
-      </Box>
+      </div>
 
       {/* Quick Actions & Alerts */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
-        <Box>
-          <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Recent Activity & Alerts
-            </Typography>
+            </h3>
             
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div className="space-y-4">
               {/* Payment Alerts */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
-                <Warning sx={{ color: 'warning.dark' }} />
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <div className="flex items-center space-x-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                <div>
+                  <div className="text-sm font-medium text-yellow-900">
                     Pending Payments Alert
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  </div>
+                  <div className="text-sm text-yellow-700">
                     ₹{combinedStats.pendingPayments.toLocaleString()} in pending payments require attention
-                  </Typography>
-                </Box>
-              </Box>
+                  </div>
+                </div>
+              </div>
               
               {/* Staff Utilization Alert */}
               {combinedStats.staffUtilization < 70 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
-                  <Group sx={{ color: 'info.dark' }} />
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                <div className="flex items-center space-x-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <UsersIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium text-blue-900">
                       Low Staff Utilization
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    </div>
+                    <div className="text-sm text-blue-700">
                       Staff utilization at {combinedStats.staffUtilization}% - consider reassigning resources
-                    </Typography>
-                  </Box>
-                </Box>
+                    </div>
+                  </div>
+                </div>
               )}
               
               {/* High Demand Alert */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-                <TrendingUp sx={{ color: 'success.dark' }} />
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <div className="flex items-center space-x-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <ArrowTrendingUpIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <div>
+                  <div className="text-sm font-medium text-green-900">
                     High Booking Volume
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  </div>
+                  <div className="text-sm text-green-700">
                     {combinedStats.growthRate}% increase in bookings this month
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Paper>
-        </Box>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         
-        <Box>
-          <Paper sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+        <div>
+          <div className="bg-white rounded-lg border border-gray-200 p-6 h-full">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Quick Stats
-            </Typography>
+            </h3>
             
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2">Conversion Rate</Typography>
-                <Chip 
-                  label={`${combinedStats.conversionRate}%`} 
-                  size="small" 
-                  color="primary" 
-                />
-              </Box>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Conversion Rate</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {combinedStats.conversionRate}%
+                </span>
+              </div>
               
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2">Peak Hours</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Peak Hours</span>
+                <span className="text-sm font-medium text-gray-900">
                   10 AM - 2 PM
-                </Typography>
-              </Box>
+                </span>
+              </div>
               
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2">Top Service</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Top Service</span>
+                <span className="text-sm font-medium text-gray-900">
                   Grah Shanti
-                </Typography>
-              </Box>
+                </span>
+              </div>
               
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2">Active Staff</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Active Staff</span>
+                <span className="text-sm font-medium text-gray-900">
                   12/15
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
-        </Box>
-      </Box>
-    </Box>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
