@@ -119,22 +119,6 @@ const AdminBookingsPage: React.FC = () => {
     }
   }, [activeTab, astrologyBookings, regularBookings, pujaBookings]);
 
-  // Load initial data
-  useEffect(() => {
-    handleRefreshData();
-    fetchAstrologyDashboard();
-    fetchRegularDashboard();
-    fetchPujaDashboard();
-  }, []);
-
-  // Clear error after timeout
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => clearError(), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, clearError]);
-
   // Refresh data based on active tab
   const handleRefreshData = useCallback(async () => {
     try {
@@ -156,6 +140,22 @@ const AdminBookingsPage: React.FC = () => {
       toast.error('Failed to refresh data');
     }
   }, [activeTab, filters, fetchAstrologyBookings, fetchRegularBookings, fetchPujaBookings, fetchAllBookings]);
+
+  // Load initial data
+  useEffect(() => {
+    handleRefreshData();
+    fetchAstrologyDashboard();
+    fetchRegularDashboard();
+    fetchPujaDashboard();
+  }, [handleRefreshData, fetchAstrologyDashboard, fetchRegularDashboard, fetchPujaDashboard]);
+
+  // Clear error after timeout
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => clearError(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
 
   // Apply filters
   const handleApplyFilters = useCallback(() => {
@@ -234,7 +234,7 @@ const AdminBookingsPage: React.FC = () => {
     setShowCalendar(false);
     // Apply the date filter
     handleApplyFilters();
-  }, []);
+  }, [handleApplyFilters]);
 
   // Handle calendar toggle
   const handleCalendarToggle = useCallback(() => {

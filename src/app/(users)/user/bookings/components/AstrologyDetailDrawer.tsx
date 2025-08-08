@@ -6,6 +6,7 @@ import { X, Calendar, Clock, Mail, Phone, Video, User, Star, IndianRupee, Downlo
 import StatusBadge, { OrderTracking } from './StatusBadge';
 import CopyableText from './CopyableText';
 import CancelBookingModal from './CancelBookingModal';
+import Image from 'next/image';
 
 interface AstrologyDetailDrawerProps {
   booking: any;
@@ -128,10 +129,13 @@ const AstrologyDetailDrawer: React.FC<AstrologyDetailDrawerProps> = ({ booking, 
             {/* Service Image */}
             {booking.service?.image_url && (
               <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
-                <img
+                <Image
                   src={booking.service.image_url}
                   alt={booking.service.title}
                   className="w-full h-full object-cover"
+                  layout="responsive"
+                  width={500}
+                  height={300}
                 />
               </div>
             )}

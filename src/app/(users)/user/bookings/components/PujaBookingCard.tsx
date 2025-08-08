@@ -3,6 +3,7 @@
 import React from 'react';
 import { Calendar, Clock, IndianRupee, Eye, Video, X, Download } from 'lucide-react';
 import StatusBadge from './StatusBadge';
+import Image from 'next/image';
 
 interface PujaBookingCardProps {
   booking: any;
@@ -68,10 +69,13 @@ const PujaBookingCard: React.FC<PujaBookingCardProps> = ({ booking, onViewDetail
         {/* Service Image - Smaller */}
         {booking.cart?.puja_service?.image_url && (
           <div className="aspect-[16/9] rounded-lg overflow-hidden shadow-sm mb-3">
-            <img
+            <Image
               src={booking.cart.puja_service.image_url}
               alt={booking.cart.puja_service.title}
               className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+              layout="responsive"
+              width={500}
+              height={300}
             />
           </div>
         )}

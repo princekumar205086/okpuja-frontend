@@ -6,6 +6,7 @@ import { X, Calendar, Clock, MapPin, Phone, Mail, IndianRupee, User, Package, Do
 import StatusBadge, { OrderTracking } from './StatusBadge';
 import CopyableText from './CopyableText';
 import CancelBookingModal from './CancelBookingModal';
+import Image from 'next/image';
 
 interface PujaDetailDrawerProps {
   booking: any;
@@ -122,10 +123,13 @@ const PujaDetailDrawer: React.FC<PujaDetailDrawerProps> = ({ booking, open, onCl
             {/* Service Image */}
             {booking.cart?.puja_service?.image_url && (
               <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
-                <img
+                <Image
                   src={booking.cart.puja_service.image_url}
                   alt={booking.cart.puja_service.title}
                   className="w-full h-full object-cover"
+                  layout="responsive"
+                  width={500}
+                  height={300}
                 />
               </div>
             )}

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Calendar, Clock, IndianRupee, Eye, Video, X, Download } from 'lucide-react';
 import StatusBadge from './StatusBadge';
+import Image from 'next/image';
 
 interface AstrologyBookingCardProps {
   booking: any;
@@ -89,10 +90,13 @@ const AstrologyBookingCard: React.FC<AstrologyBookingCardProps> = ({ booking, on
         {/* Service Image - Smaller */}
         {booking.service?.image_url && (
           <div className="aspect-[16/9] rounded-lg overflow-hidden shadow-sm mb-3">
-            <img
+            <Image
               src={booking.service.image_url}
               alt={booking.service.title}
               className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+              layout="responsive"
+              width={500}
+              height={300}
             />
           </div>
         )}
