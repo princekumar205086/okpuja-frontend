@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Grid } from '@mui/material';
+import { Grid2 as Grid } from '@mui/material';
 import MobileStatsCard from './MobileStatsCard';
 import {
   People as UsersIcon,

@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Box, Typography, Button, Avatar, Chip, Grid } from '@mui/material';
+import { Box, Typography, Button, Avatar, Chip, Grid2 as Grid } from '@mui/material';
 import { motion } from 'framer-motion';
 import { 
   GetApp as ExportIcon,
