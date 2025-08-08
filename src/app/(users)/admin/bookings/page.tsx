@@ -951,13 +951,13 @@ const BookingCards: React.FC<{
               
               {/* Second Row: Booking ID and Service Type */}
               <div className="text-white">
-                <h3 className="text-xl font-bold tracking-wide mb-1">
+                <h3 className="text-lg font-bold tracking-wide mb-2 break-all">
                   #{item.astro_book_id || item.book_id || item.id}
                 </h3>
                 <div className="flex items-center space-x-2">
-                  {isAstrology && <SparklesIcon className="h-4 w-4" />}
-                  {serviceType === 'puja' && <FireIcon className="h-4 w-4" />}
-                  {serviceType === 'regular' && <UserGroupIcon className="h-4 w-4" />}
+                  {isAstrology && <SparklesIcon className="h-4 w-4 flex-shrink-0" />}
+                  {serviceType === 'puja' && <FireIcon className="h-4 w-4 flex-shrink-0" />}
+                  {serviceType === 'regular' && <UserGroupIcon className="h-4 w-4 flex-shrink-0" />}
                   <span className="text-sm font-medium opacity-90 capitalize">
                     {serviceType} Service
                   </span>
