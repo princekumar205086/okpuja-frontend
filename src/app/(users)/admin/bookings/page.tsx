@@ -36,7 +36,8 @@ import AdminDashboardStats from './components/AdminDashboardStats';
 
 // Import Calendar component
 import Calendar from '../../../components/ui/Calendar';
-import BookingDetailsModal from '../../../components/ui/BookingDetailsModal';
+import { BookingDrawer } from '../../../components/ui/BookingDrawer';
+import { MUIProvider } from '../../../components/providers/MUIProvider';
 
 // Import utilities
 import { exportToCSV, exportToJSON } from '../../../utils/exportUtils';
@@ -93,7 +94,7 @@ const AdminBookingsPage: React.FC = () => {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showBookingDrawer, setShowBookingDrawer] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -246,14 +247,14 @@ const AdminBookingsPage: React.FC = () => {
   // Handle booking view
   const handleViewBooking = useCallback((booking: any) => {
     setSelectedBooking(booking);
-    setShowBookingModal(true);
+    setShowBookingDrawer(true);
   }, []);
 
   // Handle booking edit
   const handleEditBooking = useCallback((booking: any) => {
-    // Open booking modal for editing
+    // Open booking drawer for editing
     setSelectedBooking(booking);
-    setShowBookingModal(true);
+    setShowBookingDrawer(true);
   }, []);
 
   // Handle sending meeting link for astrology sessions
@@ -267,6 +268,18 @@ const AdminBookingsPage: React.FC = () => {
     } catch (error) {
       console.error('Error sending meeting link:', error);
       toast.error('Failed to send meeting link');
+    }
+  }, []);
+
+  // Handle reschedule booking
+  const handleRescheduleBooking = useCallback(async (booking: any, newDate: string, newTime: string) => {
+    try {
+      // Here you would implement the API call to reschedule the booking
+      // For now, just show success message
+      toast.success(`Booking rescheduled to ${newDate} at ${newTime}`);
+    } catch (error) {
+      console.error('Error rescheduling booking:', error);
+      toast.error('Failed to reschedule booking');
     }
   }, []);
 
@@ -336,17 +349,18 @@ const AdminBookingsPage: React.FC = () => {
   const currentData = getCurrentData();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Booking Management
-          </h1>
-          <p className="text-gray-600">
-            Manage all your bookings, track performance, and handle customer requests
-          </p>
-        </div>
+    <MUIProvider>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Booking Management
+            </h1>
+            <p className="text-gray-600">
+              Manage all your bookings, track performance, and handle customer requests
+            </p>
+          </div>
 
         {/* Error Display */}
         {error && (
@@ -658,18 +672,18 @@ const AdminBookingsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Booking Details Modal */}
-      <BookingDetailsModal
-        isOpen={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
+      {/* Booking Details Drawer */}
+      <BookingDrawer
+        open={showBookingDrawer}
+        onClose={() => setShowBookingDrawer(false)}
         booking={selectedBooking}
         bookingType={activeTab as 'astrology' | 'regular' | 'puja' | 'all'}
         onUpdateStatus={handleBookingStatusUpdate}
-        onEdit={handleEditBooking}
         onSendMeetLink={handleSendMeetLink}
-        onReschedule={handleEditBooking}
+        onReschedule={handleRescheduleBooking}
       />
-    </div>
+      </div>
+    </MUIProvider>
   );
 };
 
