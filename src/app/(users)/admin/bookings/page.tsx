@@ -600,7 +600,7 @@ const AdminBookingsPage: React.FC = () => {
           </div>
 
           {/* Data Display */}
-          <div className="p-6">
+          <div className={`${viewMode === 'card' ? 'bg-gray-50' : 'bg-white'} ${viewMode === 'card' ? 'p-8' : 'p-6'}`}>
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -629,18 +629,32 @@ const AdminBookingsPage: React.FC = () => {
                     onSendMeetLink={handleSendMeetLink}
                   />
                 ) : (
-                  <BookingCards
-                    data={currentData}
-                    activeTab={activeTab}
-                    selectedBookings={selectedBookings}
-                    onSelectionChange={setSelectedBookings}
-                    getStatusColor={getStatusColor}
-                    getStatusIcon={getStatusIcon}
-                    onUpdateStatus={updateBookingStatus}
-                    onViewBooking={handleViewBooking}
-                    onEditBooking={handleEditBooking}
-                    onSendMeetLink={handleSendMeetLink}
-                  />
+                  <div className="space-y-2">
+                    {viewMode === 'card' && (
+                      <div className="mb-6">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                          {activeTab === 'all' ? 'All Bookings' : 
+                           activeTab === 'astrology' ? 'Astrology Services' :
+                           activeTab === 'puja' ? 'Puja Services' : 'Regular Services'}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          Showing {currentData.length} {currentData.length === 1 ? 'booking' : 'bookings'}
+                        </p>
+                      </div>
+                    )}
+                    <BookingCards
+                      data={currentData}
+                      activeTab={activeTab}
+                      selectedBookings={selectedBookings}
+                      onSelectionChange={setSelectedBookings}
+                      getStatusColor={getStatusColor}
+                      getStatusIcon={getStatusIcon}
+                      onUpdateStatus={updateBookingStatus}
+                      onViewBooking={handleViewBooking}
+                      onEditBooking={handleEditBooking}
+                      onSendMeetLink={handleSendMeetLink}
+                    />
+                  </div>
                 )}
               </>
             )}
@@ -762,11 +776,17 @@ const BookingTable: React.FC<{
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((item) => {
-              const itemId = item.id?.toString() || '';
+            {data.map((item, index) => {
+              // Create a unique key using multiple fallback options
+              const itemId = item.id?.toString() || 
+                           item.astro_book_id?.toString() || 
+                           item.book_id?.toString() || 
+                           `item-${index}`;
+              const uniqueKey = `${activeTab}-${itemId}-${index}`;
+              
               return (
                 <tr
-                  key={itemId}
+                  key={uniqueKey}
                   className={`hover:bg-gray-50 ${isSelected(itemId) ? 'bg-blue-50' : ''}`}
                 >
                   <td className="px-6 py-4">
@@ -877,96 +897,173 @@ const BookingCards: React.FC<{
   const isSelected = (id: string) => selectedBookings.includes(id);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {data.map((item) => {
-        const itemId = item.id?.toString() || '';
+    <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
+      {data.map((item, index) => {
+        // Create a unique key using multiple fallback options
+        const itemId = item.id?.toString() || 
+                       item.astro_book_id?.toString() || 
+                       item.book_id?.toString() || 
+                       `item-${index}`;
+        const uniqueKey = `${activeTab}-${itemId}-${index}`;
+        const serviceType = activeTab !== 'all' ? activeTab : item.type;
+        const isAstrology = serviceType === 'astrology';
+        
         return (
           <div
-            key={itemId}
-            className={`bg-white rounded-lg border transition-all duration-200 hover:shadow-lg ${
-              isSelected(itemId) ? 'border-blue-500 shadow-lg ring-2 ring-blue-200' : 'border-gray-200'
+            key={uniqueKey}
+            className={`bg-white rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group ${
+              isSelected(itemId) 
+                ? 'border-blue-500 shadow-2xl ring-2 ring-blue-100 bg-blue-50/20' 
+                : 'border-gray-200 hover:border-gray-300'
             }`}
           >
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
+            {/* Card Header with Gradient */}
+            <div className={`px-6 py-5 border-b border-gray-100 ${
+              isAstrology 
+                ? 'bg-gradient-to-r from-purple-500 via-purple-600 to-indigo-600' 
+                : serviceType === 'puja' 
+                ? 'bg-gradient-to-r from-orange-500 via-red-500 to-red-600'
+                : 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-600'
+            }`}>
+              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <input
                     type="checkbox"
                     checked={isSelected(itemId)}
                     onChange={(e) => handleSelectItem(itemId, e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-white focus:ring-white/20 border-white/30 rounded bg-white/10 backdrop-blur-sm"
                   />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold tracking-wide">
                       #{item.astro_book_id || item.book_id || item.id}
                     </h3>
-                    <p className="text-sm text-gray-500">
-                      {activeTab !== 'all' ? activeTab : item.type}
+                    <div className="flex items-center space-x-2 mt-1">
+                      {isAstrology && <SparklesIcon className="h-4 w-4" />}
+                      {serviceType === 'puja' && <FireIcon className="h-4 w-4" />}
+                      {serviceType === 'regular' && <UserGroupIcon className="h-4 w-4" />}
+                      <span className="text-sm font-medium opacity-90 capitalize">
+                        {serviceType} Service
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${
+                  item.status === 'CONFIRMED' 
+                    ? 'bg-green-100 text-green-800 border border-green-200'
+                    : item.status === 'PENDING' 
+                    ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                    : item.status === 'COMPLETED' 
+                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                    : item.status === 'CANCELLED' 
+                    ? 'bg-red-100 text-red-800 border border-red-200'
+                    : 'bg-gray-100 text-gray-800 border border-gray-200'
+                }`}>
+                  {getStatusIcon(item.status)}
+                  <span className="ml-1.5">{item.status_display || item.status}</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Customer Information */}
+              <div className="mb-6">
+                <div className="flex items-start space-x-4 mb-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shadow-sm">
+                      <UserGroupIcon className="h-6 w-6 text-gray-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-semibold text-gray-900 truncate mb-1">
+                      {item.customer_name || item.user_name || item.contact_name || 'Unknown Customer'}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {item.contact_email || item.user_email || 'No email provided'}
                     </p>
                   </div>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
-                  {getStatusIcon(item.status)}
-                  <span className="ml-1">{item.status_display || item.status}</span>
-                </span>
               </div>
 
-              {/* Customer Info */}
-              <div className="mb-4">
-                <p className="text-sm font-medium text-gray-900">
-                  {item.customer_name || item.user_name || item.contact_name || 'Unknown'}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {item.contact_email || item.user_email || 'No email'}
-                </p>
+              {/* Service Details */}
+              <div className="mb-6">
+                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Service Details</h4>
+                      <p className="text-lg font-bold text-gray-900 leading-tight mb-2">
+                        {item.service?.title || item.service_title || 'Unknown Service'}
+                      </p>
+                      {item.category_name && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                          {item.category_name}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-2xl font-bold text-gray-900">
+                        ₹{(item.service?.price || item.total_amount || 0).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Total Amount</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Service Info */}
-              <div className="mb-4">
-                <p className="text-sm font-medium text-gray-900">
-                  {item.service?.title || item.service_title || 'Unknown Service'}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {item.category_name || 'N/A'}
-                </p>
-                <p className="text-lg font-bold text-gray-900 mt-1">
-                  ₹{item.service?.price || item.total_amount || 0}
-                </p>
+              {/* Timing Information */}
+              <div className="mb-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white border border-gray-200 rounded-lg p-3">
+                    <p className="text-gray-500 font-medium mb-1 text-xs uppercase tracking-wide">Created Date</p>
+                    <p className="text-gray-900 font-semibold text-sm">
+                      {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-lg p-3">
+                    <p className="text-gray-500 font-medium mb-1 text-xs uppercase tracking-wide">Time</p>
+                    <p className="text-gray-900 font-semibold text-sm">
+                      {item.created_at ? new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Date */}
-              <div className="mb-4">
-                <p className="text-sm text-gray-500">
-                  Created: {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => onViewBooking(item)}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                  >
-                    <EyeIcon className="h-4 w-4 mr-1" />
-                    View
-                  </button>
+              {/* Action Buttons */}
+              <div className="flex flex-col space-y-3">
+                <button 
+                  onClick={() => onViewBooking(item)}
+                  className="w-full inline-flex items-center justify-center px-4 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow-md group-hover:shadow-lg"
+                >
+                  <EyeIcon className="h-4 w-4 mr-2" />
+                  View Full Details
+                </button>
+                
+                <div className="grid grid-cols-2 gap-3">
                   <button 
                     onClick={() => onEditBooking(item)}
-                    className="inline-flex items-center px-3 py-1.5 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-white hover:bg-green-50 transition-colors"
+                    className="inline-flex items-center justify-center px-3 py-2.5 bg-green-50 border border-green-200 text-green-700 text-sm font-medium rounded-xl hover:bg-green-100 transition-all duration-200 hover:shadow-sm"
                   >
-                    <CalendarIcon className="h-4 w-4 mr-1" />
+                    <CalendarIcon className="h-4 w-4 mr-1.5" />
                     Reschedule
                   </button>
+                  
                   {/* Session Link for Astrology */}
-                  {(item.type === 'astrology' || activeTab === 'astrology') && (
+                  {isAstrology && (
                     <button 
                       onClick={() => onSendMeetLink(item)}
-                      className="inline-flex items-center px-3 py-1.5 border border-purple-300 rounded-md text-sm font-medium text-purple-700 bg-white hover:bg-purple-50 transition-colors"
+                      className="inline-flex items-center justify-center px-3 py-2.5 bg-purple-50 border border-purple-200 text-purple-700 text-sm font-medium rounded-xl hover:bg-purple-100 transition-all duration-200 hover:shadow-sm"
                     >
-                      <LinkIcon className="h-4 w-4 mr-1" />
+                      <LinkIcon className="h-4 w-4 mr-1.5" />
                       Meet Link
+                    </button>
+                  )}
+                  
+                  {!isAstrology && (
+                    <button 
+                      onClick={() => onViewBooking(item)}
+                      className="inline-flex items-center justify-center px-3 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium rounded-xl hover:bg-blue-100 transition-all duration-200 hover:shadow-sm"
+                    >
+                      <PencilIcon className="h-4 w-4 mr-1.5" />
+                      Edit
                     </button>
                   )}
                 </div>
