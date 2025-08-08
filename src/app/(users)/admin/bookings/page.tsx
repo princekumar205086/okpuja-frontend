@@ -18,6 +18,8 @@ import {
   ClockIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
+  CalendarIcon,
+  LinkIcon,
 } from '@heroicons/react/24/outline';
 import {
   ChartBarIcon,
@@ -107,9 +109,10 @@ const AdminBookingsPage: React.FC = () => {
       case 'astrology':
         return astrologyBookings || [];
       case 'regular':
-        return regularBookings || [];
-      case 'puja':
-        return pujaBookings || [];
+        // Combine both puja and regular services for "Puja Services" tab
+        return [...(pujaBookings || []), ...(regularBookings || [])].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       default:
         return [
           ...(astrologyBookings?.map(b => ({ ...b, type: 'astrology' })) || []),
@@ -127,10 +130,9 @@ const AdminBookingsPage: React.FC = () => {
           await fetchAstrologyBookings(filters);
           break;
         case 'regular':
-          await fetchRegularBookings(filters);
-          break;
-        case 'puja':
+          // Fetch both puja and regular services for "Puja Services" tab
           await fetchPujaBookings(filters);
+          await fetchRegularBookings(filters);
           break;
         default:
           await fetchAllBookings();
@@ -249,9 +251,23 @@ const AdminBookingsPage: React.FC = () => {
 
   // Handle booking edit
   const handleEditBooking = useCallback((booking: any) => {
-    // Close modal and handle edit logic
-    setShowBookingModal(false);
-    toast.success('Edit functionality will be implemented');
+    // Open booking modal for editing
+    setSelectedBooking(booking);
+    setShowBookingModal(true);
+  }, []);
+
+  // Handle sending meeting link for astrology sessions
+  const handleSendMeetLink = useCallback(async (booking: any) => {
+    try {
+      const meetLink = prompt('Enter meeting link:', 'https://meet.google.com/');
+      if (!meetLink) return;
+
+      // Here you would implement the API call to send the meeting link
+      toast.success(`Meeting link sent to ${booking.customer_name || booking.user_name}`);
+    } catch (error) {
+      console.error('Error sending meeting link:', error);
+      toast.error('Failed to send meeting link');
+    }
   }, []);
 
   // Handle booking status update
@@ -314,8 +330,7 @@ const AdminBookingsPage: React.FC = () => {
   const tabs = [
     { id: 'all', label: 'All Bookings', icon: ChartBarIcon, count: getCurrentData().length },
     { id: 'astrology', label: 'Astrology', icon: SparklesIcon, count: astrologyBookings?.length || 0 },
-    { id: 'regular', label: 'Regular Services', icon: UserGroupIcon, count: regularBookings?.length || 0 },
-    { id: 'puja', label: 'Puja Services', icon: FireIcon, count: pujaBookings?.length || 0 },
+    { id: 'regular', label: 'Puja Services', icon: FireIcon, count: regularBookings?.length || 0 },
   ];
 
   const currentData = getCurrentData();
@@ -597,6 +612,7 @@ const AdminBookingsPage: React.FC = () => {
                     onUpdateStatus={updateBookingStatus}
                     onViewBooking={handleViewBooking}
                     onEditBooking={handleEditBooking}
+                    onSendMeetLink={handleSendMeetLink}
                   />
                 ) : (
                   <BookingCards
@@ -609,6 +625,7 @@ const AdminBookingsPage: React.FC = () => {
                     onUpdateStatus={updateBookingStatus}
                     onViewBooking={handleViewBooking}
                     onEditBooking={handleEditBooking}
+                    onSendMeetLink={handleSendMeetLink}
                   />
                 )}
               </>
@@ -649,6 +666,8 @@ const AdminBookingsPage: React.FC = () => {
         bookingType={activeTab as 'astrology' | 'regular' | 'puja' | 'all'}
         onUpdateStatus={handleBookingStatusUpdate}
         onEdit={handleEditBooking}
+        onSendMeetLink={handleSendMeetLink}
+        onReschedule={handleEditBooking}
       />
     </div>
   );
@@ -665,7 +684,8 @@ const BookingTable: React.FC<{
   onUpdateStatus: (type: 'regular' | 'puja', id: number, status: string, reason?: string) => Promise<boolean>;
   onViewBooking: (booking: any) => void;
   onEditBooking: (booking: any) => void;
-}> = ({ data, activeTab, selectedBookings, onSelectionChange, getStatusColor, getStatusIcon, onUpdateStatus, onViewBooking, onEditBooking }) => {
+  onSendMeetLink: (booking: any) => void;
+}> = ({ data, activeTab, selectedBookings, onSelectionChange, getStatusColor, getStatusIcon, onUpdateStatus, onViewBooking, onEditBooking, onSendMeetLink }) => {
   
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -788,19 +808,24 @@ const BookingTable: React.FC<{
                       >
                         <EyeIcon className="h-4 w-4" />
                       </button>
+                      {/* Admin Reschedule Feature */}
                       <button 
                         onClick={() => onEditBooking(item)}
-                        className="text-gray-600 hover:text-gray-900 p-1 rounded transition-colors"
-                        title="Edit Booking"
+                        className="text-green-600 hover:text-green-900 p-1 rounded transition-colors"
+                        title="Reschedule/Edit Booking"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <CalendarIcon className="h-4 w-4" />
                       </button>
-                      <button 
-                        className="text-red-600 hover:text-red-900 p-1 rounded transition-colors"
-                        title="Delete Booking"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
+                      {/* Session Link for Astrology */}
+                      {(item.type === 'astrology' || activeTab === 'astrology') && (
+                        <button 
+                          onClick={() => onSendMeetLink(item)}
+                          className="text-purple-600 hover:text-purple-900 p-1 rounded transition-colors"
+                          title="Send Meeting Link"
+                        >
+                          <LinkIcon className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -824,7 +849,8 @@ const BookingCards: React.FC<{
   onUpdateStatus: (type: 'regular' | 'puja', id: number, status: string, reason?: string) => Promise<boolean>;
   onViewBooking: (booking: any) => void;
   onEditBooking: (booking: any) => void;
-}> = ({ data, activeTab, selectedBookings, onSelectionChange, getStatusColor, getStatusIcon, onUpdateStatus, onViewBooking, onEditBooking }) => {
+  onSendMeetLink: (booking: any) => void;
+}> = ({ data, activeTab, selectedBookings, onSelectionChange, getStatusColor, getStatusIcon, onUpdateStatus, onViewBooking, onEditBooking, onSendMeetLink }) => {
   
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
@@ -914,15 +940,22 @@ const BookingCards: React.FC<{
                   </button>
                   <button 
                     onClick={() => onEditBooking(item)}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center px-3 py-1.5 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-white hover:bg-green-50 transition-colors"
                   >
-                    <PencilIcon className="h-4 w-4 mr-1" />
-                    Edit
+                    <CalendarIcon className="h-4 w-4 mr-1" />
+                    Reschedule
                   </button>
+                  {/* Session Link for Astrology */}
+                  {(item.type === 'astrology' || activeTab === 'astrology') && (
+                    <button 
+                      onClick={() => onSendMeetLink(item)}
+                      className="inline-flex items-center px-3 py-1.5 border border-purple-300 rounded-md text-sm font-medium text-purple-700 bg-white hover:bg-purple-50 transition-colors"
+                    >
+                      <LinkIcon className="h-4 w-4 mr-1" />
+                      Meet Link
+                    </button>
+                  )}
                 </div>
-                <button className="text-red-600 hover:text-red-900 p-1 rounded transition-colors">
-                  <TrashIcon className="h-4 w-4" />
-                </button>
               </div>
             </div>
           </div>

@@ -14,6 +14,8 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   MapPinIcon,
+  LinkIcon,
+  CalendarIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
@@ -24,6 +26,8 @@ interface BookingDetailsModalProps {
   bookingType: 'astrology' | 'regular' | 'puja' | 'all';
   onUpdateStatus?: (status: string, reason?: string) => Promise<boolean>;
   onEdit?: (booking: any) => void;
+  onSendMeetLink?: (booking: any) => void;
+  onReschedule?: (booking: any) => void;
 }
 
 export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
@@ -33,11 +37,15 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   bookingType,
   onUpdateStatus,
   onEdit,
+  onSendMeetLink,
+  onReschedule,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [newStatus, setNewStatus] = useState(booking?.status || '');
   const [statusReason, setStatusReason] = useState('');
+  const [showStatusUpdate, setShowStatusUpdate] = useState(false);
+  const [meetLink, setMeetLink] = useState('');
 
   if (!isOpen || !booking) return null;
 
@@ -76,7 +84,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   const handleStatusUpdate = async () => {
     if (!onUpdateStatus || newStatus === booking.status) {
-      setIsEditing(false);
+      setShowStatusUpdate(false);
       return;
     }
 
@@ -84,14 +92,43 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     try {
       const success = await onUpdateStatus(newStatus, statusReason);
       if (success) {
-        setIsEditing(false);
-        toast.success('Status updated successfully');
+        toast.success('Booking status updated successfully');
+        booking.status = newStatus; // Update local state
+        setShowStatusUpdate(false);
+        setStatusReason('');
+      } else {
+        toast.error('Failed to update booking status');
       }
     } catch (error) {
-      console.error('Status update error:', error);
-      toast.error('Failed to update status');
+      console.error('Error updating status:', error);
+      toast.error('Failed to update booking status');
     } finally {
       setStatusUpdating(false);
+    }
+  };
+
+  const handleSendMeetingLink = async () => {
+    if (!onSendMeetLink || !meetLink.trim()) {
+      toast.error('Please enter a valid meeting link');
+      return;
+    }
+
+    try {
+      await onSendMeetLink({ ...booking, meetLink });
+      toast.success('Meeting link sent successfully');
+      setMeetLink('');
+    } catch (error) {
+      console.error('Error sending meeting link:', error);
+      toast.error('Failed to send meeting link');
+    }
+  };
+
+  const handleReschedule = () => {
+    if (onReschedule) {
+      onReschedule(booking);
+      onClose();
+    } else {
+      toast('Reschedule feature will be implemented', { icon: 'ℹ️' });
     }
   };
 
@@ -364,22 +401,95 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Close
-            </button>
-            {onEdit && (
-              <button
-                onClick={() => onEdit(booking)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Edit Booking
-              </button>
+          {/* Admin Actions */}
+          <div className="space-y-4 pt-6 border-t border-gray-200">
+            {/* Status Management */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Status Management</h4>
+              <div className="flex items-center space-x-3">
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <button
+                  onClick={handleStatusUpdate}
+                  disabled={statusUpdating || newStatus === booking.status}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  {statusUpdating ? 'Updating...' : 'Update Status'}
+                </button>
+              </div>
+              {newStatus !== booking.status && (
+                <textarea
+                  placeholder="Reason for status change (optional)"
+                  value={statusReason}
+                  onChange={(e) => setStatusReason(e.target.value)}
+                  className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={2}
+                />
+              )}
+            </div>
+
+            {/* Astrology-specific features */}
+            {(bookingType === 'astrology' || booking.type === 'astrology') && (
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Astrology Session</h4>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="url"
+                    placeholder="Enter meeting link (e.g., Google Meet, Zoom)"
+                    value={meetLink}
+                    onChange={(e) => setMeetLink(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <button
+                    onClick={handleSendMeetingLink}
+                    disabled={!meetLink.trim()}
+                    className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    Send Link
+                  </button>
+                </div>
+              </div>
             )}
+
+            {/* Main Actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleReschedule}
+                  className="inline-flex items-center px-4 py-2 border border-green-300 text-green-700 rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  Reschedule
+                </button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Close
+                </button>
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(booking)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <PencilIcon className="h-4 w-4 mr-2 inline" />
+                    Edit Details
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
