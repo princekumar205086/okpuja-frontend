@@ -83,6 +83,9 @@ const AdminBookingsPage: React.FC = () => {
     generateReport,
     performBulkAction,
     updateBookingStatus,
+    rescheduleAstrologyBooking,
+    rescheduleRegularBooking,
+    reschedulePujaBooking,
     clearError,
   } = useAdminBookingStore();
 
@@ -274,14 +277,52 @@ const AdminBookingsPage: React.FC = () => {
   // Handle reschedule booking
   const handleRescheduleBooking = useCallback(async (booking: any, newDate: string, newTime: string) => {
     try {
-      // Here you would implement the API call to reschedule the booking
-      // For now, just show success message
-      toast.success(`Booking rescheduled to ${newDate} at ${newTime}`);
+      const bookingType = activeTab !== 'all' ? activeTab : booking.type;
+      let result = null;
+
+      switch (bookingType) {
+        case 'astrology':
+          result = await rescheduleAstrologyBooking(booking.id, {
+            preferred_date: newDate,
+            preferred_time: newTime,
+            reason: 'Admin reschedule'
+          });
+          break;
+        
+        case 'regular':
+          result = await rescheduleRegularBooking(booking.id, {
+            new_date: newDate,
+            new_time: newTime,
+            reason: 'Admin reschedule'
+          });
+          break;
+        
+        case 'puja':
+          result = await reschedulePujaBooking(booking.id, {
+            new_date: newDate,
+            new_time: newTime,
+            reason: 'Admin reschedule'
+          });
+          break;
+        
+        default:
+          toast.error('Unknown booking type');
+          return false;
+      }
+
+      if (result) {
+        // Update the selected booking if it's currently open
+        if (selectedBooking && selectedBooking.id === booking.id) {
+          setSelectedBooking({ ...selectedBooking, ...result.booking });
+        }
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('Error rescheduling booking:', error);
-      toast.error('Failed to reschedule booking');
+      return false;
     }
-  }, []);
+  }, [activeTab, rescheduleAstrologyBooking, rescheduleRegularBooking, reschedulePujaBooking, selectedBooking]);
 
   // Handle booking status update
   const handleBookingStatusUpdate = useCallback(async (status: string, reason?: string) => {
@@ -350,14 +391,14 @@ const AdminBookingsPage: React.FC = () => {
 
   return (
     <MUIProvider>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               Booking Management
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm sm:text-base">
               Manage all your bookings, track performance, and handle customer requests
             </p>
           </div>
@@ -897,7 +938,7 @@ const BookingCards: React.FC<{
   const isSelected = (id: string) => selectedBookings.includes(id);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
       {data.map((item, index) => {
         // Create a unique key using multiple fallback options
         const itemId = item.id?.toString() || 
@@ -911,14 +952,14 @@ const BookingCards: React.FC<{
         return (
           <div
             key={uniqueKey}
-            className={`bg-white rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group ${
+            className={`bg-white rounded-xl sm:rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group ${
               isSelected(itemId) 
                 ? 'border-blue-500 shadow-2xl ring-2 ring-blue-100 bg-blue-50/20' 
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             {/* Card Header with Gradient */}
-            <div className={`px-6 py-5 border-b border-gray-100 ${
+            <div className={`px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5 border-b border-gray-100 ${
               isAstrology 
                 ? 'bg-gradient-to-r from-purple-500 via-purple-600 to-indigo-600' 
                 : serviceType === 'puja' 
@@ -926,14 +967,14 @@ const BookingCards: React.FC<{
                 : 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-600'
             }`}>
               {/* First Row: Checkbox and Status Badge */}
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
                 <input
                   type="checkbox"
                   checked={isSelected(itemId)}
                   onChange={(e) => handleSelectItem(itemId, e.target.checked)}
-                  className="h-4 w-4 text-white focus:ring-white/20 border-white/30 rounded bg-white/10 backdrop-blur-sm"
+                  className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white focus:ring-white/20 border-white/30 rounded bg-white/10 backdrop-blur-sm"
                 />
-                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${
+                <span className={`inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-semibold shadow-sm ${
                   item.status === 'CONFIRMED' 
                     ? 'bg-green-100 text-green-800 border border-green-200'
                     : item.status === 'PENDING' 
@@ -945,40 +986,40 @@ const BookingCards: React.FC<{
                     : 'bg-gray-100 text-gray-800 border border-gray-200'
                 }`}>
                   {getStatusIcon(item.status)}
-                  <span className="ml-1.5">{item.status_display || item.status}</span>
+                  <span className="ml-1 sm:ml-1.5">{item.status_display || item.status}</span>
                 </span>
               </div>
               
               {/* Second Row: Booking ID and Service Type */}
               <div className="text-white">
-                <h3 className="text-lg font-bold tracking-wide mb-2 break-all">
+                <h3 className="text-base sm:text-lg font-bold tracking-wide mb-1.5 sm:mb-2 break-all">
                   #{item.astro_book_id || item.book_id || item.id}
                 </h3>
-                <div className="flex items-center space-x-2">
-                  {isAstrology && <SparklesIcon className="h-4 w-4 flex-shrink-0" />}
-                  {serviceType === 'puja' && <FireIcon className="h-4 w-4 flex-shrink-0" />}
-                  {serviceType === 'regular' && <UserGroupIcon className="h-4 w-4 flex-shrink-0" />}
-                  <span className="text-sm font-medium opacity-90 capitalize">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  {isAstrology && <SparklesIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />}
+                  {serviceType === 'puja' && <FireIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />}
+                  {serviceType === 'regular' && <UserGroupIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />}
+                  <span className="text-xs sm:text-sm font-medium opacity-90 capitalize">
                     {serviceType} Service
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-3 sm:p-4 md:p-6">
               {/* Customer Information */}
-              <div className="mb-6">
-                <div className="flex items-start space-x-4 mb-3">
+              <div className="mb-3 sm:mb-4 md:mb-6">
+                <div className="flex items-start space-x-2.5 sm:space-x-3 md:space-x-4 mb-2.5 sm:mb-3">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shadow-sm">
-                      <UserGroupIcon className="h-6 w-6 text-gray-600" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm">
+                      <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-gray-600" />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-lg font-semibold text-gray-900 truncate mb-1">
+                    <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 truncate mb-0.5 sm:mb-1">
                       {item.customer_name || item.user_name || item.contact_name || 'Unknown Customer'}
                     </p>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-xs sm:text-sm text-gray-500 truncate">
                       {item.contact_email || item.user_email || 'No email provided'}
                     </p>
                   </div>
@@ -986,22 +1027,22 @@ const BookingCards: React.FC<{
               </div>
 
               {/* Service Details */}
-              <div className="mb-6">
-                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-                  <div className="flex justify-between items-start mb-3">
+              <div className="mb-3 sm:mb-4 md:mb-6">
+                <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 border border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 sm:mb-3 space-y-2 sm:space-y-0">
                     <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Service Details</h4>
-                      <p className="text-lg font-bold text-gray-900 leading-tight mb-2">
+                      <h4 className="text-xs font-semibold text-gray-700 mb-1.5 sm:mb-2 uppercase tracking-wide">Service Details</h4>
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-gray-900 leading-tight mb-1.5 sm:mb-2">
                         {item.service?.title || item.service_title || 'Unknown Service'}
                       </p>
                       {item.category_name && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
                           {item.category_name}
                         </span>
                       )}
                     </div>
-                    <div className="text-right ml-4">
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="text-left sm:text-right sm:ml-4">
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
                         ₹{(item.service?.price || item.total_amount || 0).toLocaleString()}
                       </p>
                       <p className="text-xs text-gray-500 uppercase tracking-wide">Total Amount</p>
@@ -1011,17 +1052,17 @@ const BookingCards: React.FC<{
               </div>
 
               {/* Timing Information */}
-              <div className="mb-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
+              <div className="mb-3 sm:mb-4 md:mb-6">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+                  <div className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3">
                     <p className="text-gray-500 font-medium mb-1 text-xs uppercase tracking-wide">Created Date</p>
-                    <p className="text-gray-900 font-semibold text-sm">
+                    <p className="text-gray-900 font-semibold text-xs sm:text-sm">
                       {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
-                  <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <div className="bg-white border border-gray-200 rounded-lg p-2.5 sm:p-3">
                     <p className="text-gray-500 font-medium mb-1 text-xs uppercase tracking-wide">Time</p>
-                    <p className="text-gray-900 font-semibold text-sm">
+                    <p className="text-gray-900 font-semibold text-xs sm:text-sm">
                       {item.created_at ? new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A'}
                     </p>
                   </div>
@@ -1029,42 +1070,45 @@ const BookingCards: React.FC<{
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col space-y-3">
+              <div className="flex flex-col space-y-2.5 sm:space-y-3">
                 <button 
                   onClick={() => onViewBooking(item)}
-                  className="w-full inline-flex items-center justify-center px-4 py-3 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow-md group-hover:shadow-lg"
+                  className="w-full inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 md:py-3 bg-gray-900 text-white text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow-md group-hover:shadow-lg"
                 >
-                  <EyeIcon className="h-4 w-4 mr-2" />
-                  View Full Details
+                  <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  View Details
                 </button>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button 
                     onClick={() => onEditBooking(item)}
-                    className="inline-flex items-center justify-center px-3 py-2.5 bg-green-50 border border-green-200 text-green-700 text-sm font-medium rounded-xl hover:bg-green-100 transition-all duration-200 hover:shadow-sm"
+                    className="inline-flex items-center justify-center px-2 sm:px-3 py-1.5 sm:py-2 md:py-2.5 bg-green-50 border border-green-200 text-green-700 text-xs sm:text-sm font-medium rounded-lg sm:rounded-xl hover:bg-green-100 transition-all duration-200 hover:shadow-sm"
                   >
-                    <CalendarIcon className="h-4 w-4 mr-1.5" />
-                    Reschedule
+                    <CalendarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                    <span className="hidden xs:inline sm:inline">Reschedule</span>
+                    <span className="xs:hidden sm:hidden">Schedule</span>
                   </button>
                   
                   {/* Session Link for Astrology */}
                   {isAstrology && (
                     <button 
                       onClick={() => onSendMeetLink(item)}
-                      className="inline-flex items-center justify-center px-3 py-2.5 bg-purple-50 border border-purple-200 text-purple-700 text-sm font-medium rounded-xl hover:bg-purple-100 transition-all duration-200 hover:shadow-sm"
+                      className="inline-flex items-center justify-center px-2 sm:px-3 py-1.5 sm:py-2 md:py-2.5 bg-purple-50 border border-purple-200 text-purple-700 text-xs sm:text-sm font-medium rounded-lg sm:rounded-xl hover:bg-purple-100 transition-all duration-200 hover:shadow-sm"
                     >
-                      <LinkIcon className="h-4 w-4 mr-1.5" />
-                      Meet Link
+                      <LinkIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                      <span className="hidden xs:inline sm:inline">Meet Link</span>
+                      <span className="xs:hidden sm:hidden">Meet</span>
                     </button>
                   )}
                   
                   {!isAstrology && (
                     <button 
                       onClick={() => onViewBooking(item)}
-                      className="inline-flex items-center justify-center px-3 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium rounded-xl hover:bg-blue-100 transition-all duration-200 hover:shadow-sm"
+                      className="inline-flex items-center justify-center px-2 sm:px-3 py-1.5 sm:py-2 md:py-2.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs sm:text-sm font-medium rounded-lg sm:rounded-xl hover:bg-blue-100 transition-all duration-200 hover:shadow-sm"
                     >
-                      <PencilIcon className="h-4 w-4 mr-1.5" />
-                      Edit
+                      <PencilIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                      <span className="hidden xs:inline sm:inline">Edit</span>
+                      <span className="xs:hidden sm:hidden">Edit</span>
                     </button>
                   )}
                 </div>

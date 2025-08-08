@@ -191,6 +191,11 @@ export interface AdminBookingState {
   updateAstrologyBooking: (astroBookId: string, data: any) => Promise<boolean>;
   updateBookingStatus: (type: 'regular' | 'puja', id: number, status: string, reason?: string) => Promise<boolean>;
   
+  // Reschedule Actions
+  rescheduleAstrologyBooking: (id: number, data: { preferred_date: string; preferred_time: string; reason?: string }) => Promise<any>;
+  rescheduleRegularBooking: (id: number, data: { new_date: string; new_time: string; reason?: string }) => Promise<any>;
+  reschedulePujaBooking: (id: number, data: { new_date: string; new_time: string; reason?: string }) => Promise<any>;
+  
   // Reports
   generateReport: (type: 'astrology' | 'regular' | 'puja', params?: any) => Promise<any>;
   
@@ -552,6 +557,100 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         } catch (err: any) {
           console.error('Generate report error:', err);
           toast.error('Failed to generate report');
+          return null;
+        }
+      },
+
+      // Reschedule booking methods
+      rescheduleAstrologyBooking: async (id: number, data: { preferred_date: string; preferred_time: string; reason?: string }) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const response = await apiClient.patch(`/astrology/bookings/${id}/reschedule/`, data);
+          
+          // Refresh astrology bookings
+          await get().fetchAstrologyBookings();
+          
+          toast.success('Astrology booking rescheduled successfully');
+          set({ loading: false });
+          return response.data;
+        } catch (err: any) {
+          console.error('Reschedule astrology booking error:', err);
+          let errorMessage = 'Failed to reschedule astrology booking';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          } else if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+          }
+          
+          set({
+            error: errorMessage,
+            loading: false
+          });
+          toast.error(errorMessage);
+          return null;
+        }
+      },
+
+      rescheduleRegularBooking: async (id: number, data: { new_date: string; new_time: string; reason?: string }) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const response = await apiClient.post(`/booking/bookings/${id}/reschedule/`, data);
+          
+          // Refresh regular bookings
+          await get().fetchRegularBookings();
+          
+          toast.success('Regular booking rescheduled successfully');
+          set({ loading: false });
+          return response.data;
+        } catch (err: any) {
+          console.error('Reschedule regular booking error:', err);
+          let errorMessage = 'Failed to reschedule regular booking';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          } else if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+          }
+          
+          set({
+            error: errorMessage,
+            loading: false
+          });
+          toast.error(errorMessage);
+          return null;
+        }
+      },
+
+      reschedulePujaBooking: async (id: number, data: { new_date: string; new_time: string; reason?: string }) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const response = await apiClient.post(`/puja/bookings/${id}/reschedule/`, data);
+          
+          // Refresh puja bookings
+          await get().fetchPujaBookings();
+          
+          toast.success('Puja booking rescheduled successfully');
+          set({ loading: false });
+          return response.data;
+        } catch (err: any) {
+          console.error('Reschedule puja booking error:', err);
+          let errorMessage = 'Failed to reschedule puja booking';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          } else if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+          }
+          
+          set({
+            error: errorMessage,
+            loading: false
+          });
+          toast.error(errorMessage);
           return null;
         }
       },
