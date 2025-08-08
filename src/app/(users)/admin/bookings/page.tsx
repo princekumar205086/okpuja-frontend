@@ -925,28 +925,14 @@ const BookingCards: React.FC<{
                 ? 'bg-gradient-to-r from-orange-500 via-red-500 to-red-600'
                 : 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-600'
             }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={isSelected(itemId)}
-                    onChange={(e) => handleSelectItem(itemId, e.target.checked)}
-                    className="h-4 w-4 text-white focus:ring-white/20 border-white/30 rounded bg-white/10 backdrop-blur-sm"
-                  />
-                  <div className="text-white">
-                    <h3 className="text-xl font-bold tracking-wide">
-                      #{item.astro_book_id || item.book_id || item.id}
-                    </h3>
-                    <div className="flex items-center space-x-2 mt-1">
-                      {isAstrology && <SparklesIcon className="h-4 w-4" />}
-                      {serviceType === 'puja' && <FireIcon className="h-4 w-4" />}
-                      {serviceType === 'regular' && <UserGroupIcon className="h-4 w-4" />}
-                      <span className="text-sm font-medium opacity-90 capitalize">
-                        {serviceType} Service
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              {/* First Row: Checkbox and Status Badge */}
+              <div className="flex items-center justify-between mb-3">
+                <input
+                  type="checkbox"
+                  checked={isSelected(itemId)}
+                  onChange={(e) => handleSelectItem(itemId, e.target.checked)}
+                  className="h-4 w-4 text-white focus:ring-white/20 border-white/30 rounded bg-white/10 backdrop-blur-sm"
+                />
                 <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${
                   item.status === 'CONFIRMED' 
                     ? 'bg-green-100 text-green-800 border border-green-200'
@@ -961,6 +947,21 @@ const BookingCards: React.FC<{
                   {getStatusIcon(item.status)}
                   <span className="ml-1.5">{item.status_display || item.status}</span>
                 </span>
+              </div>
+              
+              {/* Second Row: Booking ID and Service Type */}
+              <div className="text-white">
+                <h3 className="text-xl font-bold tracking-wide mb-1">
+                  #{item.astro_book_id || item.book_id || item.id}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  {isAstrology && <SparklesIcon className="h-4 w-4" />}
+                  {serviceType === 'puja' && <FireIcon className="h-4 w-4" />}
+                  {serviceType === 'regular' && <UserGroupIcon className="h-4 w-4" />}
+                  <span className="text-sm font-medium opacity-90 capitalize">
+                    {serviceType} Service
+                  </span>
+                </div>
               </div>
             </div>
 
