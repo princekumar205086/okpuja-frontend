@@ -391,14 +391,14 @@ const AdminBookingsPage: React.FC = () => {
 
   return (
     <MUIProvider>
-      <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
+      <div className="min-h-screen bg-gray-50 p-2 sm:p-3 md:p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               Booking Management
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base">
               Manage all your bookings, track performance, and handle customer requests
             </p>
           </div>
@@ -430,9 +430,9 @@ const AdminBookingsPage: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6" aria-label="Tabs">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="flex space-x-1 xs:space-x-2 sm:space-x-4 md:space-x-8 px-2 sm:px-4 md:px-6" aria-label="Tabs">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -440,17 +440,17 @@ const AdminBookingsPage: React.FC = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`
-                      py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+                      py-3 sm:py-4 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm flex items-center space-x-1 sm:space-x-2 whitespace-nowrap
                       ${activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                       }
                     `}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                     <span>{tab.label}</span>
                     <span className={`
-                      inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                      inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[10px] xs:text-xs font-medium
                       ${activeTab === tab.id
                         ? 'bg-blue-100 text-blue-800'
                         : 'bg-gray-100 text-gray-800'
@@ -465,11 +465,11 @@ const AdminBookingsPage: React.FC = () => {
           </div>
 
           {/* Action Bar */}
-          <div className="p-6 border-b border-gray-200">
+          <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               {/* Left side - Search and Filters */}
-              <div className="flex items-center space-x-4">
-                <div className="relative">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
+                <div className="relative flex-grow max-w-full sm:max-w-xs">
                   <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
@@ -477,89 +477,89 @@ const AdminBookingsPage: React.FC = () => {
                     value={filters.search}
                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                     onKeyPress={(e) => e.key === 'Enter' && handleApplyFilters()}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
                   />
                 </div>
                 
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap"
                 >
-                  <FunnelIcon className="h-4 w-4 mr-2" />
+                  <FunnelIcon className="h-4 w-4 mr-1 sm:mr-2" />
                   Filters
-                  <ChevronDownIcon className={`h-4 w-4 ml-2 transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+                  <ChevronDownIcon className={`h-4 w-4 ml-1 sm:ml-2 transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
                 </button>
 
                 <button
                   onClick={handleRefreshData}
                   disabled={loading}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 whitespace-nowrap"
                 >
-                  <ArrowPathIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <ArrowPathIcon className={`h-4 w-4 mr-1 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
                 </button>
               </div>
 
               {/* Right side - View Toggle and Actions */}
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
                 {/* View Toggle */}
-                <div className="inline-flex rounded-lg border border-gray-300 p-1 bg-gray-50">
+                <div className="inline-flex rounded-lg border border-gray-300 p-1 bg-gray-50 shrink-0">
                   <button
                     onClick={() => setViewMode('table')}
                     className={`
-                      inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors
+                      inline-flex items-center px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors
                       ${viewMode === 'table'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-900'
                       }
                     `}
                   >
-                    <TableCellsIcon className="h-4 w-4 mr-1.5" />
+                    <TableCellsIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                     Table
                   </button>
                   <button
                     onClick={() => setViewMode('card')}
                     className={`
-                      inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors
+                      inline-flex items-center px-2 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors
                       ${viewMode === 'card'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-900'
                       }
                     `}
                   >
-                    <Squares2X2Icon className="h-4 w-4 mr-1.5" />
+                    <Squares2X2Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                     Cards
                   </button>
                 </div>
 
                 <button
                   onClick={handleExport}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap"
                 >
-                  <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                  Export
+                  <ArrowDownTrayIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Export</span>
                 </button>
 
                 <button
                   onClick={handleCalendarToggle}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap"
                 >
-                  <CalendarDaysIcon className="h-4 w-4 mr-2" />
-                  Calendar
+                  <CalendarDaysIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Calendar</span>
                 </button>
               </div>
             </div>
 
             {/* Advanced Filters Panel */}
             {showFilters && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select
                       value={filters.status}
                       onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">All Statuses</option>
                       <option value="PENDING">Pending</option>
@@ -571,35 +571,35 @@ const AdminBookingsPage: React.FC = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">From Date</label>
                     <input
                       type="date"
                       value={filters.dateFrom}
                       onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">To Date</label>
                     <input
                       type="date"
                       value={filters.dateTo}
                       onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                   
-                  <div className="flex items-end space-x-2">
+                  <div className="flex items-end space-x-2 sm:space-x-3">
                     <button
                       onClick={handleApplyFilters}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       Apply
                     </button>
                     <button
                       onClick={() => setFilters({ search: '', status: '', dateFrom: '', dateTo: '', serviceType: '' })}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 text-gray-700 text-xs sm:text-sm font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       Clear
                     </button>
@@ -610,27 +610,27 @@ const AdminBookingsPage: React.FC = () => {
 
             {/* Bulk Actions Bar */}
             {selectedBookings.length > 0 && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-blue-900">
+              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between space-y-2 xs:space-y-0">
+                  <span className="text-xs sm:text-sm font-medium text-blue-900">
                     {selectedBookings.length} booking(s) selected
                   </span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => handleBulkAction('confirm')}
-                      className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-600 text-white text-xs sm:text-sm rounded-md hover:bg-green-700"
                     >
                       Confirm
                     </button>
                     <button
                       onClick={() => handleBulkAction('cancel')}
-                      className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-red-600 text-white text-xs sm:text-sm rounded-md hover:bg-red-700"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => setSelectedBookings([])}
-                      className="px-3 py-1.5 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-600 text-white text-xs sm:text-sm rounded-md hover:bg-gray-700"
                     >
                       Clear
                     </button>
@@ -777,12 +777,12 @@ const BookingTable: React.FC<{
   const isIndeterminate = selectedBookings.length > 0 && selectedBookings.length < data.length;
 
   return (
-    <div className="overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="overflow-hidden rounded-lg">
+      <div className="overflow-x-auto -mx-3 sm:mx-0">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="w-4 px-6 py-3">
+              <th className="w-4 p-2 sm:px-3 md:px-6 py-2 sm:py-3">
                 <input
                   type="checkbox"
                   checked={isAllSelected}
@@ -790,28 +790,28 @@ const BookingTable: React.FC<{
                     if (input) input.indeterminate = isIndeterminate;
                   }}
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Booking ID
+              <th className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                ID
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Customer
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="hidden sm:table-cell p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Service
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="hidden sm:table-cell p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="hidden md:table-cell p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -830,58 +830,58 @@ const BookingTable: React.FC<{
                   key={uniqueKey}
                   className={`hover:bg-gray-50 ${isSelected(itemId) ? 'bg-blue-50' : ''}`}
                 >
-                  <td className="px-6 py-4">
+                  <td className="p-2 sm:px-3 md:px-6 py-2 sm:py-3">
                     <input
                       type="checkbox"
                       checked={isSelected(itemId)}
                       onChange={(e) => handleSelectItem(itemId, e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                  <td className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap">
+                    <div className="text-xs sm:text-sm font-medium text-gray-900">
                       #{item.astro_book_id || item.book_id || item.id}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500 hidden xs:block">
                       {activeTab !== 'all' ? activeTab : item.type}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                  <td className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap">
+                    <div className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[100px] xs:max-w-[150px] sm:max-w-none">
                       {item.customer_name || item.user_name || item.contact_name || 'Unknown'}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500 hidden xs:block truncate max-w-[100px] xs:max-w-[150px] sm:max-w-none">
                       {item.contact_email || item.user_email || 'No email'}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                  <td className="hidden sm:table-cell p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap">
+                    <div className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[150px] md:max-w-none">
                       {item.service?.title || item.service_title || 'Unknown Service'}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500">
                       {item.category_name || 'N/A'}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="hidden sm:table-cell p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                     ₹{item.service?.price || item.total_amount || 0}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
+                  <td className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
                       {getStatusIcon(item.status)}
-                      <span className="ml-1">{item.status_display || item.status}</span>
+                      <span className="ml-0.5 sm:ml-1 text-[10px] xs:text-xs">{item.status_display || item.status}</span>
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="hidden md:table-cell p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                     {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
+                  <td className="p-2 sm:px-3 md:px-6 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm font-medium">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                       <button 
                         onClick={() => onViewBooking(item)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded transition-colors"
                         title="View Details"
                       >
-                        <EyeIcon className="h-4 w-4" />
+                        <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </button>
                       {/* Admin Reschedule Feature */}
                       <button 
@@ -889,7 +889,7 @@ const BookingTable: React.FC<{
                         className="text-green-600 hover:text-green-900 p-1 rounded transition-colors"
                         title="Reschedule/Edit Booking"
                       >
-                        <CalendarIcon className="h-4 w-4" />
+                        <CalendarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </button>
                       {/* Session Link for Astrology */}
                       {(item.type === 'astrology' || activeTab === 'astrology') && (
@@ -898,7 +898,7 @@ const BookingTable: React.FC<{
                           className="text-purple-600 hover:text-purple-900 p-1 rounded transition-colors"
                           title="Send Meeting Link"
                         >
-                          <LinkIcon className="h-4 w-4" />
+                          <LinkIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </button>
                       )}
                     </div>
@@ -938,7 +938,7 @@ const BookingCards: React.FC<{
   const isSelected = (id: string) => selectedBookings.includes(id);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+    <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
       {data.map((item, index) => {
         // Create a unique key using multiple fallback options
         const itemId = item.id?.toString() || 
@@ -952,7 +952,7 @@ const BookingCards: React.FC<{
         return (
           <div
             key={uniqueKey}
-            className={`bg-white rounded-xl sm:rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 group ${
+            className={`bg-white rounded-lg sm:rounded-xl shadow-sm border transition-all duration-300 hover:shadow-xl sm:hover:shadow-2xl sm:hover:-translate-y-1 md:hover:-translate-y-2 group ${
               isSelected(itemId) 
                 ? 'border-blue-500 shadow-2xl ring-2 ring-blue-100 bg-blue-50/20' 
                 : 'border-gray-200 hover:border-gray-300'
