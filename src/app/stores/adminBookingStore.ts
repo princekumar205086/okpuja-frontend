@@ -597,7 +597,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         try {
           set({ loading: true, error: null });
           
-          const response = await apiClient.post(`/booking/bookings/${id}/reschedule/`, data);
+          const response = await apiClient.post(`/puja/bookings/${id}/reschedule/`, data);
           
           // Refresh regular bookings
           await get().fetchRegularBookings();
