@@ -19,6 +19,7 @@ import {
   Error as ErrorIcon,
   PhotoCamera as CameraIcon,
 } from '@mui/icons-material';
+import Image from 'next/image';
 
 interface ImageUploadZoneProps {
   onImageSelect: (file: File) => void;
@@ -232,10 +233,11 @@ const ImageUploadZone: React.FC<ImageUploadZoneProps> = ({
             className="relative"
           >
             <div className="relative rounded-xl overflow-hidden bg-gray-100">
-              <img
+              <Image
                 src={preview}
                 alt="Preview"
                 className="w-full h-64 object-cover"
+                layout="fill"
               />
               
               {/* Overlay */}

@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { Event, EventStatus } from '../../../../stores/eventStore';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 interface EventDetailModalProps {
   open: boolean;
@@ -138,10 +139,17 @@ const EventDetailModal: React.FC<EventDetailModalProps> = ({
         {/* Header Image */}
         {(event.banner_url || event.thumbnail_url || event.original_image_url) && (
           <div className="relative h-64 overflow-hidden">
-            <img
-              src={event.banner_url || event.thumbnail_url || event.original_image_url}
+            <Image
+              src={
+                event.banner_url ||
+                event.thumbnail_url ||
+                event.original_image_url ||
+                '/default-image.png'
+              }
               alt={event.title}
               className="w-full h-full object-cover"
+              layout="fill"
+              objectFit="cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             

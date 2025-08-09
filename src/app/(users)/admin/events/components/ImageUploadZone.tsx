@@ -19,6 +19,7 @@ import {
   Error as ErrorIcon,
   PhotoCamera as CameraIcon,
 } from '@mui/icons-material';
+import Image from 'next/image';
 
 interface ImageUploadZoneProps {
   onImageSelect: (file: File) => void;
@@ -42,36 +43,6 @@ const ImageUploadZone: React.FC<ImageUploadZoneProps> = ({
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(currentImage ?? null);
-
-  // Handle drag events
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  }, []);
-
-  // Handle drop
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  }, []);
-
-  // Handle file input change
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  }, []);
 
   // Validate and process file
   const handleFile = (file: File) => {
@@ -106,6 +77,36 @@ const ImageUploadZone: React.FC<ImageUploadZoneProps> = ({
 
     onImageSelect(file);
   };
+
+  // Handle drag events
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+
+  // Handle drop
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  }, [handleFile]);
+
+  // Handle file input change
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  }, [handleFile]);
 
   // Clear image
   const handleClear = () => {
@@ -232,10 +233,12 @@ const ImageUploadZone: React.FC<ImageUploadZoneProps> = ({
             className="relative"
           >
             <div className="relative rounded-xl overflow-hidden bg-gray-100">
-              <img
+              <Image
                 src={preview}
                 alt="Preview"
                 className="w-full h-64 object-cover"
+                layout="fill"
+                objectFit="cover"
               />
               
               {/* Overlay */}
