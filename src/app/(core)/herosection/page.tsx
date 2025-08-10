@@ -48,27 +48,7 @@ const VideoCarousel: React.FC = () => {
       primaryLink: "/astrology",
       secondaryCta: "View Astrologers",
       secondaryLink: "/astrologers",
-    },
-    {
-      id: 3,
-      videoUrl: "/video/puja_vid.mp4",
-      headline: "Celebrate Festivities with Divine Blessings!",
-      subtext: "Navratri, Diwali, Ganesh Puja & more at your home or temple",
-      primaryCta: "View Festival Pujas",
-      primaryLink: "/festival-pujas",
-      secondaryCta: "Customize Puja",
-      secondaryLink: "/customize",
-    },
-    {
-      id: 4,
-      videoUrl: "/video/astro.mp4",
-      headline: "Book Now & Get Special Discounts!",
-      subtext: "Use code PUJA20 for flat 20% off on your first booking",
-      primaryCta: "Apply Offer",
-      primaryLink: "/offers",
-      secondaryCta: "Browse Pujas",
-      secondaryLink: "/pujaservice",
-    },
+    }
   ];
 
   // Hide swipe hint after 5 seconds

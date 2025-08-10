@@ -15,6 +15,7 @@ import { useAuthStore } from '../../../stores/authStore';
 import { useAstrologyServiceStore } from '../../../stores/astrologyServiceStore';
 import { toast } from 'react-hot-toast';
 import BookingForm from './BookingForm';
+import { errorHandlers } from '../../../utils/errorHandling';
 
 interface ServiceDetailPageProps {
   params: Promise<{
@@ -131,7 +132,7 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
       }
     } catch (error: any) {
       console.error('Booking failed:', error);
-      toast.error(error.response?.data?.message || 'Failed to process booking. Please try again.');
+      errorHandlers.booking(error);
     } finally {
       setBookingLoading(false);
     }

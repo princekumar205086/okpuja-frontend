@@ -1,5 +1,6 @@
 import apiClient from '../../apiService/globalApiconfig';
 import { toast } from 'react-hot-toast';
+import { errorHandlers } from '../../utils/errorHandling';
 
 export interface AstrologyBookingDetails {
   booking_id: number;
@@ -33,15 +34,7 @@ export const astrologyBookingApiService = {
       return response.data;
     } catch (error: any) {
       console.error('Error creating astrology booking details:', error);
-      
-      let errorMessage = 'Failed to save booking details';
-      if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-      
-      toast.error(errorMessage);
+      errorHandlers.booking(error);
       return null;
     }
   },
@@ -64,13 +57,7 @@ export const astrologyBookingApiService = {
       return response.data;
     } catch (error: any) {
       console.error('Error updating astrology booking details:', error);
-      
-      let errorMessage = 'Failed to update booking details';
-      if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      }
-      
-      toast.error(errorMessage);
+      errorHandlers.update(error);
       return null;
     }
   }

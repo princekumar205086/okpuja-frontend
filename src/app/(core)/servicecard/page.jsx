@@ -10,7 +10,7 @@ export default function ServiceCard() {
   const serviceData = [
     {
       image: "/image/havan kund.jpeg",
-      number: 40000,
+      number: 2300,
       suffix: "+",
       text: "Sacred Pujas & Homas Performed",
       description: "Authentic spiritual ceremonies conducted with devotion",
@@ -23,7 +23,7 @@ export default function ServiceCard() {
     },
     {
       image: "/image/pandits.jpeg",
-      number: 1200,
+      number: 500,
       suffix: "+",
       text: "Expert Pandits & Purohits",
       description: "Learned scholars dedicated to spiritual guidance",
@@ -36,7 +36,7 @@ export default function ServiceCard() {
     },
     {
       image: "/image/deep.jpeg",
-      number: 400,
+      number: 230,
       suffix: "+",
       text: "Comprehensive Services",
       description: "Diverse spiritual solutions for every need",

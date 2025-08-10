@@ -54,6 +54,17 @@ export default function BookingForm({
     if (!formData.contact_email) newErrors.contact_email = 'Email is required';
     if (!formData.contact_phone) newErrors.contact_phone = 'Phone number is required';
 
+    // Birth date validation - cannot be in the future
+    if (formData.birth_date) {
+      const birthDate = new Date(formData.birth_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+      
+      if (birthDate > today) {
+        newErrors.birth_date = 'Birth date cannot be in the future';
+      }
+    }
+
     // Email validation
     if (formData.contact_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email)) {
       newErrors.contact_email = 'Please enter a valid email address';
@@ -89,6 +100,9 @@ export default function BookingForm({
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 30);
   const maxDateStr = maxDate.toISOString().split('T')[0];
+  
+  // For birth date, set max to today (cannot be in the future)
+  const maxBirthDate = today;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -199,6 +213,7 @@ export default function BookingForm({
                 name="birth_date"
                 value={formData.birth_date}
                 onChange={handleChange}
+                max={maxBirthDate}
                 className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                   errors.birth_date ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -206,6 +221,9 @@ export default function BookingForm({
               {errors.birth_date && (
                 <p className="mt-1 text-sm text-red-600">{errors.birth_date}</p>
               )}
+              <p className="mt-1 text-xs text-gray-500">
+                Birth date cannot be in the future
+              </p>
             </div>
 
             <div>

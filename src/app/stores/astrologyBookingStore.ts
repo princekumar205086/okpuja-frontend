@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import apiClient from '../apiService/globalApiconfig';
 import { toast } from 'react-hot-toast';
+import { errorHandlers } from '../utils/errorHandling';
 
 export interface AstrologyUser {
   id: number;
@@ -100,13 +101,7 @@ export const useAstrologyBookingStore = create<AstrologyBookingState>()(
           });
         } catch (err: any) {
           console.error('Fetch astrology bookings error:', err);
-          let errorMessage = 'Failed to load astrology bookings';
-          
-          if (err.response?.status === 401) {
-            errorMessage = 'Please login to view bookings';
-          } else if (err.response?.data?.detail) {
-            errorMessage = err.response.data.detail;
-          }
+          const errorMessage = errorHandlers.fetch(err, false); // Don't show toast automatically
           
           set({ 
             error: errorMessage,
@@ -138,15 +133,7 @@ export const useAstrologyBookingStore = create<AstrologyBookingState>()(
           return null;
         } catch (err: any) {
           console.error('Get astrology booking confirmation error:', err);
-          let errorMessage = 'Failed to get booking confirmation';
-          
-          if (err.response?.status === 404) {
-            errorMessage = 'Booking not found';
-          } else if (err.response?.status === 400) {
-            errorMessage = 'Invalid booking ID';
-          } else if (err.response?.data?.detail) {
-            errorMessage = err.response.data.detail;
-          }
+          const errorMessage = errorHandlers.fetch(err, false); // Don't show toast automatically
           
           set({ 
             error: errorMessage,
@@ -175,11 +162,7 @@ export const useAstrologyBookingStore = create<AstrologyBookingState>()(
           return true;
         } catch (err: any) {
           console.error('Update Google Meet link error:', err);
-          let errorMessage = 'Failed to update Google Meet link';
-          
-          if (err.response?.data?.detail) {
-            errorMessage = err.response.data.detail;
-          }
+          const errorMessage = errorHandlers.update(err, false); // Don't show toast automatically
           
           set({ 
             error: errorMessage,
