@@ -1,46 +1,90 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight, FaClock } from "react-icons/fa";
-
-// Define upcoming event data
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Vara Lakshmi Vratam",
-    date: "October 31, 2024",
-    time: "06:00 AM - 12:00 PM",
-    location: "Pan India",
-    description: "Sacred festival dedicated to Goddess Lakshmi for prosperity and wealth, celebrated with devotion and traditional rituals",
-    image: "/uploads/vara lakshmi.jpeg",
-    color: "from-pink-500 to-rose-500"
-  },
-  {
-    id: 2,
-    title: "Navratri Celebrations",
-    date: "October 3 - 12, 2024",
-    time: "All Day Event",
-    location: "Pan India",
-    description: "Nine sacred nights devoted to the worship of Goddess Durga with traditional dances, prayers and celebrations",
-    image: "/uploads/1728074541833-Durga Mata.jpeg",
-    color: "from-orange-500 to-red-500"
-  },
-  {
-    id: 3,
-    title: "Ganesh Chaturthi",
-    date: "September 7, 2024",
-    time: "05:00 AM - 08:00 PM",
-    location: "Pan India",
-    description: "Grand celebration of Lord Ganesha's birthday, the beloved remover of obstacles and harbinger of new beginnings",
-    image: "/uploads/1737638615456-Ganesh chaturthi.jpeg",
-    color: "from-yellow-500 to-orange-500"
-  },
-];
+import { FaCalendarAlt, FaMapMarkerAlt, FaArrowRight, FaClock, FaSpinner } from "react-icons/fa";
+import { usePublicEventStore } from "../../stores/publicEventStore";
+import { EventData } from "../../apiService/eventsApi";
+import { format } from "date-fns";
 
 const UpcomingEvents = () => {
   const [hoveredEvent, setHoveredEvent] = useState<number | null>(null);
+  const { upcomingEvents, loading, error, fetchUpcomingEvents } = usePublicEventStore();
+
+  useEffect(() => {
+    fetchUpcomingEvents(6); // Fetch 6 upcoming events
+  }, [fetchUpcomingEvents]);
+
+  // Helper function to format date
+  const formatEventDate = (dateString: string): string => {
+    try {
+      return format(new Date(dateString), "MMMM dd, yyyy");
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Helper function to format time
+  const formatEventTime = (startTime: string, endTime: string): string => {
+    try {
+      const start = format(new Date(`2000-01-01T${startTime}`), "h:mm a");
+      const end = format(new Date(`2000-01-01T${endTime}`), "h:mm a");
+      return `${start} - ${end}`;
+    } catch {
+      return "All Day Event";
+    }
+  };
+
+  // Helper function to get gradient color based on event type or use default
+  const getEventGradient = (index: number): string => {
+    const gradients = [
+      "from-pink-500 to-rose-500",
+      "from-orange-500 to-red-500", 
+      "from-yellow-500 to-orange-500",
+      "from-purple-500 to-pink-500",
+      "from-blue-500 to-purple-500",
+      "from-green-500 to-blue-500"
+    ];
+    return gradients[index % gradients.length];
+  };
+
+  // Loading component
+  const LoadingCard = () => (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse">
+      <div className="h-64 bg-gray-200"></div>
+      <div className="p-6">
+        <div className="space-y-3 mb-4">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+        </div>
+        <div className="h-16 bg-gray-200 rounded mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+      </div>
+    </div>
+  );
+
+  // Error component
+  const ErrorComponent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="col-span-full bg-red-50 border border-red-200 rounded-xl p-8 text-center"
+    >
+      <div className="text-red-500 mb-4">
+        <FaCalendarAlt className="mx-auto text-4xl" />
+      </div>
+      <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to load events</h3>
+      <p className="text-red-600 mb-4">{error}</p>
+      <button
+        onClick={() => fetchUpcomingEvents(6)}
+        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+      >
+        Try Again
+      </button>
+    </motion.div>
+  );
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-red-50 ">
@@ -94,79 +138,132 @@ const UpcomingEvents = () => {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          {upcomingEvents.map((event, index) => (
+          {loading ? (
+            // Loading state
+            Array.from({ length: 3 }).map((_, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+              >
+                <LoadingCard />
+              </motion.div>
+            ))
+          ) : error ? (
+            // Error state
+            <ErrorComponent />
+          ) : upcomingEvents.length === 0 ? (
+            // Empty state
             <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              onMouseEnter={() => setHoveredEvent(event.id)}
-              onMouseLeave={() => setHoveredEvent(null)}
-              className="group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="col-span-full bg-gray-50 border border-gray-200 rounded-xl p-12 text-center"
             >
-              <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 h-full">
-                {/* Event Image */}
-                <div className="relative h-64 overflow-hidden">
-                  <Image
-                    src={event.image}
-                    alt={event.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
-                  
-                  {/* Gradient Badge */}
-                  <div className="absolute top-4 left-4">
-                    <div className={`px-4 py-2 bg-gradient-to-r ${event.color} text-white text-sm font-semibold rounded-full shadow-lg`}>
-                      Upcoming
-                    </div>
-                  </div>
-
-                  {/* Event Title Overlay */}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-white font-bold text-xl mb-2 group-hover:text-orange-200 transition-colors duration-300">
-                      {event.title}
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Event Details */}
-                <div className="p-6">
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center text-gray-600">
-                      <FaCalendarAlt className="text-orange-500 mr-3 text-sm" />
-                      <span className="text-sm font-medium">{event.date}</span>
-                    </div>
-                    
-                    <div className="flex items-center text-gray-600">
-                      <FaClock className="text-orange-500 mr-3 text-sm" />
-                      <span className="text-sm font-medium">{event.time}</span>
-                    </div>
-                    
-                    <div className="flex items-center text-gray-600">
-                      <FaMapMarkerAlt className="text-orange-500 mr-3 text-sm" />
-                      <span className="text-sm font-medium">{event.location}</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed mb-6">
-                    {event.description}
-                  </p>
-                  
-                  <motion.button
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                    className="inline-flex items-center text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors duration-300"
-                  >
-                    Learn More
-                    <FaArrowRight className="ml-2 text-xs transition-transform duration-300 group-hover:translate-x-1" />
-                  </motion.button>
-                </div>
+              <div className="text-gray-400 mb-4">
+                <FaCalendarAlt className="mx-auto text-4xl" />
               </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">No upcoming events</h3>
+              <p className="text-gray-500">Check back soon for new events and celebrations.</p>
             </motion.div>
-          ))}
+          ) : (
+            // Events list
+            upcomingEvents.map((event: EventData, index: number) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                onMouseEnter={() => setHoveredEvent(event.id)}
+                onMouseLeave={() => setHoveredEvent(null)}
+                className="group"
+              >
+                <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 h-full">
+                  {/* Event Image */}
+                  <div className="relative h-64 overflow-hidden">
+                    <Image
+                      src={event.imagekit_thumbnail_url || event.thumbnail_url || "/placeholder-service.jpg"}
+                      alt={event.title}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
+                    
+                    {/* Gradient Badge */}
+                    <div className="absolute top-4 left-4">
+                      <div className={`px-4 py-2 bg-gradient-to-r ${getEventGradient(index)} text-white text-sm font-semibold rounded-full shadow-lg`}>
+                        {event.days_until === 0 ? 'Today' : event.days_until === 1 ? 'Tomorrow' : `In ${event.days_until} days`}
+                      </div>
+                    </div>
+
+                    {/* Featured Badge */}
+                    {event.is_featured && (
+                      <div className="absolute top-4 right-4">
+                        <div className="px-3 py-1 bg-yellow-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                          Featured
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Event Title Overlay */}
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h3 className="text-white font-bold text-xl mb-2 group-hover:text-orange-200 transition-colors duration-300">
+                        {event.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Event Details */}
+                  <div className="p-6">
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center text-gray-600">
+                        <FaCalendarAlt className="text-orange-500 mr-3 text-sm" />
+                        <span className="text-sm font-medium">{formatEventDate(event.event_date)}</span>
+                      </div>
+                      
+                      <div className="flex items-center text-gray-600">
+                        <FaClock className="text-orange-500 mr-3 text-sm" />
+                        <span className="text-sm font-medium">{formatEventTime(event.start_time, event.end_time)}</span>
+                      </div>
+                      
+                      <div className="flex items-center text-gray-600">
+                        <FaMapMarkerAlt className="text-orange-500 mr-3 text-sm" />
+                        <span className="text-sm font-medium">{event.location}</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
+                      {event.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <motion.button
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                        className="inline-flex items-center text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors duration-300"
+                      >
+                        Learn More
+                        <FaArrowRight className="ml-2 text-xs transition-transform duration-300 group-hover:translate-x-1" />
+                      </motion.button>
+
+                      {event.registration_link && (
+                        <a
+                          href={event.registration_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-700 underline"
+                        >
+                          Register
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
 
         {/* Call to Action */}
@@ -234,3 +331,20 @@ const UpcomingEvents = () => {
 };
 
 export default UpcomingEvents;
+
+// Add CSS for line clamping
+const styles = `
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+}

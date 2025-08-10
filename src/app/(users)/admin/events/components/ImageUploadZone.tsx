@@ -45,7 +45,7 @@ const ImageUploadZone: React.FC<ImageUploadZoneProps> = ({
   const [preview, setPreview] = useState<string | null>(currentImage ?? null);
 
   // Validate and process file
-  const handleFile = (file: File) => {
+  const handleFile = useCallback((file: File) => {
     // Validate file type
     if (!acceptedFormats.includes(file.type)) {
       return;
@@ -76,7 +76,7 @@ const ImageUploadZone: React.FC<ImageUploadZoneProps> = ({
     }, 100);
 
     onImageSelect(file);
-  };
+  }, [acceptedFormats, maxSize, onImageSelect]);
 
   // Handle drag events
   const handleDrag = useCallback((e: React.DragEvent) => {

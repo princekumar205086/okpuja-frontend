@@ -1,16 +1,60 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BsChevronLeft, BsChevronRight, BsCalendar3, BsClock } from "react-icons/bs";
-import { FaRegCalendarAlt } from "react-icons/fa";
+import { BsChevronLeft, BsChevronRight, BsCalendar3, BsClock, BsGeoAlt, BsArrowRight } from "react-icons/bs";
+import { FaRegCalendarAlt, FaSpinner } from "react-icons/fa";
+import { usePublicEventStore } from "../../stores/publicEventStore";
+import { EventData } from "../../apiService/eventsApi";
+import { format } from "date-fns";
 
 export default function Events() {
   // Reference to the slider to control it with custom navigation
   const sliderRef = useRef<Slider | null>(null);
+  const { events, loading, error, fetchEvents } = usePublicEventStore();
+
+  useEffect(() => {
+    fetchEvents({ 
+      status: 'PUBLISHED',
+      ordering: 'event_date',
+      page_size: 20 
+    });
+  }, [fetchEvents]);
+
+  // Helper function to format date
+  const formatEventDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return {
+        day: format(date, 'EEEE'),
+        number: format(date, 'd'),
+        month: format(date, 'MMMM'),
+      };
+    } catch {
+      return {
+        day: 'Friday',
+        number: '1',
+        month: 'January',
+      };
+    }
+  };
+
+  // Loading component
+  const LoadingSlide = () => (
+    <div className="px-3">
+      <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse">
+        <div className="h-56 bg-gray-200"></div>
+        <div className="p-6">
+          <div className="h-4 bg-gray-200 rounded mb-3 w-3/4"></div>
+          <div className="h-16 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+        </div>
+      </div>
+    </div>
+  );
 
   const settings = {
     dots: true,
@@ -62,64 +106,35 @@ export default function Events() {
     dotsClass: "slick-dots custom-dots flex justify-center space-x-2",
   };
 
-  const data = [
-    {
-      imagesrc: "/calander/1.png",
-      title: "Republic Day",
-      date: { day: "Friday", number: "26", month: "January" },
-      content:
-        "January 26 2024, Friday. Republic Day is celebrated to mark the day when the Constitution of India came into effect on January 26, 1950. It is a national holiday in India.",
-    },
-    {
-      imagesrc: "/calander/2.png",
-      title: "Vasant Panchami",
-      date: { day: "Thursday", number: "1", month: "February" },
-      content:
-        "February 1 2024, Thursday. Vasant Panchami, also known as Saraswati Puja, is dedicated to Goddess Saraswati, the Hindu deity of learning, wisdom, and knowledge. It marks the onset of the spring season.",
-    },
-    {
-      imagesrc: "/calander/3.png",
-      title: "Guru Ravidas Jayanti",
-      date: { day: "Sunday", number: "4", month: "February" },
-      content:
-        "February 4 2024, Sunday. Guru Ravidas Jayanti celebrates the birth anniversary of Guru Ravidas, a saint, poet, and social reformer in the Bhakti movement during the 15th century.",
-    },
-    {
-      imagesrc: "/calander/4.png",
-      title: "Swami Dayanand Saraswati Jayanti",
-      date: { day: "Sunday", number: "11", month: "February" },
-      content:
-        "February 11 2024, Sunday. Swami Dayanand Saraswati Jayanti marks the birth anniversary of Swami Dayanand Saraswati, an important Hindu religious scholar, reformer, and founder of the Arya Samaj.",
-    },
-    {
-      imagesrc: "/calander/5.png",
-      title: "Maha Shivaratri",
-      date: { day: "Tuesday", number: "13", month: "February" },
-      content:
-        "February 13 2024, Tuesday. Maha Shivaratri is a Hindu festival dedicated to Lord Shiva, celebrated annually in honor of the god's marriage to Goddess Parvati. It is a day of fasting, prayer, and devotion.",
-    },
-    {
-      imagesrc: "/calander/6.png",
-      title: "Holika Dahan",
-      date: { day: "Wednesday", number: "14", month: "February" },
-      content:
-        "February 14 2024, Wednesday. Holika Dahan, also known as Choti Holi, commemorates the victory of good over evil and the burning of demoness Holika.",
-    },
-    {
-      imagesrc: "/calander/7.png",
-      title: "Holi",
-      date: { day: "Thursday", number: "15", month: "February" },
-      content:
-        "February 15 2024, Thursday. Holi, also known as the Festival of Colors, celebrates the arrival of spring and the victory of good over evil.",
-    },
-    {
-      imagesrc: "/calander/8.png",
-      title: "Maha Navami",
-      date: { day: "Thursday", number: "29", month: "February" },
-      content:
-        "February 29 2024, Thursday. Maha Navami, or Navami Puja, is celebrated on the ninth day of Navratri, dedicated to worshipping Goddess Durga.",
-    },
-  ];
+  // Helper function to format time
+  const formatEventTime = (startTime: string, endTime: string): string => {
+    try {
+      const start = format(new Date(`2000-01-01T${startTime}`), "h:mm a");
+      const end = format(new Date(`2000-01-01T${endTime}`), "h:mm a");
+      return `${start} - ${end}`;
+    } catch {
+      return "All Day Event";
+    }
+  };
+
+  // Error component
+  const ErrorComponent = () => (
+    <div className="px-3">
+      <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+        <div className="text-red-500 mb-4">
+          <BsCalendar3 className="mx-auto text-4xl" />
+        </div>
+        <h3 className="text-lg font-semibold text-red-800 mb-2">Unable to load events</h3>
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={() => fetchEvents({ status: 'PUBLISHED', ordering: 'event_date', page_size: 20 })}
+          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
@@ -177,83 +192,104 @@ export default function Events() {
         {/* Slider */}
         <div className="relative">
           <Slider ref={sliderRef} {...settings} className="events-slider">
-            {data.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="px-3"
-              >
-                <div className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full">
-                  {/* Date Badge */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-center p-3 rounded-xl shadow-lg">
-                      <div className="text-2xl font-bold leading-none mb-1">
-                        {item.date.number}
-                      </div>
-                      <div className="text-xs font-medium uppercase tracking-wide">
-                        {item.date.month.slice(0, 3)}
-                      </div>
-                    </div>
+            {loading ? (
+              // Loading state
+              Array.from({ length: 4 }).map((_, index) => (
+                <LoadingSlide key={index} />
+              ))
+            ) : error ? (
+              // Error state
+              <ErrorComponent />
+            ) : events.length === 0 ? (
+              // Empty state
+              <div className="px-3">
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
+                  <div className="text-gray-400 mb-4">
+                    <BsCalendar3 className="mx-auto text-4xl" />
                   </div>
-
-                  {/* Image */}
-                  <div className="relative h-56 overflow-hidden">
-                    <Image
-                      src={item.imagesrc}
-                      alt={item.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 25vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6">
-                    <div className="flex items-center mb-3">
-                      <div className="flex items-center px-3 py-1 bg-orange-100 rounded-full">
-                        <BsClock className="text-orange-600 text-sm mr-2" />
-                        <span className="text-orange-700 text-sm font-medium">
-                          {item.date.day}
-                        </span>
-                      </div>
-                    </div>
-
-                    <h3 className="font-bold text-gray-800 text-xl mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
-                      {item.title}
-                    </h3>
-
-                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
-                      {item.content}
-                    </p>
-
-                    <motion.button 
-                      whileHover={{ x: 5 }}
-                      className="flex items-center text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors duration-300"
-                    >
-                      Learn More
-                      <svg
-                        className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5l7 7-7 7"
-                        ></path>
-                      </svg>
-                    </motion.button>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No events available</h3>
+                  <p className="text-gray-500">Check back soon for new events and celebrations.</p>
                 </div>
-              </motion.div>
-            ))}
+              </div>
+            ) : (
+              // Events from API
+              events.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="px-3"
+                >
+                  <div className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full">
+                    {/* Date Badge */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-center p-3 rounded-xl shadow-lg">
+                        <div className="text-2xl font-bold leading-none mb-1">
+                          {formatEventDate(event.event_date).number}
+                        </div>
+                        <div className="text-xs font-medium uppercase tracking-wide">
+                          {formatEventDate(event.event_date).month.slice(0, 3)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden">
+                      <Image
+                        src={event.imagekit_thumbnail_url || event.thumbnail_url || "/placeholder-service.jpg"}
+                        alt={event.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 25vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <div className="flex items-center mb-3">
+                        <div className="flex items-center px-3 py-1 bg-orange-100 rounded-full">
+                          <BsClock className="text-orange-600 text-sm mr-2" />
+                          <span className="text-orange-800 text-xs font-medium">
+                            {formatEventTime(event.start_time, event.end_time)}
+                          </span>
+                        </div>
+                        {event.is_featured && (
+                          <div className="ml-2 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-semibold rounded-full">
+                            Featured
+                          </div>
+                        )}
+                      </div>
+
+                      <h3 className="font-bold text-gray-800 text-xl mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors duration-300">
+                        {event.title}
+                      </h3>
+
+                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+                        {event.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-gray-500 text-xs">
+                          <BsGeoAlt className="mr-1" />
+                          <span>{event.location}</span>
+                        </div>
+                        
+                        <motion.button 
+                          whileHover={{ x: 5 }}
+                          className="flex items-center text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors duration-300"
+                        >
+                          Learn More
+                          <BsArrowRight className="ml-2 text-lg" />
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </Slider>
         </div>
 
