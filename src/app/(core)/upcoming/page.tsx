@@ -153,7 +153,7 @@ const UpcomingEvents = () => {
           ) : error ? (
             // Error state
             <ErrorComponent />
-          ) : upcomingEvents.length === 0 ? (
+          ) : !Array.isArray(upcomingEvents) || upcomingEvents.length === 0 ? (
             // Empty state
             <motion.div
               initial={{ opacity: 0, y: 20 }}

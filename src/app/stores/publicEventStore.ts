@@ -55,8 +55,8 @@ export const usePublicEventStore = create<PublicEventState>()(
           const response = await eventsAPI.getEvents(defaultFilters);
           
           set({
-            events: response.results,
-            totalCount: response.count,
+            events: response.results || [],
+            totalCount: response.count || 0,
             loading: false,
             error: null,
           });
@@ -71,7 +71,12 @@ export const usePublicEventStore = create<PublicEventState>()(
             errorMessage = "Network error. Please check your connection.";
           }
 
-          set({ error: errorMessage, loading: false });
+          set({ 
+            error: errorMessage, 
+            loading: false,
+            events: [],
+            totalCount: 0 
+          });
         }
       },
 
@@ -82,7 +87,7 @@ export const usePublicEventStore = create<PublicEventState>()(
           const events = await eventsAPI.getUpcomingEvents(limit);
           
           set({
-            upcomingEvents: events,
+            upcomingEvents: Array.isArray(events) ? events : [],
             loading: false,
             error: null,
           });
@@ -97,7 +102,11 @@ export const usePublicEventStore = create<PublicEventState>()(
             errorMessage = "Network error. Please check your connection.";
           }
 
-          set({ error: errorMessage, loading: false });
+          set({ 
+            error: errorMessage, 
+            loading: false,
+            upcomingEvents: []
+          });
         }
       },
 
@@ -108,7 +117,7 @@ export const usePublicEventStore = create<PublicEventState>()(
           const events = await eventsAPI.getFeaturedEvents(limit);
           
           set({
-            featuredEvents: events,
+            featuredEvents: Array.isArray(events) ? events : [],
             loading: false,
             error: null,
           });
@@ -117,7 +126,11 @@ export const usePublicEventStore = create<PublicEventState>()(
           console.error("Fetch featured events error:", err);
           const errorMessage = "Failed to fetch featured events.";
           
-          set({ error: errorMessage, loading: false });
+          set({ 
+            error: errorMessage, 
+            loading: false,
+            featuredEvents: []
+          });
         }
       },
 
@@ -128,7 +141,7 @@ export const usePublicEventStore = create<PublicEventState>()(
           const events = await eventsAPI.getCurrentMonthEvents();
           
           set({
-            currentMonthEvents: events,
+            currentMonthEvents: Array.isArray(events) ? events : [],
             loading: false,
             error: null,
           });
@@ -137,7 +150,11 @@ export const usePublicEventStore = create<PublicEventState>()(
           console.error("Fetch current month events error:", err);
           const errorMessage = "Failed to fetch current month events.";
           
-          set({ error: errorMessage, loading: false });
+          set({ 
+            error: errorMessage, 
+            loading: false,
+            currentMonthEvents: []
+          });
         }
       },
 
@@ -146,12 +163,15 @@ export const usePublicEventStore = create<PublicEventState>()(
           const events = await eventsAPI.getTodaysEvents();
           
           set({
-            todaysEvents: events,
+            todaysEvents: Array.isArray(events) ? events : [],
             error: null,
           });
 
         } catch (err: any) {
           console.error("Fetch today's events error:", err);
+          set({
+            todaysEvents: []
+          });
         }
       },
 

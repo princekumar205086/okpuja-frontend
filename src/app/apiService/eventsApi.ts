@@ -42,82 +42,192 @@ export interface EventFilters {
 class EventsAPI {
   // Get all events with optional filters
   async getEvents(filters: EventFilters = {}): Promise<EventsResponse> {
-    const params = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.append(key, value.toString());
-      }
-    });
+    try {
+      const params = new URLSearchParams();
+      
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, value.toString());
+        }
+      });
 
-    const response = await apiClient.get(`/misc/events/?${params}`);
-    return response.data;
+      const response = await apiClient.get(`/misc/events/?${params}`);
+      
+      // Ensure response has the expected structure
+      if (!response.data) {
+        return { count: 0, next: null, previous: null, results: [] };
+      }
+
+      // Handle both paginated and direct array responses
+      if (Array.isArray(response.data)) {
+        return {
+          count: response.data.length,
+          next: null,
+          previous: null,
+          results: response.data
+        };
+      }
+
+      return {
+        count: response.data.count || 0,
+        next: response.data.next || null,
+        previous: response.data.previous || null,
+        results: response.data.results || []
+      };
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      return { count: 0, next: null, previous: null, results: [] };
+    }
   }
 
   // Get upcoming events (published events with future dates)
   async getUpcomingEvents(limit: number = 10): Promise<EventData[]> {
-    const params = new URLSearchParams({
-      status: 'PUBLISHED',
-      ordering: 'event_date',
-      page_size: limit.toString(),
-    });
+    try {
+      const params = new URLSearchParams({
+        status: 'PUBLISHED',
+        ordering: 'event_date',
+        page_size: limit.toString(),
+      });
 
-    const response = await apiClient.get(`/misc/events/?${params}`);
-    
-    // Filter for future events
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    return response.data.results.filter((event: EventData) => {
-      const eventDate = new Date(event.event_date);
-      return eventDate >= today;
-    });
+      const response = await apiClient.get(`/misc/events/?${params}`);
+      
+      // Check if response.data exists and has results
+      if (!response.data) {
+        console.error('No data in API response');
+        return [];
+      }
+
+      // Handle both paginated and direct array responses
+      const events = response.data.results || response.data;
+      
+      if (!Array.isArray(events)) {
+        console.error('API response is not an array:', events);
+        return [];
+      }
+
+      // Filter for future events
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      return events.filter((event: EventData) => {
+        if (!event.event_date) return false;
+        const eventDate = new Date(event.event_date);
+        return eventDate >= today;
+      });
+    } catch (error) {
+      console.error('Error fetching upcoming events:', error);
+      return [];
+    }
   }
 
   // Get featured events
   async getFeaturedEvents(limit: number = 6): Promise<EventData[]> {
-    const params = new URLSearchParams({
-      status: 'PUBLISHED',
-      is_featured: 'true',
-      ordering: 'event_date',
-      page_size: limit.toString(),
-    });
+    try {
+      const params = new URLSearchParams({
+        status: 'PUBLISHED',
+        is_featured: 'true',
+        ordering: 'event_date',
+        page_size: limit.toString(),
+      });
 
-    const response = await apiClient.get(`/misc/events/?${params}`);
-    return response.data.results;
+      const response = await apiClient.get(`/misc/events/?${params}`);
+      
+      if (!response.data) {
+        return [];
+      }
+
+      // Handle both paginated and direct array responses
+      const events = response.data.results || response.data;
+      
+      if (!Array.isArray(events)) {
+        console.error('Featured events response is not an array:', events);
+        return [];
+      }
+
+      return events;
+    } catch (error) {
+      console.error('Error fetching featured events:', error);
+      return [];
+    }
   }
 
   // Get single event by ID
   async getEvent(id: number): Promise<EventData> {
-    const response = await apiClient.get(`/misc/events/${id}/`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/misc/events/${id}/`);
+      
+      if (!response.data) {
+        throw new Error('No event data received');
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching event ${id}:`, error);
+      throw error; // Re-throw to let the store handle it
+    }
   }
 
   // Get events by date range
   async getEventsByDateRange(startDate: string, endDate: string): Promise<EventData[]> {
-    const params = new URLSearchParams({
-      status: 'PUBLISHED',
-      event_date_after: startDate,
-      event_date_before: endDate,
-      ordering: 'event_date',
-    });
+    try {
+      const params = new URLSearchParams({
+        status: 'PUBLISHED',
+        event_date_after: startDate,
+        event_date_before: endDate,
+        ordering: 'event_date',
+      });
 
-    const response = await apiClient.get(`/misc/events/?${params}`);
-    return response.data.results;
+      const response = await apiClient.get(`/misc/events/?${params}`);
+      
+      if (!response.data) {
+        return [];
+      }
+
+      // Handle both paginated and direct array responses
+      const events = response.data.results || response.data;
+      
+      if (!Array.isArray(events)) {
+        console.error('Date range events response is not an array:', events);
+        return [];
+      }
+
+      return events;
+    } catch (error) {
+      console.error('Error fetching events by date range:', error);
+      return [];
+    }
   }
 
   // Get today's events
   async getTodaysEvents(): Promise<EventData[]> {
-    const today = new Date().toISOString().split('T')[0];
-    
-    const params = new URLSearchParams({
-      status: 'PUBLISHED',
-      event_date: today,
-      ordering: 'start_time',
-    });
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const params = new URLSearchParams({
+        status: 'PUBLISHED',
+        event_date: today,
+        ordering: 'start_time',
+      });
 
-    const response = await apiClient.get(`/misc/events/?${params}`);
-    return response.data.results;
+      const response = await apiClient.get(`/misc/events/?${params}`);
+      
+      if (!response.data) {
+        return [];
+      }
+
+      // Handle both paginated and direct array responses
+      const events = response.data.results || response.data;
+      
+      if (!Array.isArray(events)) {
+        console.error('Today events response is not an array:', events);
+        return [];
+      }
+
+      return events;
+    } catch (error) {
+      console.error('Error fetching today events:', error);
+      return [];
+    }
   }
 
   // Get events for current month

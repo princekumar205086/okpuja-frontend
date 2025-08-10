@@ -200,7 +200,7 @@ export default function Events() {
             ) : error ? (
               // Error state
               <ErrorComponent />
-            ) : events.length === 0 ? (
+            ) : !Array.isArray(events) || events.length === 0 ? (
               // Empty state
               <div className="px-3">
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
