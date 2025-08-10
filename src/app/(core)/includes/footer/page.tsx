@@ -73,15 +73,15 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-maroon-900 via-maroon-800 to-stone-900 overflow-hidden" style={{backgroundImage: 'linear-gradient(to bottom right, #4a1a1a, #5c1f1f, #3a1515)'}}>
       {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-gradient-to-br from-orange-500 to-red-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full blur-3xl"></div>
+      <div className="absolute inset-0 opacity-15">
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-gradient-to-br from-rose-600 to-red-800 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-gradient-to-br from-red-700 to-maroon-600 rounded-full blur-3xl"></div>
       </div>
 
       {/* Top decorative element */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-600 via-red-700 to-maroon-600"></div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Enhanced Newsletter Section */}
@@ -90,14 +90,14 @@ const Footer = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="max-w-6xl mx-auto py-16 px-6 md:px-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl shadow-2xl transform -translate-y-8 mb-8"
+          className="max-w-6xl mx-auto py-16 px-6 md:px-8 bg-gradient-to-r from-maroon-700 to-red-800 rounded-3xl shadow-2xl transform -translate-y-8 mb-8"
         >
           <div className="flex flex-col lg:flex-row items-center justify-between">
             <div className="mb-8 lg:mb-0 lg:mr-8 text-center lg:text-left">
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
                 Stay Connected with Divine Blessings
               </h3>
-              <p className="text-orange-100 text-lg">
+              <p className="text-rose-100 text-lg">
                 Get exclusive updates on spiritual events, special offers, and sacred ceremonies
               </p>
             </div>
@@ -111,7 +111,7 @@ const Footer = () => {
                 />
                 <button
                   type="submit"
-                  className="px-8 py-4 bg-white text-orange-600 font-semibold rounded-2xl hover:bg-orange-50 transition-all duration-300 whitespace-nowrap shadow-lg hover:shadow-xl flex items-center justify-center group"
+                  className="px-8 py-4 bg-white text-maroon-700 font-semibold rounded-2xl hover:bg-rose-50 transition-all duration-300 whitespace-nowrap shadow-lg hover:shadow-xl flex items-center justify-center group"
                 >
                   Subscribe
                   <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-200" />
@@ -153,7 +153,7 @@ const Footer = () => {
                   { icon: FaLinkedin, href: "#", label: "LinkedIn" }
                 ].map(({ icon: Icon, href, label }, index) => (
                   <Link key={index} href={href} aria-label={label}>
-                    <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-110 shadow-lg">
+                    <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-r from-maroon-600 to-red-700 text-white rounded-2xl hover:from-maroon-700 hover:to-red-800 transition-all duration-300 transform hover:scale-110 shadow-lg">
                       <Icon size={20} />
                     </div>
                   </Link>
@@ -165,7 +165,7 @@ const Footer = () => {
           {/* Quick Links Section */}
           <motion.div variants={itemVariants}>
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 h-full">
-              <h3 className="text-xl font-bold text-white mb-6 pb-3 border-b border-orange-500/30">
+              <h3 className="text-xl font-bold text-white mb-6 pb-3 border-b border-maroon-400/30">
                 Quick Links
               </h3>
               <ul className="space-y-3">
@@ -173,16 +173,16 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={item.link}
-                      className="text-gray-300 hover:text-orange-400 transition-colors duration-200 flex items-center group"
+                      className="text-gray-300 hover:text-rose-300 transition-colors duration-200 flex items-center group"
                     >
-                      <FaArrowRight className="h-3 w-3 mr-3 text-orange-500 group-hover:translate-x-1 transition-transform duration-200" />
+                      <FaArrowRight className="h-3 w-3 mr-3 text-maroon-400 group-hover:translate-x-1 transition-transform duration-200" />
                       {item.name}
                     </Link>
                   </li>
                 ))}
               </ul>
 
-              <h3 className="text-xl font-bold text-white mb-6 mt-8 pb-3 border-b border-orange-500/30">
+              <h3 className="text-xl font-bold text-white mb-6 mt-8 pb-3 border-b border-maroon-400/30">
                 Legal
               </h3>
               <ul className="space-y-3">
@@ -190,9 +190,9 @@ const Footer = () => {
                   <li key={index}>
                     <Link
                       href={item.link}
-                      className="text-gray-300 hover:text-orange-400 transition-colors duration-200 flex items-center group"
+                      className="text-gray-300 hover:text-rose-300 transition-colors duration-200 flex items-center group"
                     >
-                      <FaArrowRight className="h-3 w-3 mr-3 text-orange-500 group-hover:translate-x-1 transition-transform duration-200" />
+                      <FaArrowRight className="h-3 w-3 mr-3 text-maroon-400 group-hover:translate-x-1 transition-transform duration-200" />
                       {item.name}
                     </Link>
                   </li>
@@ -204,7 +204,7 @@ const Footer = () => {
           {/* Puja Services Section */}
           <motion.div variants={itemVariants}>
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 h-full">
-              <h3 className="text-xl font-bold text-white mb-6 pb-3 border-b border-orange-500/30">
+              <h3 className="text-xl font-bold text-white mb-6 pb-3 border-b border-maroon-400/30">
                 Popular Pujas
               </h3>
               <div className="space-y-3">
@@ -212,9 +212,9 @@ const Footer = () => {
                   <Link
                     key={index}
                     href={puja.link}
-                    className="text-gray-300 hover:text-orange-400 transition-colors duration-200 flex items-center group"
+                    className="text-gray-300 hover:text-rose-300 transition-colors duration-200 flex items-center group"
                   >
-                    <FaArrowRight className="h-3 w-3 mr-3 text-orange-500 group-hover:translate-x-1 transition-transform duration-200" />
+                    <FaArrowRight className="h-3 w-3 mr-3 text-maroon-400 group-hover:translate-x-1 transition-transform duration-200" />
                     {puja.name}
                   </Link>
                 ))}
@@ -225,12 +225,12 @@ const Footer = () => {
           {/* Contact Section */}
           <motion.div variants={itemVariants}>
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 h-full">
-              <h3 className="text-xl font-bold text-white mb-6 pb-3 border-b border-orange-500/30">
+              <h3 className="text-xl font-bold text-white mb-6 pb-3 border-b border-maroon-400/30">
                 Contact Us
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start">
-                  <div className="mr-4 mt-1 text-orange-500 bg-orange-500/10 p-2 rounded-lg">
+                  <div className="mr-4 mt-1 text-white bg-maroon-500/10 p-2 rounded-lg">
                     <FaMapMarkerAlt />
                   </div>
                   <span className="text-gray-300 leading-relaxed">
@@ -238,23 +238,23 @@ const Footer = () => {
                   </span>
                 </li>
                 <li className="flex items-center">
-                  <div className="mr-4 text-orange-500 bg-orange-500/10 p-2 rounded-lg">
+                  <div className="mr-4 text-white bg-maroon-500/10 p-2 rounded-lg">
                     <FaPhoneAlt />
                   </div>
                   <a
                     href="tel:+919471661636"
-                    className="text-gray-300 hover:text-orange-400 transition-colors duration-200"
+                    className="text-gray-300 hover:text-rose-300 transition-colors duration-200"
                   >
                     +91 9471661636
                   </a>
                 </li>
                 <li className="flex items-center">
-                  <div className="mr-4 text-orange-500 bg-orange-500/10 p-2 rounded-lg">
+                  <div className="mr-4 text-white bg-maroon-500/10 p-2 rounded-lg">
                     <FaEnvelope />
                   </div>
                   <a
                     href="mailto:namaste@okpuja.com"
-                    className="text-gray-300 hover:text-orange-400 transition-colors duration-200"
+                    className="text-gray-300 hover:text-rose-300 transition-colors duration-200"
                   >
                     namaste@okpuja.com
                   </a>
@@ -282,7 +282,7 @@ const Footer = () => {
                     { icon: FaUniversity, label: "Banking" }
                   ].map(({ icon: Icon, label }, index) => (
                     <div key={index} className="px-3 py-2 bg-white/10 rounded-lg flex items-center text-sm text-gray-300 backdrop-blur-sm">
-                      <Icon className="mr-2 text-orange-500" />
+                      <Icon className="mr-2 text-maroon-400" />
                       {label}
                     </div>
                   ))}
@@ -313,7 +313,7 @@ const Footer = () => {
       </div>
 
       {/* Enhanced Copyright Bar */}
-      <div className="bg-gradient-to-r from-gray-900 to-slate-900 border-t border-white/10">
+      <div className="bg-gradient-to-r from-stone-900 to-maroon-900 border-t border-white/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <p className="text-gray-400 mb-3 sm:mb-0">
@@ -323,7 +323,7 @@ const Footer = () => {
               Powered by{" "}
               <Link
                 href="https://www.webdigger.in"
-                className="ml-2 text-orange-400 hover:text-orange-300 font-medium transition-colors duration-200"
+                className="ml-2 text-rose-300 hover:text-rose-200 font-medium transition-colors duration-200"
               >
                 Webdigger
               </Link>

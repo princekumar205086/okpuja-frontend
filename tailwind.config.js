@@ -32,6 +32,19 @@ module.exports = {
         'red-700': '#b91c1c',
         'red-800': '#991b1b',
         'red-900': '#7f1d1d',
+        // Professional maroon color palette
+        'maroon-50': '#fdf2f2',
+        'maroon-100': '#fce8e8',
+        'maroon-200': '#f6d4d4',
+        'maroon-300': '#eeb0b0',
+        'maroon-400': '#e38383',
+        'maroon-500': '#d55757',
+        'maroon-600': '#be3a3a',
+        'maroon-700': '#8b2635',
+        'maroon-800': '#681e2b',
+        'maroon-900': '#4a1a1a',
+        // Additional stone colors for better gradients
+        'stone-900': '#1c1917',
       },
       fontFamily: {
         sans: [
