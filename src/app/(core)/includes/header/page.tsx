@@ -566,7 +566,7 @@ const Header = () => {
                           </div>
                         </Link>
                         {user.role === 'USER' && (
-                          <Link href="/mybooking" onClick={toggleMenu}>
+                          <Link href="/user/bookings" onClick={toggleMenu}>
                             <div className="p-4 rounded-2xl flex items-center text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 text-base font-medium transition-all duration-300 transform hover:scale-[1.02]">
                               <FaHistory className="mr-3 text-xl" />
                               <span className="flex-1">My Bookings</span>
