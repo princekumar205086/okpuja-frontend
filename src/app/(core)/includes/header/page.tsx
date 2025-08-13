@@ -264,10 +264,10 @@ const Header = () => {
                                 My Dashboard
                               </span>
                             </Link>
-                            <Link href={getProfileUrl()}>
+                            <Link href='user/profile'>
                               <span className="flex px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors items-center">
                                 <FaCog className="mr-3 text-orange-500" />
-                                Profile Settings
+                                Profile
                               </span>
                             </Link>
                             {user.role === 'USER' && (
