@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import apiClient from "../apiService/globalApiconfig";
 import { toast } from "react-hot-toast";
 
-type User = {
+export type User = {
   id: number;
   email: string;
   role: string;
