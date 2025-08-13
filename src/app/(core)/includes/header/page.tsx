@@ -271,7 +271,7 @@ const Header = () => {
                               </span>
                             </Link>
                             {user.role === 'USER' && (
-                              <Link href="/mybooking">
+                              <Link href="/user/bookings">
                                 <span className="flex px-4 py-3 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors items-center">
                                   <FaHistory className="mr-3 text-orange-500" />
                                   My Bookings
