@@ -96,33 +96,6 @@ const useDashboardData = () => {
   const { bookings, fetchBookings, loading: bookingLoading } = useBookingStore();
   const { bookings: astrologyBookings, fetchAstrologyBookings, loading: astrologyLoading } = useAstrologyBookingStore();
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        await Promise.all([
-          fetchBookings(),
-          fetchAstrologyBookings(),
-        ]);
-      } catch (err) {
-        console.error('Error loading dashboard data:', err);
-        setError('Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
-  }, [fetchBookings, fetchAstrologyBookings]);
-
-  useEffect(() => {
-    if (!loading && !bookingLoading && !astrologyLoading) {
-      processBookingsData();
-    }
-  }, [bookings, astrologyBookings, loading, bookingLoading, astrologyLoading, processBookingsData]);
-
   const processBookingsData = useCallback(() => {
     try {
       const pujaBookings = bookings || [];
@@ -273,6 +246,33 @@ const useDashboardData = () => {
       setError('Failed to process dashboard data');
     }
   }, [bookings, astrologyBookings]);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        await Promise.all([
+          fetchBookings(),
+          fetchAstrologyBookings(),
+        ]);
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [fetchBookings, fetchAstrologyBookings]);
+
+  useEffect(() => {
+    if (!loading && !bookingLoading && !astrologyLoading) {
+      processBookingsData();
+    }
+  }, [bookings, astrologyBookings, loading, bookingLoading, astrologyLoading, processBookingsData]);
 
   const refreshData = async () => {
     try {
