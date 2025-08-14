@@ -15,11 +15,11 @@ import {
 import { useProfileStore } from '../../../../stores/profileStore';
 import { Address, profileService } from '../../../../apiService/profileService';
 
-interface AddressManagerProps {
-  className?: string;
-}
+type AddressManagerProps = {
+    className?: string;
+};
 
-interface AddressFormData extends Omit<Address, 'id' | 'created_at' | 'updated_at'> {}
+type AddressFormData = Omit<Address, 'id' | 'created_at' | 'updated_at'>;
 
 export const AddressManager: React.FC<AddressManagerProps> = ({ className = '' }) => {
   const { addresses, fetchAddresses, createAddress, updateAddress, deleteAddress, addressesLoading } = useProfileStore();

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { CreditCard, Upload, Save, X, Edit3, CheckCircle, AlertCircle } from 'lucide-react';
 import { useProfileStore } from '../../../../stores/profileStore';
 import { PanCard } from '../../../../apiService/profileService';
@@ -8,8 +9,7 @@ import { PanCard } from '../../../../apiService/profileService';
 interface PanCardManagerProps {
   className?: string;
 }
-
-interface PanCardFormData extends Omit<PanCard, 'id' | 'created_at' | 'updated_at' | 'user' | 'is_verified'> {}
+type PanCardFormData = Omit<PanCard, 'id' | 'created_at' | 'updated_at' | 'user' | 'is_verified'>;
 
 export const PanCardManager: React.FC<PanCardManagerProps> = ({ className = '' }) => {
   const { panCard, fetchPanCard, updatePanCard, panCardLoading } = useProfileStore();
@@ -170,6 +170,7 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ className = '' }
   };
 
   const verificationStatus = getVerificationStatus();
+  const VerificationIcon = verificationStatus?.icon;
 
   return (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-200 ${className}`}>
@@ -232,12 +233,14 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ className = '' }
               
               {/* Current Image or Upload Area */}
               <div className="space-y-4">
-                {/* Preview Area */}
                 {(imagePreview || formData.pan_card_image_url) && (
                   <div className="relative inline-block">
-                    <img
+                    <Image
                       src={imagePreview || formData.pan_card_image_url || ''}
                       alt="PAN Card"
+                      width={256}
+                      height={160}
+                      unoptimized
                       className="w-64 h-40 object-cover rounded-lg border border-gray-300"
                     />
                     <button
@@ -305,6 +308,7 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ className = '' }
             {panCard ? (
               <div className="space-y-6">
                 {/* PAN Number Display */}
+                {/* PAN Number Display */}
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-2">
                     PAN Number
@@ -313,39 +317,42 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ className = '' }
                     <p className="text-xl font-mono tracking-wider font-semibold text-gray-900">
                       {formatPanDisplay(panCard.pan_number)}
                     </p>
-                    {verificationStatus && (
+
+                    {verificationStatus && VerificationIcon && (
                       <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${verificationStatus.className}`}>
-                        <verificationStatus.icon className="w-3 h-3" />
+                        <VerificationIcon className="w-3 h-3" />
                         {verificationStatus.text}
                       </span>
                     )}
                   </div>
+
+                  {panCard.pan_card_image_url && (
+                    <div className="pt-4">
+                      <label className="block text-sm font-medium text-gray-500 mb-2">
+                        PAN Card Image
+                      </label>
+                      <Image
+                        src={panCard.pan_card_image_url}
+                        alt="PAN Card"
+                        width={256}
+                        height={160}
+                        unoptimized
+                        className="w-64 h-40 object-cover rounded-lg border border-gray-300 cursor-pointer hover:opacity-90 transition-opacity duration-200"
+                        onClick={() => window.open(panCard.pan_card_image_url!, '_blank')}
+                      />
+                      <p className="mt-1 text-xs text-gray-500">Click to view full image</p>
+                    </div>
+                  )}
+
+                  {/* Last Updated */}
+                  {panCard.updated_at && (
+                    <div className="pt-4 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">
+                        Last updated: {new Date(panCard.updated_at).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  )}
                 </div>
-
-                {/* PAN Card Image */}
-                {panCard.pan_card_image_url && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-2">
-                      PAN Card Image
-                    </label>
-                    <img
-                      src={panCard.pan_card_image_url}
-                      alt="PAN Card"
-                      className="w-64 h-40 object-cover rounded-lg border border-gray-300 cursor-pointer hover:opacity-90 transition-opacity duration-200"
-                      onClick={() => window.open(panCard.pan_card_image_url!, '_blank')}
-                    />
-                    <p className="mt-1 text-xs text-gray-500">Click to view full image</p>
-                  </div>
-                )}
-
-                {/* Last Updated */}
-                {panCard.updated_at && (
-                  <div className="pt-4 border-t border-gray-100">
-                    <p className="text-xs text-gray-500">
-                      Last updated: {new Date(panCard.updated_at).toLocaleString('en-IN')}
-                    </p>
-                  </div>
-                )}
               </div>
             ) : (
               /* No PAN Card */
@@ -363,7 +370,8 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ className = '' }
               </div>
             )}
           </div>
-        )}
+        )
+      }
       </div>
     </div>
   );

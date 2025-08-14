@@ -238,7 +238,7 @@ export function CustomFormIntegrationExample() {
   );
 }
 
-export default {
+const ProfileExamples = {
   FullProfilePage,
   IndividualComponentExample,
   CustomLayoutExample,
@@ -247,3 +247,5 @@ export default {
   WithCustomErrorHandlingExample,
   CustomFormIntegrationExample,
 };
+
+export default ProfileExamples;

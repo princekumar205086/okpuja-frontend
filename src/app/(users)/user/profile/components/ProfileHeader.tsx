@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Camera, User, Mail, Calendar, Badge } from 'lucide-react';
 import { useAuthStore } from '../../../../stores/authStore';
 import { useProfileStore } from '../../../../stores/profileStore';
@@ -72,11 +73,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className = '' }) 
             onClick={handleImageClick}
           >
             {profile?.profile_picture ? (
-              <img
-                src={profile.profile_picture}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              <div className="w-full h-full relative">
+                <Image
+                  src={profile.profile_picture}
+                  alt="Profile"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-white text-xl lg:text-2xl font-semibold">
                 {getInitials() || <User className="w-8 h-8 lg:w-10 lg:h-10" />}
