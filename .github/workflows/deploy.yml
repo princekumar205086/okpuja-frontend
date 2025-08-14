@@ -1,83 +1,49 @@
-name: CI Build & Deploy to VPS
+name: Deploy to VPS
 
 on:
   push:
     branches:
-      - master
+      - master  # or your deploy branch
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Node + pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 20   # change if you need another Node version
+    - name: Set up SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+    - name: Connect to VPS and pull latest changes
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+          cd ${{ secrets.VPS_PATH }} && \
+          git fetch --all && \
+          git reset --hard origin/master && \
+          git pull origin master
+        "
 
-      - name: Build
-        run: pnpm run build
+    - name: Install dependencies
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+          cd ${{ secrets.VPS_PATH }} && \
+          pnpm install
+        "
 
-      - name: Prepare artifact (tar)
-        run: |
-          # include the built output and minimal files needed on server
-          TAR=site-artifact.tar.gz
-          rm -f $TAR
-          tar -czf $TAR .next package.json pnpm-lock.yaml next.config.* public
-          ls -lah $TAR
+    - name: Build application
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+          cd ${{ secrets.VPS_PATH }} && \
+          pnpm run build
+        "
 
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      - name: Copy artifact to VPS (scp)
-        env:
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PATH: ${{ secrets.VPS_PATH }}
-        run: |
-          # Use ServerAliveInterval to keep connection healthy during scp
-          scp -o StrictHostKeyChecking=no -o ServerAliveInterval=60 site-artifact.tar.gz "${VPS_USER}@${VPS_HOST}:/tmp/site-artifact.tar.gz"
-
-      - name: Deploy on VPS: extract, install prod deps, restart app
-        env:
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PATH: ${{ secrets.VPS_PATH }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 "${VPS_USER}@${VPS_HOST}" "
-            set -e
-            mkdir -p ${VPS_PATH}
-            cd ${VPS_PATH}
-            # Extract artifact (overwrites .next and minimal files)
-            tar -xzf /tmp/site-artifact.tar.gz -C ${VPS_PATH}
-            rm -f /tmp/site-artifact.tar.gz
-
-            # Ensure pnpm exists on server. If not installed, install it using corepack
-            if ! command -v pnpm >/dev/null 2>&1; then
-              echo 'Installing pnpm via corepack'
-              corepack enable
-            fi
-
-            # Install production dependencies (fast)
-            pnpm install --prod --frozen-lockfile
-
-            # Restart via pm2 (assumes pm2 is installed). If process not present, start it.
-            if pm2 describe okpuja >/dev/null 2>&1; then
-              pm2 restart okpuja
-            else
-              # Start using pnpm start which should run 'next start'
-              pm2 start --name okpuja -- pnpm -- start
-            fi
-
-            # Print last lines of pm2 logs
-            pm2 logs okpuja --lines 100 --nostream || true
-          "
+    - name: Restart application with PM2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+          cd ${{ secrets.VPS_PATH }} && \
+          pm2 restart okpuja
+        "
