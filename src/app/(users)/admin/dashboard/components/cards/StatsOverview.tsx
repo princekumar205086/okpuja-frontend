@@ -1,6 +1,5 @@
 "use client";
 import React from 'react';
-import { Grid2 as Grid } from '@mui/material';
 import MobileStatsCard from './MobileStatsCard';
 import {
   People as UsersIcon,
@@ -90,9 +89,9 @@ const StatsOverview: React.FC = () => {
   ];
 
   return (
-    <Grid container spacing={3}>
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={index}>
+        <div key={index} className="col-span-1">
           <MobileStatsCard
             title={stat.title}
             value={stat.value}
@@ -103,9 +102,9 @@ const StatsOverview: React.FC = () => {
             gradient={stat.gradient}
             index={index}
           />
-        </Grid>
+        </div>
       ))}
-    </Grid>
+    </div>
   );
 };
 

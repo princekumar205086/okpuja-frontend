@@ -10,7 +10,7 @@ import {
   Button,
   Card,
   CardContent,
-  Grid2 as Grid,
+  Grid,
   Divider,
   TextField,
   ButtonGroup,
@@ -285,37 +285,37 @@ export const BookingDrawer: React.FC<BookingDrawerProps> = ({
           </Card>
 
           {/* Service Information */}
-          <Card sx={{ mb: 3 }}>
+            <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" mb={2}>Service Information</Typography>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body2" color="textSecondary">Service</Typography>
-                  <Typography variant="body1" fontWeight="bold">
-                    {booking.service?.title || booking.service_title || 'Unknown Service'}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body2" color="textSecondary">Amount</Typography>
-                  <Typography variant="h6" color="primary" fontWeight="bold">
-                    ₹{booking.service?.price || booking.total_amount || 0}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body2" color="textSecondary">Scheduled Date</Typography>
-                  <Typography variant="body1">
-                    {booking.preferred_date || booking.selected_date || 'Not scheduled'}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body2" color="textSecondary">Scheduled Time</Typography>
-                  <Typography variant="body1">
-                    {booking.preferred_time || booking.selected_time || 'Not scheduled'}
-                  </Typography>
-                </Grid>
-              </Grid>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Typography variant="body2" color="textSecondary">Service</Typography>
+                <Typography variant="body1" fontWeight="bold">
+                {booking.service?.title || booking.service_title || 'Unknown Service'}
+                </Typography>
+              </div>
+              <div>
+                <Typography variant="body2" color="textSecondary">Amount</Typography>
+                <Typography variant="h6" color="primary" fontWeight="bold">
+                ₹{booking.service?.price || booking.total_amount || 0}
+                </Typography>
+              </div>
+              <div>
+                <Typography variant="body2" color="textSecondary">Scheduled Date</Typography>
+                <Typography variant="body1">
+                {booking.preferred_date || booking.selected_date || 'Not scheduled'}
+                </Typography>
+              </div>
+              <div>
+                <Typography variant="body2" color="textSecondary">Scheduled Time</Typography>
+                <Typography variant="body1">
+                {booking.preferred_time || booking.selected_time || 'Not scheduled'}
+                </Typography>
+              </div>
+              </div>
             </CardContent>
-          </Card>
+            </Card>
 
           {/* Payment Information */}
           <Card sx={{ mb: 3 }}>

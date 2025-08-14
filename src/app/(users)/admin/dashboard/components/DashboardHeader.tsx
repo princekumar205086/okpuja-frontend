@@ -1,11 +1,10 @@
 "use client";
 import React from 'react';
-import { Box, Typography, Button, Avatar, Chip, Grid2 as Grid } from '@mui/material';
+import { Box, Typography, Button, Avatar, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
 import { 
   GetApp as ExportIcon,
   Refresh as RefreshIcon,
-  Notifications as NotificationsIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { useAuthStore } from '@/app/stores/authStore';
@@ -29,9 +28,10 @@ const DashboardHeader: React.FC = () => {
       transition={{ duration: 0.5 }}
     >
       <Box sx={{ mb: 4 }}>
-        <Grid container spacing={3} alignItems="center">
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+        {/* Responsive layout using Tailwind instead of MUI Grid */}
+        <div className="flex flex-wrap -mx-3 items-center">
+          <div className="w-full md:w-8/12 px-3">
+            <div className="flex items-center gap-3">
               <Box>
                 <Typography variant="h3" fontWeight="bold" gutterBottom>
                   नमस्ते, {user?.full_name || 'Admin'} 🙏
@@ -43,19 +43,19 @@ const DashboardHeader: React.FC = () => {
                   {currentTime}
                 </Typography>
               </Box>
-            </Box>
-          </Grid>
-          
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+            </div>
+          </div>
+
+          <div className="w-full md:w-4/12 px-3">
+            <div className="flex items-center gap-2 justify-start md:justify-end">
               <Button
                 variant="outlined"
                 size="small"
                 startIcon={<RefreshIcon />}
+                className="hidden sm:flex"
                 sx={{ 
                   borderRadius: 2,
                   textTransform: 'none',
-                  display: { xs: 'none', sm: 'flex' }
                 }}
               >
                 Refresh
@@ -65,10 +65,10 @@ const DashboardHeader: React.FC = () => {
                 variant="outlined"
                 size="small"
                 startIcon={<ExportIcon />}
+                className="hidden sm:flex"
                 sx={{ 
                   borderRadius: 2,
                   textTransform: 'none',
-                  display: { xs: 'none', sm: 'flex' }
                 }}
               >
                 Export
@@ -100,9 +100,9 @@ const DashboardHeader: React.FC = () => {
               >
                 {user?.full_name?.charAt(0)?.toUpperCase() || 'A'}
               </Avatar>
-            </Box>
-          </Grid>
-        </Grid>
+            </div>
+          </div>
+        </div>
 
         {/* Status Bar */}
         <Box 

@@ -1,8 +1,0 @@
-ignoredBuiltDependencies:
-  - unrs-resolver
-
-onlyBuiltDependencies:
-  - '@mui/x-telemetry'
-  - '@tailwindcss/oxide'
-  - core-js
-  - sharp
