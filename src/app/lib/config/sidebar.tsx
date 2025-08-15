@@ -57,7 +57,6 @@ export const getSidebarItems = (userType: "admin" | "employee" | "user") => {
   const employeeItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/employee/dashboard" },
     { text: "Assigned Bookings", icon: <BookingIcon />, path: "/employee/bookings" },
-    { text: "Payments", icon: <PaymentIcon />, path: "/employee/payments" },
     { text: "Schedule", icon: <ScheduleIcon />, path: "/employee/schedule" },
     { text: "Profile", icon: <ProfileIcon />, path: "/employee/profile" },
   ];
@@ -71,7 +70,7 @@ export const getSidebarItems = (userType: "admin" | "employee" | "user") => {
     { text: "Blog", icon: <BlogIcon />, path: "/blog" },
     { text: "Gallery", icon: <GalleryIcon />, path: "/gallery" },
     { text: "Events", icon: <EventIcon />, path: "/events" },
-    { text: "Support", icon: <SupportIcon />, path: "/user/contactus" },
+    { text: "Support", icon: <SupportIcon />, path: "/contactus" },
     { text: "Profile", icon: <ProfileIcon />, path: "/user/profile" },
   ];
 
