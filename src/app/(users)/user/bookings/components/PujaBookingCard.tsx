@@ -42,7 +42,7 @@ const PujaBookingCard: React.FC<PujaBookingCardProps> = ({ booking, onViewDetail
   const handleInvoiceDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (booking.book_id) {
-      window.open(`/booking/invoice/${booking.book_id}/`, '_blank');
+      window.open(`/confirmbooking?book_id=${booking.book_id}/`, '_blank');
     }
   };
 

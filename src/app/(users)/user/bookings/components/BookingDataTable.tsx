@@ -179,7 +179,7 @@ const BookingDataTable: React.FC<BookingDataTableProps> = ({
                   onClick={() => {
                     const bookingId = type === 'puja' ? params.row.book_id : params.row.astro_book_id;
                     if (bookingId) {
-                      window.open(`/booking/invoice/${bookingId}/`, '_blank');
+                      window.open(`/confirmbooking?book_id=${bookingId}/`, '_blank');
                     }
                   }}
                   sx={{ color: 'text.secondary' }}

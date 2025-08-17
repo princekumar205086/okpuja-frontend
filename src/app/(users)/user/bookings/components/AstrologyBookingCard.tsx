@@ -63,7 +63,7 @@ const AstrologyBookingCard: React.FC<AstrologyBookingCardProps> = ({ booking, on
   const handleInvoiceDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (booking.book_id) {
-      window.open(`/booking/invoice/${booking.book_id}/`, '_blank');
+      window.open(`/confirmbooking?book_id=${booking.book_id}/`, '_blank');
     }
   };
 

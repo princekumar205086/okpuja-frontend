@@ -121,7 +121,7 @@ export const generateBookingShareLink = (bookingId: string, type: 'puja' | 'astr
 
 // Download invoice
 export const downloadInvoice = (bookingId: string) => {
-  const invoiceUrl = `/booking/invoice/${bookingId}/`;
+  const invoiceUrl = `/confirmbooking?book_id=${bookingId}/`;
   window.open(invoiceUrl, '_blank');
 };
 

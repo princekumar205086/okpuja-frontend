@@ -52,7 +52,7 @@ const PujaDetailDrawer: React.FC<PujaDetailDrawerProps> = ({ booking, open, onCl
 
   const handleInvoiceDownload = () => {
     if (booking.book_id) {
-      window.open(`/booking/invoice/${booking.book_id}/`, '_blank');
+      window.open(`/confirmbooking?book_id=${booking.book_id}/`, '_blank');
     }
   };
 
