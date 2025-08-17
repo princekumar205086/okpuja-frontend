@@ -34,17 +34,17 @@ const PromotionsPage: React.FC = () => {
   useEffect(() => {
     fetchPromoCodes();
     fetchPromoStats();
-  }, []);
+  }, [fetchPromoCodes, fetchPromoStats]);
 
   // Refetch data when filters or pagination change
   useEffect(() => {
     fetchPromoCodes();
-  }, [filters, pagination.page, pagination.limit]);
+  }, [filters, pagination.page, pagination.limit, fetchPromoCodes]);
 
   // Clear any existing errors when component mounts
   useEffect(() => {
     clearError();
-  }, []);
+  }, [clearError]);
 
   // Modal handlers
   const handleCreateSingle = () => {
