@@ -216,8 +216,35 @@ export default function ServiceDetailPage() {
       return;
     }
 
-    // Handle booking logic here
-    toast.success('Booking functionality would be implemented here!');
+    // For now booking is handled via cart -> checkout. Add to cart then navigate to checkout
+    const cartItemData = {
+      service_type: 'PUJA' as const,
+      puja_service: service!.id,
+      package_id: selectedPackage.id,
+      selected_date: selectedDate,
+      selected_time: selectedTime,
+    };
+
+    const doAddAndGo = async () => {
+      try {
+        const success = await addToCart(cartItemData);
+        if (success) {
+          // Clear transient selections
+          setSelectedDate('');
+          setSelectedTime('');
+          setErrorMessage('');
+          // Navigate to checkout
+          router.push('/checkout');
+        } else {
+          setErrorMessage('Failed to add item to cart. Please try again.');
+        }
+      } catch (err) {
+        console.error('Error adding to cart during booking:', err);
+        setErrorMessage('Failed to add item to cart. Please try again.');
+      }
+    };
+
+    void doAddAndGo();
   };
 
   const handleAddToCart = async () => {

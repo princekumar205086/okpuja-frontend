@@ -416,7 +416,10 @@ const CartPage: React.FC = () => {
                                 <span className="break-words">{item.package.includes_materials ? ' Included' : ' Not Included'}</span>
                               </div>
                             </div>
-                            <p className="text-gray-600 text-xs sm:text-sm mt-2 break-words">{item.package.description}</p>
+                            <div
+                              className="text-gray-600 text-xs sm:text-sm mt-2 break-words"
+                              dangerouslySetInnerHTML={{ __html: item.package.description || '' }}
+                            />
                           </div>
                         )}
 

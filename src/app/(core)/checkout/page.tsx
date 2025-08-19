@@ -20,7 +20,10 @@ import {
   FaHome,
   FaCheck,
   FaSpinner,
-  FaArrowLeft
+  FaArrowLeft,
+  FaLocationArrow,
+  FaTimes,
+  FaCheckCircle
 } from 'react-icons/fa';
 
 import { useAuthStore } from '../../stores/authStore';
@@ -38,6 +41,7 @@ const CheckoutPage: React.FC = () => {
     loading: addressLoading, 
     fetchAddresses, 
     createAddress, 
+    updateAddress,
     deleteAddress 
   } = useAddressStore();
   const { processCartPayment, loading: paymentLoading } = usePaymentStore();
@@ -53,14 +57,17 @@ const CheckoutPage: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   
   // Address form state
   const [addressForm, setAddressForm] = useState({
     address_line1: '',
     address_line2: '',
+    postal_code: '',
     city: '',
     state: '',
-    postal_code: '',
     country: 'India',
     is_default: false
   });
@@ -87,8 +94,28 @@ const CheckoutPage: React.FC = () => {
   const handleAddressFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!addressForm.address_line1 || !addressForm.city || !addressForm.state || !addressForm.postal_code) {
+    if (!addressForm.address_line1 || !addressForm.postal_code || !addressForm.city || !addressForm.state) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (editingAddressId) {
+      const success = await updateAddress(editingAddressId, addressForm);
+      if (success) {
+        setShowAddressForm(false);
+        setEditingAddressId(null);
+        setAddressForm({
+          address_line1: '',
+          address_line2: '',
+          postal_code: '',
+          city: '',
+          state: '',
+          country: 'India',
+          is_default: false
+        });
+        await fetchAddresses();
+        toast.success('Address updated successfully');
+      }
       return;
     }
 
@@ -98,24 +125,184 @@ const CheckoutPage: React.FC = () => {
       setAddressForm({
         address_line1: '',
         address_line2: '',
+        postal_code: '',
         city: '',
         state: '',
-        postal_code: '',
         country: 'India',
         is_default: false
       });
       await fetchAddresses();
+      toast.success('Address added successfully');
+    }
+  };
+
+  // Prefill form for editing
+  const handleEditAddress = (addressId: number) => {
+    const addr = addresses.find(a => a.id === addressId);
+    if (!addr) return;
+    setEditingAddressId(addressId);
+    setAddressForm({
+      address_line1: addr.address_line1 || '',
+      address_line2: addr.address_line2 || '',
+      postal_code: addr.postal_code || '',
+      city: addr.city || '',
+      state: addr.state || '',
+      country: addr.country || 'India',
+      is_default: !!addr.is_default
+    });
+    setShowAddressForm(true);
+    setSelectedAddress(addressId);
+  };
+
+  // Get current location and fetch pincode
+  const getCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by this browser');
+      return;
+    }
+
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // Use a more reliable reverse geocoding service
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'OKPUJA-Frontend/1.0'
+              }
+            }
+          );
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch location data');
+          }
+          
+          const data = await response.json();
+          
+          if (data && data.address) {
+            const address = data.address;
+            const pincode = address.postcode || '';
+            const city = address.city || address.town || address.village || address.suburb || '';
+            const state = address.state || '';
+            const country = address.country || 'India';
+            
+            if (pincode && city && state) {
+              setAddressForm(prev => ({ 
+                ...prev, 
+                postal_code: pincode,
+                city, 
+                state, 
+                country 
+              }));
+              toast.success('📍 Location detected successfully!');
+            } else {
+              // Fallback: try to get pincode from coordinates using India Post API
+              await fallbackLocationLookup(latitude, longitude);
+            }
+          } else {
+            await fallbackLocationLookup(latitude, longitude);
+          }
+        } catch (error) {
+          console.error('Location detection error:', error);
+          toast.error('Failed to detect location. Please enter manually.');
+        } finally {
+          setLocationLoading(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        setLocationLoading(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            toast.error('📍 Location access denied. Please allow location access and try again.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            toast.error('📍 Location information is unavailable.');
+            break;
+          case error.TIMEOUT:
+            toast.error('📍 Location request timed out.');
+            break;
+          default:
+            toast.error('📍 An unknown error occurred while detecting location.');
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 300000
+      }
+    );
+  };
+
+  // Fallback location lookup using approximate pincode services
+  const fallbackLocationLookup = async (lat: number, lng: number) => {
+    try {
+      // Try alternative geocoding service
+      const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+      const data = await response.json();
+      
+      if (data && data.postcode && data.city && data.principalSubdivision) {
+        setAddressForm(prev => ({ 
+          ...prev, 
+          postal_code: data.postcode,
+          city: data.city,
+          state: data.principalSubdivision,
+          country: data.countryName || 'India'
+        }));
+        toast.success('📍 Location detected successfully!');
+      } else {
+        toast.error('📍 Unable to detect location details. Please enter manually.');
+      }
+    } catch (error) {
+      console.error('Fallback location error:', error);
+      toast.error('📍 Unable to detect location. Please enter manually.');
     }
   };
 
   const handleDeleteAddress = async (addressId: number) => {
-    if (window.confirm('Are you sure you want to delete this address?')) {
+    const confirmed = await new Promise((resolve) => {
+      toast((t) => (
+        <div className="text-center">
+          <p className="mb-3">Are you sure you want to delete this address?</p>
+          <div className="flex justify-center space-x-2">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                resolve(true);
+              }}
+              className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+            >
+              Yes, Delete
+            </button>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                resolve(false);
+              }}
+              className="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ), {
+        duration: Infinity,
+      });
+    });
+
+    if (confirmed) {
       const success = await deleteAddress(addressId);
       if (success) {
         if (selectedAddress === addressId) {
           setSelectedAddress(null);
         }
         await fetchAddresses();
+        toast.success('Address deleted successfully');
       }
     }
   };
@@ -315,6 +502,53 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
+  async function lookupPincode(value: string) {
+    // Only proceed for 6 digit numeric pincodes
+    if (!/^\d{6}$/.test(value)) {
+      return;
+    }
+
+    setPincodeLoading(true);
+    try {
+      // India Post public API
+      const res = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+      if (!res.ok) throw new Error('Pincode lookup failed');
+
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        toast.error('Unable to fetch pincode details. Please enter manually.');
+        return;
+      }
+
+      const result = data[0];
+      if (result.Status !== 'Success' || !result.PostOffice || result.PostOffice.length === 0) {
+        toast.error('Pincode not found. Please enter city/state manually.');
+        return;
+      }
+
+      // Use first PostOffice entry as the best match
+      const po = result.PostOffice[0];
+      const city = po.District || po.Block || addressForm.city || '';
+      const state = po.State || addressForm.state || '';
+      const country = po.Country || 'India';
+
+      setAddressForm(prev => ({
+        ...prev,
+        postal_code: value,
+        city,
+        state,
+        country
+      }));
+
+      toast.success('Pincode details applied');
+    } catch (err) {
+      console.error('Pincode lookup error:', err);
+      toast.error('Failed to lookup pincode. Please enter city/state manually.');
+    } finally {
+      setPincodeLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 w-full max-w-full overflow-x-hidden">
       {/* Header */}
@@ -422,7 +656,7 @@ const CheckoutPage: React.FC = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Edit functionality can be added here
+                              handleEditAddress(address.id);
                             }}
                             className="text-gray-400 hover:text-orange-500 transition-colors p-1"
                           >
@@ -449,116 +683,248 @@ const CheckoutPage: React.FC = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 border-t pt-6"
+                  exit={{ opacity: 0, y: -20 }}
+                  className="mt-6 border-t-2 border-gradient-to-r from-orange-200 to-amber-200 pt-6"
                 >
-                  <h3 className="text-lg font-medium text-gray-800 mb-4">Add New Address</h3>
-                  <form onSubmit={handleAddressFormSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address Line 1 *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={addressForm.address_line1}
-                        onChange={(e) => setAddressForm(prev => ({ ...prev, address_line1: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="House number, building name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address Line 2
-                      </label>
-                      <input
-                        type="text"
-                        value={addressForm.address_line2}
-                        onChange={(e) => setAddressForm(prev => ({ ...prev, address_line2: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Street, area, landmark"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          City *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={addressForm.city}
-                          onChange={(e) => setAddressForm(prev => ({ ...prev, city: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
+                  <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-200">
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center mr-3">
+                          {editingAddressId ? (
+                            <FaEdit className="text-white text-lg" />
+                          ) : (
+                            <FaPlus className="text-white text-lg" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-800">
+                            {editingAddressId ? 'Edit Address' : 'Add New Address'}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {editingAddressId ? 'Update your address details' : 'Enter your delivery address details'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          State *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={addressForm.state}
-                          onChange={(e) => setAddressForm(prev => ({ ...prev, state: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Postal Code *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={addressForm.postal_code}
-                          onChange={(e) => setAddressForm(prev => ({ ...prev, postal_code: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Country *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={addressForm.country}
-                          onChange={(e) => setAddressForm(prev => ({ ...prev, country: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
+                      <div className="flex items-center space-x-2">
+                        <motion.button
+                          type="button"
+                          onClick={getCurrentLocation}
+                          disabled={locationLoading}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                        >
+                          {locationLoading ? (
+                            <FaSpinner className="animate-spin mr-2" />
+                          ) : (
+                            <FaLocationArrow className="mr-2" />
+                          )}
+                          {locationLoading ? 'Detecting...' : 'Use Current Location'}
+                        </motion.button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAddressForm(false);
+                            setEditingAddressId(null);
+                            setAddressForm({
+                              address_line1: '',
+                              address_line2: '',
+                              postal_code: '',
+                              city: '',
+                              state: '',
+                              country: 'India',
+                              is_default: false
+                            });
+                          }}
+                          className="text-gray-400 hover:text-gray-600 p-2"
+                        >
+                          <FaTimes className="text-lg" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="isDefault"
-                        checked={addressForm.is_default}
-                        onChange={(e) => setAddressForm(prev => ({ ...prev, is_default: e.target.checked }))}
-                        className="mr-2"
-                      />
-                      <label htmlFor="isDefault" className="text-sm text-gray-700">
-                        Set as default address
-                      </label>
-                    </div>
-                    <div className="flex space-x-4">
-                      <button
-                        type="submit"
-                        disabled={addressLoading}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
-                      >
-                        {addressLoading ? 'Adding...' : 'Add Address'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowAddressForm(false)}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+
+                    <form onSubmit={handleAddressFormSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Address Line 1 *
+                          </label>
+                          <div className="relative">
+                            <FaHome className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <input
+                              type="text"
+                              required
+                              value={addressForm.address_line1}
+                              onChange={(e) => setAddressForm(prev => ({ ...prev, address_line1: e.target.value }))}
+                              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                              placeholder="House number, building name, floor"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Address Line 2
+                          </label>
+                          <div className="relative">
+                            <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <input
+                              type="text"
+                              value={addressForm.address_line2}
+                              onChange={(e) => setAddressForm(prev => ({ ...prev, address_line2: e.target.value }))}
+                              className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                              placeholder="Street, area, landmark, nearby"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="md:col-span-1">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Pincode *
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              required
+                              maxLength={6}
+                              value={addressForm.postal_code}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                setAddressForm(prev => ({ ...prev, postal_code: value }));
+                                if (value.length === 6) {
+                                  lookupPincode(value);
+                                }
+                              }}
+                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                              placeholder="560001"
+                            />
+                            {pincodeLoading && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <FaSpinner className="animate-spin text-orange-500" />
+                              </div>
+                            )}
+                          </div>
+                          {pincodeLoading && (
+                            <p className="text-xs text-orange-600 mt-1 flex items-center">
+                              <FaSpinner className="animate-spin mr-1" />
+                              Fetching location details...
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="md:col-span-1">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            City *
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              required
+                              value={addressForm.city}
+                              readOnly
+                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 cursor-not-allowed text-gray-600"
+                              placeholder="Auto-filled from pincode"
+                            />
+                            {addressForm.city && (
+                              <FaCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-1">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            State *
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              required
+                              value={addressForm.state}
+                              readOnly
+                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 cursor-not-allowed text-gray-600"
+                              placeholder="Auto-filled from pincode"
+                            />
+                            {addressForm.state && (
+                              <FaCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Country *
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              required
+                              value={addressForm.country}
+                              readOnly
+                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 cursor-not-allowed text-gray-600"
+                            />
+                            <FaCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center bg-white rounded-lg p-4 border-2 border-dashed border-orange-200">
+                        <input
+                          type="checkbox"
+                          id="isDefault"
+                          checked={addressForm.is_default}
+                          onChange={(e) => setAddressForm(prev => ({ ...prev, is_default: e.target.checked }))}
+                          className="mr-3 w-5 h-5 text-orange-500 border-2 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+                        />
+                        <label htmlFor="isDefault" className="text-sm font-medium text-gray-700 cursor-pointer">
+                          🏠 Set as default address
+                        </label>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4 border-t border-orange-200">
+                        <motion.button
+                          type="submit"
+                          disabled={addressLoading || pincodeLoading}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center"
+                        >
+                          {addressLoading ? (
+                            <>
+                              <FaSpinner className="animate-spin mr-2" />
+                              {editingAddressId ? 'Saving Changes...' : 'Adding Address...'}
+                            </>
+                          ) : (
+                            <>
+                              <FaCheckCircle className="mr-2" />
+                              {editingAddressId ? 'Save Changes' : 'Add Address'}
+                            </>
+                          )}
+                        </motion.button>
+                        <motion.button
+                          type="button"
+                          onClick={() => {
+                            setShowAddressForm(false);
+                            setEditingAddressId(null);
+                            setAddressForm({
+                              address_line1: '',
+                              address_line2: '',
+                              postal_code: '',
+                              city: '',
+                              state: '',
+                              country: 'India',
+                              is_default: false
+                            });
+                          }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex-1 sm:flex-none bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white px-8 py-4 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
+                        >
+                          <FaTimes className="mr-2" />
+                          Cancel
+                        </motion.button>
+                      </div>
+                    </form>
+                  </div>
                 </motion.div>
               )}
             </div>
