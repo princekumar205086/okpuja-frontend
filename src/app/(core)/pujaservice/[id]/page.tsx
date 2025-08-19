@@ -164,8 +164,14 @@ export default function ServiceDetailPage() {
     const filtered = packages.filter(
       pkg => pkg.location === selectedLocation && pkg.language === selectedLanguage
     );
-    setFilteredPackages(filtered);
-    setSelectedPackage(null);
+    // Sort by price (ascending) for clarity
+    const sorted = [...filtered].sort((a, b) => Number(a.price) - Number(b.price));
+    setFilteredPackages(sorted);
+
+    // Keep selection if still valid, otherwise preselect the first option
+    setSelectedPackage(prev =>
+      prev && sorted.some(p => p.id === prev.id) ? prev : (sorted[0] ?? null)
+    );
   }, [selectedLocation, selectedLanguage, service, packages]);
 
   // Date validation
@@ -442,7 +448,7 @@ export default function ServiceDetailPage() {
         </div>
       </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 pb-24 sm:pb-0">
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -551,6 +557,21 @@ export default function ServiceDetailPage() {
                 </div>
               </div>
 
+              {/* Lightweight loading skeleton while fetching packages */}
+              {storeLoading && (
+                <div className="mb-8 space-y-3">
+                  <div className="h-20 rounded-lg bg-gray-100 animate-pulse" />
+                  <div className="h-20 rounded-lg bg-gray-100 animate-pulse" />
+                </div>
+              )}
+
+              {/* Friendly empty state when no matching packages */}
+              {selectedLocation && selectedLanguage && filteredPackages.length === 0 && !storeLoading && (
+                <div className="mb-8 p-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-gray-700 text-sm">
+                  No packages available for the selected location and language. Please try a different combination.
+                </div>
+              )}
+
               {/* Package Selection */}
               <AnimatePresence>
                 {filteredPackages.length > 0 && (
@@ -567,7 +588,7 @@ export default function ServiceDetailPage() {
 
                     {/* Use a radiogroup for accessibility */}
                     <div role="radiogroup" aria-label="Available packages" className="space-y-4">
-                      {filteredPackages.map((pkg) => (
+                      {filteredPackages.map((pkg, idx) => (
                         // Use a label so the entire card is clickable and keyboard accessible
                         <label key={pkg.id} className="block cursor-pointer">
                           {/* hidden radio input keeps native accessibility and keyboard support */}
@@ -590,6 +611,17 @@ export default function ServiceDetailPage() {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
                                 setSelectedPackage(pkg);
+                              }
+                              if (['ArrowDown', 'ArrowRight'].includes(e.key)) {
+                                e.preventDefault();
+                                const next = filteredPackages[(idx + 1) % filteredPackages.length];
+                                setSelectedPackage(next);
+                              }
+                              if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+                                e.preventDefault();
+                                const prevIdx = (idx - 1 + filteredPackages.length) % filteredPackages.length;
+                                const prev = filteredPackages[prevIdx];
+                                setSelectedPackage(prev);
                               }
                             }}
                             className={`relative p-5 rounded-xl border-2 transition-all duration-300 flex items-start gap-4 ${selectedPackage?.id === pkg.id
@@ -712,6 +744,7 @@ export default function ServiceDetailPage() {
                           min={moment().format("YYYY-MM-DD")}
                           className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-50 hover:bg-white transition-all"
                         />
+                        <div className="mt-1 text-xs text-gray-500">Earliest available date is today.</div>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -721,8 +754,10 @@ export default function ServiceDetailPage() {
                           type="time"
                           value={selectedTime}
                           onChange={handleTimeChange}
+                          min={selectedDate === moment().format("YYYY-MM-DD") ? moment().format("HH:mm") : undefined}
                           className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-50 hover:bg-white transition-all"
                         />
+                        <div className="mt-1 text-xs text-gray-500">All times in IST (UTC+5:30).</div>
                       </div>
                     </div>
 
@@ -731,6 +766,8 @@ export default function ServiceDetailPage() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg"
+                        role="alert"
+                        aria-live="assertive"
                       >
                         <p className="text-red-700 text-sm font-medium">{errorMessage}</p>
                       </motion.div>
@@ -784,7 +821,7 @@ export default function ServiceDetailPage() {
                 <div className="grid grid-cols-1 gap-3">
                   <div className="flex items-center justify-center p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer">
                     <Phone className="h-4 w-4 mr-2 text-orange-500" />
-                    <span className="text-sm font-medium text-gray-700">+91 9876543210</span>
+                    <span className="text-sm font-medium text-gray-700">+91 9471661636</span>
                   </div>
                   <div className="flex items-center justify-center p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer">
                     <Mail className="h-4 w-4 mr-2 text-orange-500" />
@@ -981,6 +1018,34 @@ export default function ServiceDetailPage() {
             </div>
           )}
         </motion.div>
+      </div>
+
+      {/* Mobile summary bar */}
+      <div className="fixed bottom-0 inset-x-0 sm:hidden z-50">
+        <div className="mx-4 mb-4 rounded-xl shadow-lg border border-gray-200 bg-white p-3 flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="text-xs text-gray-500 truncate">
+              {selectedPackage ? packageTypeDisplayNames[selectedPackage.package_type] : 'No package selected'}
+            </div>
+            <div className="text-sm font-semibold text-gray-900">
+              {selectedPackage ? `₹${parseFloat(selectedPackage.price.toString()).toLocaleString('en-IN')}` : ''}
+            </div>
+            <div className="text-xs text-gray-500 truncate">
+              {selectedDate && selectedTime ? `${moment(selectedDate).format('DD MMM')} • ${selectedTime}` : ''}
+            </div>
+          </div>
+          <button
+            disabled={!selectedPackage || !selectedDate || !selectedTime}
+            onClick={handleBooking}
+            className={`ml-3 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+              selectedPackage && selectedDate && selectedTime
+                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            Book
+          </button>
+        </div>
       </div>
 
       {/* Login Prompt Modal */}
