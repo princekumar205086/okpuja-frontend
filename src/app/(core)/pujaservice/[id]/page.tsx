@@ -757,7 +757,17 @@ export default function ServiceDetailPage() {
                           min={selectedDate === moment().format("YYYY-MM-DD") ? moment().format("HH:mm") : undefined}
                           className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-gray-50 hover:bg-white transition-all"
                         />
-                        <div className="mt-1 text-xs text-gray-500">All times in IST (UTC+5:30).</div>
+                        <div className="mt-1 text-xs text-gray-500">
+                          All times in IST (UTC+5:30).
+                          {/* Display friendly AM/PM preview */}
+                          {selectedTime ? (
+                            <span className="ml-1 font-medium text-gray-700">
+                              {moment(selectedTime, 'HH:mm').format('hh:mm A')}
+                            </span>
+                          ) : (
+                            <span className="ml-1"> Select a time to see it in AM/PM</span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -1031,7 +1041,7 @@ export default function ServiceDetailPage() {
               {selectedPackage ? `₹${parseFloat(selectedPackage.price.toString()).toLocaleString('en-IN')}` : ''}
             </div>
             <div className="text-xs text-gray-500 truncate">
-              {selectedDate && selectedTime ? `${moment(selectedDate).format('DD MMM')} • ${selectedTime}` : ''}
+              {selectedDate && selectedTime ? `${moment(selectedDate).format('DD MMM')} • ${moment(selectedTime, 'HH:mm').format('hh:mm A')}` : ''}
             </div>
           </div>
           <button
