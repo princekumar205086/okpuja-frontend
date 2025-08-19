@@ -564,90 +564,123 @@ export default function ServiceDetailPage() {
                       <Award className="h-4 w-4 mr-2 text-orange-500" />
                       Choose Your Package
                     </h4>
-                    <div className="space-y-4">
-                      {filteredPackages.map((pkg) => (
-                        <motion.div
-                          key={pkg.id}
-                          whileHover={{ scale: 1.02, y: -2 }}
-                          whileTap={{ scale: 0.98 }}
-                          className={`relative p-5 rounded-xl border-2 cursor-pointer transition-all duration-300 ${selectedPackage?.id === pkg.id
-                              ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50 shadow-lg'
-                              : 'border-gray-200 hover:border-orange-300 hover:shadow-md bg-white'
-                            }`}
-                          onClick={() => setSelectedPackage(pkg)}
-                        >
-                          {/* Package Type Badge */}
-                          <div className="flex items-center justify-between mb-3">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${selectedPackage?.id === pkg.id
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-orange-100 text-orange-600'
-                              }`}>
-                              {packageTypeDisplayNames[pkg.package_type]}
-                            </span>
-                            <div className="text-right">
-                              <span className="text-2xl font-bold text-orange-600">
-                                ₹{parseFloat(pkg.price.toString()).toLocaleString('en-IN')}
-                              </span>
-                              <div className="text-xs text-gray-500">per service</div>
-                            </div>
-                          </div>
 
-                          {/* Package Description */}
-                          <div
-                            className="text-sm text-gray-700 mb-4 leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: pkg.description }}
+                    {/* Use a radiogroup for accessibility */}
+                    <div role="radiogroup" aria-label="Available packages" className="space-y-4">
+                      {filteredPackages.map((pkg) => (
+                        // Use a label so the entire card is clickable and keyboard accessible
+                        <label key={pkg.id} className="block cursor-pointer">
+                          {/* hidden radio input keeps native accessibility and keyboard support */}
+                          <input
+                            type="radio"
+                            name="package"
+                            className="sr-only"
+                            checked={selectedPackage?.id === pkg.id}
+                            onChange={() => setSelectedPackage(pkg)}
+                            aria-checked={selectedPackage?.id === pkg.id}
                           />
 
-                          {/* Package Features */}
-                          <div className="space-y-2">
-                            <div className="flex items-center text-sm">
-                              <Users className="h-4 w-4 mr-2 text-green-500" />
-                              <span className="text-gray-700">
-                                <strong>
-                                  {PACKAGE_CONFIG[pkg.package_type]?.priests || pkg.priest_count}
-                                </strong> Professional Priest{
-                                  (typeof PACKAGE_CONFIG[pkg.package_type]?.priests === 'number'
-                                    ? Number(PACKAGE_CONFIG[pkg.package_type]?.priests) > 1
-                                    : pkg.priest_count > 1) ? 's' : ''
-                                }
-                              </span>
+                          <motion.div
+                            role="radio"
+                            aria-checked={selectedPackage?.id === pkg.id}
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setSelectedPackage(pkg);
+                              }
+                            }}
+                            className={`relative p-5 rounded-xl border-2 transition-all duration-300 flex items-start gap-4 ${selectedPackage?.id === pkg.id
+                                ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50 shadow-lg'
+                                : 'border-gray-200 hover:border-orange-300 hover:shadow-md bg-white'
+                              }`}
+                          >
+                            {/* Visible radio indicator on the left */}
+                            <div className="flex-shrink-0 mt-1">
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${selectedPackage?.id === pkg.id ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'}`}>
+                                {selectedPackage?.id === pkg.id ? (
+                                  <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                                ) : null}
+                              </div>
                             </div>
 
-                            <div className="flex items-center text-sm">
-                              <Clock className="h-4 w-4 mr-2 text-green-500" />
-                              <span className="text-gray-700">
-                                <strong>
-                                  {PACKAGE_CONFIG[pkg.package_type]?.duration || '2-3'} hours
-                                </strong> duration
-                              </span>
+                            <div className="flex-1">
+                              {/* Package header + price */}
+                              <div className="flex items-center justify-between mb-3">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${selectedPackage?.id === pkg.id
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-orange-100 text-orange-600'
+                                  }`}>
+                                  {packageTypeDisplayNames[pkg.package_type]}
+                                </span>
+                                <div className="text-right">
+                                  <span className="text-2xl font-bold text-orange-600">
+                                    ₹{parseFloat(pkg.price.toString()).toLocaleString('en-IN')}
+                                  </span>
+                                  <div className="text-xs text-gray-500">per service</div>
+                                </div>
+                              </div>
+
+                              {/* Package Description */}
+                              <div
+                                className="text-sm text-gray-700 mb-4 leading-relaxed"
+                                dangerouslySetInnerHTML={{ __html: pkg.description }}
+                              />
+
+                              {/* Package Features */}
+                              <div className="space-y-2">
+                                <div className="flex items-center text-sm">
+                                  <Users className="h-4 w-4 mr-2 text-green-500" />
+                                  <span className="text-gray-700">
+                                    <strong>
+                                      {PACKAGE_CONFIG[pkg.package_type]?.priests || pkg.priest_count}
+                                    </strong> Professional Priest{
+                                      (typeof PACKAGE_CONFIG[pkg.package_type]?.priests === 'number'
+                                        ? Number(PACKAGE_CONFIG[pkg.package_type]?.priests) > 1
+                                        : pkg.priest_count > 1) ? 's' : ''
+                                    }
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center text-sm">
+                                  <Clock className="h-4 w-4 mr-2 text-green-500" />
+                                  <span className="text-gray-700">
+                                    <strong>
+                                      {PACKAGE_CONFIG[pkg.package_type]?.duration || '2-3'} hours
+                                    </strong> duration
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center text-sm">
+                                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                                  <span className="text-gray-700">
+                                    {pkg.includes_materials ? 'All Puja Materials Included' : 'Materials Not Included'}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center text-sm">
+                                  <Shield className="h-4 w-4 mr-2 text-green-500" />
+                                  <span className="text-gray-700">
+                                    Authentic Procedures
+                                  </span>
+                                </div>
+                              </div>
                             </div>
 
-                            <div className="flex items-center text-sm">
-                              <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                              <span className="text-gray-700">
-                                {pkg.includes_materials ? 'All Puja Materials Included' : 'Materials Not Included'}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center text-sm">
-                              <Shield className="h-4 w-4 mr-2 text-green-500" />
-                              <span className="text-gray-700">
-                                Authentic Procedures
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Selection Indicator */}
-                          {selectedPackage?.id === pkg.id && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center"
-                            >
-                              <CheckCircle className="h-4 w-4 text-white" />
-                            </motion.div>
-                          )}
-                        </motion.div>
+                            {/* Selection Check (keeps previous visual) */}
+                            {selectedPackage?.id === pkg.id && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute top-3 right-3 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center"
+                              >
+                                <CheckCircle className="h-4 w-4 text-white" />
+                              </motion.div>
+                            )}
+                          </motion.div>
+                        </label>
                       ))}
                     </div>
                   </motion.div>
