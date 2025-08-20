@@ -2,304 +2,260 @@
 
 import React from 'react';
 import {
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  CreditCardIcon,
-  UserIcon,
-  StarIcon,
-  BanknotesIcon,
-  UsersIcon,
   ChartBarIcon,
-  ExclamationTriangleIcon,
-  PauseCircleIcon
+  CurrencyRupeeIcon,
+  UsersIcon,
+  CalendarDaysIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  XCircleIcon,
+  ArrowTrendingUpIcon,
+  SparklesIcon,
+  FireIcon,
 } from '@heroicons/react/24/outline';
 
-interface DashboardStats {
-  totalBookings: number;
-  pendingBookings: number;
-  confirmedBookings: number;
-  completedBookings: number;
-  cancelledBookings: number;
-  totalRevenue: number;
-  pendingPayments: number;
-  avgBookingValue: number;
-  customerSatisfaction: number;
-  staffUtilization: number;
-  conversionRate: number;
-  growthRate: number;
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  change?: string;
+  changeType?: 'increase' | 'decrease' | 'neutral';
+  icon: React.ComponentType<any>;
+  color: string;
+}
+
+interface DashboardData {
+  overview: {
+    total_bookings: number;
+    confirmed_bookings: number;
+    completed_bookings: number;
+    cancelled_bookings: number;
+    pending_sessions: number;
+    total_revenue: string | number;
+    average_booking_value: string | number;
+    bookings_this_period: number;
+    active_services: number;
+  };
 }
 
 interface AdminDashboardStatsProps {
-  astrologyData?: any;
-  regularData?: any;
-  pujaData?: any;
-  loading?: boolean;
+  astrologyData?: DashboardData;
+  regularData?: DashboardData;
+  pujaData?: DashboardData;
+  loading: boolean;
 }
 
-const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({ 
-  astrologyData, 
-  regularData, 
-  pujaData, 
-  loading = false 
-}) => {
-  // Combine all dashboard data
-  const combinedStats = {
-    totalBookings: (astrologyData?.total_bookings || 0) + (regularData?.total_bookings || 0) + (pujaData?.total_bookings || 0),
-    pendingBookings: (astrologyData?.pending_bookings || 0) + (regularData?.pending_bookings || 0) + (pujaData?.pending_bookings || 0),
-    confirmedBookings: (astrologyData?.confirmed_bookings || 0) + (regularData?.confirmed_bookings || 0) + (pujaData?.confirmed_bookings || 0),
-    completedBookings: (astrologyData?.completed_bookings || 0) + (regularData?.completed_bookings || 0) + (pujaData?.completed_bookings || 0),
-    cancelledBookings: (astrologyData?.cancelled_bookings || 0) + (regularData?.cancelled_bookings || 0) + (pujaData?.cancelled_bookings || 0),
-    totalRevenue: parseFloat(astrologyData?.total_revenue || '0') + parseFloat(regularData?.total_revenue || '0') + parseFloat(pujaData?.total_revenue || '0'),
-    avgBookingValue: parseFloat(astrologyData?.average_booking_value || '0'),
-    pendingPayments: (astrologyData?.pending_sessions || 0) + (regularData?.pending_bookings || 0),
-    customerSatisfaction: 4.5, // Default value since not provided by API
-    staffUtilization: 85, // Default value
-    conversionRate: 78, // Default value
-    growthRate: 12.5, // Default value
+const StatCard: React.FC<StatCardProps> = ({ title, value, change, changeType, icon: Icon, color }) => {
+  const formatValue = (val: string | number) => {
+    if (typeof val === 'string') {
+      const numVal = parseFloat(val);
+      if (isNaN(numVal)) return val;
+      return numVal.toLocaleString();
+    }
+    return val.toLocaleString();
   };
 
-  const StatCard: React.FC<{
-    title: string;
-    value: string | number;
-    icon: React.ReactNode;
-    color: string;
-    trend?: number;
-    subtitle?: string;
-    progress?: number;
-  }> = ({ title, value, icon, color, trend, subtitle, progress }) => (
-    <div className={`bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 ${color}`}>
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${color} bg-opacity-10`}>
-          {icon}
-        </div>
-        {trend !== undefined && (
-          <div className="flex items-center space-x-1">
-            {trend > 0 ? (
-              <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
-            ) : (
-              <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />
-            )}
-            <span className={`text-sm font-medium ${trend > 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {Math.abs(trend)}%
-            </span>
-          </div>
-        )}
-      </div>
-      
-      <div className="mb-2">
-        <div className="text-2xl font-bold text-gray-900">
-          {typeof value === 'number' ? value.toLocaleString() : value}
-        </div>
-        <div className="text-sm text-gray-600">{title}</div>
-      </div>
-      
-      {subtitle && (
-        <div className="text-xs text-gray-500 mb-3">{subtitle}</div>
-      )}
-      
-      {progress !== undefined && (
-        <div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-            <div 
-              className={`h-2 rounded-full transition-all duration-300 ${color}`}
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <div className="text-xs text-gray-500">{progress}% of target</div>
-        </div>
-      )}
-    </div>
-  );
-
   return (
-    <div className="mb-8">
-      {/* Key Metrics */}
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
-        Key Performance Metrics
-      </h2>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          title="Total Bookings"
-          value={combinedStats.totalBookings}
-          icon={<ClockIcon className="h-6 w-6 text-blue-600" />}
-          color="border-blue-200"
-          trend={combinedStats.growthRate}
-          subtitle="This month"
-        />
-        
-        <StatCard
-          title="Pending Bookings"
-          value={combinedStats.pendingBookings}
-          icon={<PauseCircleIcon className="h-6 w-6 text-yellow-600" />}
-          color="border-yellow-200"
-          subtitle="Requires attention"
-        />
-        
-        <StatCard
-          title="Total Revenue"
-          value={`₹${(combinedStats.totalRevenue / 100000).toFixed(1)}L`}
-          icon={<BanknotesIcon className="h-6 w-6 text-green-600" />}
-          color="border-green-200"
-          trend={15.2}
-          subtitle="This month"
-        />
-        
-        <StatCard
-          title="Avg Booking Value"
-          value={`₹${combinedStats.avgBookingValue.toLocaleString()}`}
-          icon={<ChartBarIcon className="h-6 w-6 text-indigo-600" />}
-          color="border-indigo-200"
-          trend={8.5}
-          subtitle="Per booking"
-        />
-      </div>
-
-      {/* Status Distribution */}
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
-        Booking Status Overview
-      </h2>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        <StatCard
-          title="Confirmed"
-          value={combinedStats.confirmedBookings}
-          icon={<CheckCircleIcon className="h-6 w-6 text-blue-600" />}
-          color="border-blue-200"
-          progress={combinedStats.totalBookings > 0 ? (combinedStats.confirmedBookings / combinedStats.totalBookings) * 100 : 0}
-        />
-        
-        <StatCard
-          title="Completed"
-          value={combinedStats.completedBookings}
-          icon={<CheckCircleIcon className="h-6 w-6 text-green-600" />}
-          color="border-green-200"
-          progress={combinedStats.totalBookings > 0 ? (combinedStats.completedBookings / combinedStats.totalBookings) * 100 : 0}
-        />
-        
-        <StatCard
-          title="Cancelled"
-          value={combinedStats.cancelledBookings}
-          icon={<XCircleIcon className="h-6 w-6 text-red-600" />}
-          color="border-red-200"
-          progress={combinedStats.totalBookings > 0 ? (combinedStats.cancelledBookings / combinedStats.totalBookings) * 100 : 0}
-        />
-        
-        <StatCard
-          title="Customer Rating"
-          value={`${combinedStats.customerSatisfaction}/5`}
-          icon={<StarIcon className="h-6 w-6 text-yellow-600" />}
-          color="border-yellow-200"
-          progress={combinedStats.customerSatisfaction * 20}
-          subtitle="Average rating"
-        />
-        
-        <StatCard
-          title="Staff Utilization"
-          value={`${combinedStats.staffUtilization}%`}
-          icon={<UsersIcon className="h-6 w-6 text-purple-600" />}
-          color="border-purple-200"
-          progress={combinedStats.staffUtilization}
-          subtitle="Resource usage"
-        />
-      </div>
-
-      {/* Quick Actions & Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Recent Activity & Alerts
-            </h3>
-            
-            <div className="space-y-4">
-              {/* Payment Alerts */}
-              <div className="flex items-center space-x-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
-                <div>
-                  <div className="text-sm font-medium text-yellow-900">
-                    Pending Payments Alert
-                  </div>
-                  <div className="text-sm text-yellow-700">
-                    ₹{combinedStats.pendingPayments.toLocaleString()} in pending payments require attention
-                  </div>
-                </div>
-              </div>
-              
-              {/* Staff Utilization Alert */}
-              {combinedStats.staffUtilization < 70 && (
-                <div className="flex items-center space-x-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <UsersIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                  <div>
-                    <div className="text-sm font-medium text-blue-900">
-                      Low Staff Utilization
-                    </div>
-                    <div className="text-sm text-blue-700">
-                      Staff utilization at {combinedStats.staffUtilization}% - consider reassigning resources
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* High Demand Alert */}
-              <div className="flex items-center space-x-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <ArrowTrendingUpIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
-                <div>
-                  <div className="text-sm font-medium text-green-900">
-                    High Booking Volume
-                  </div>
-                  <div className="text-sm text-green-700">
-                    {combinedStats.growthRate}% increase in bookings this month
-                  </div>
-                </div>
-              </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide mb-1">
+            {title}
+          </p>
+          <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+            {formatValue(value)}
+          </p>
+          {change && (
+            <div className={`inline-flex items-center text-xs sm:text-sm font-medium ${
+              changeType === 'increase' ? 'text-green-600' : 
+              changeType === 'decrease' ? 'text-red-600' : 'text-gray-600'
+            }`}>
+              <ArrowTrendingUpIcon className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 ${
+                changeType === 'decrease' ? 'rotate-180' : ''
+              }`} />
+              {change}
             </div>
-          </div>
+          )}
         </div>
-        
-        <div>
-          <div className="bg-white rounded-lg border border-gray-200 p-6 h-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Quick Stats
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Conversion Rate</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {combinedStats.conversionRate}%
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Peak Hours</span>
-                <span className="text-sm font-medium text-gray-900">
-                  10 AM - 2 PM
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Top Service</span>
-                <span className="text-sm font-medium text-gray-900">
-                  Grah Shanti
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Active Staff</span>
-                <span className="text-sm font-medium text-gray-900">
-                  12/15
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className={`flex-shrink-0 ${color} p-3 sm:p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300`}>
+          <Icon className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
         </div>
       </div>
     </div>
   );
 };
 
+const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
+  astrologyData,
+  regularData,
+  pujaData,
+  loading
+}) => {
+  // Aggregate data from all services
+  const aggregateData = React.useMemo(() => {
+    const astroOverview = astrologyData?.overview;
+    const regularOverview = regularData?.overview;
+    const pujaOverview = pujaData?.overview;
+
+    const totalBookings = (astroOverview?.total_bookings || 0) + 
+                         (regularOverview?.total_bookings || 0) + 
+                         (pujaOverview?.total_bookings || 0);
+
+    const confirmedBookings = (astroOverview?.confirmed_bookings || 0) + 
+                             (regularOverview?.confirmed_bookings || 0) + 
+                             (pujaOverview?.confirmed_bookings || 0);
+
+    const completedBookings = (astroOverview?.completed_bookings || 0) + 
+                             (regularOverview?.completed_bookings || 0) + 
+                             (pujaOverview?.completed_bookings || 0);
+
+    const cancelledBookings = (astroOverview?.cancelled_bookings || 0) + 
+                             (regularOverview?.cancelled_bookings || 0) + 
+                             (pujaOverview?.cancelled_bookings || 0);
+
+    const pendingSessions = (astroOverview?.pending_sessions || 0) + 
+                           (regularOverview?.pending_sessions || 0) + 
+                           (pujaOverview?.pending_sessions || 0);
+
+    // Parse revenue values properly
+    const parseRevenue = (rev: string | number) => {
+      if (typeof rev === 'string') {
+        const parsed = parseFloat(rev);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return rev || 0;
+    };
+
+    const totalRevenue = parseRevenue(astroOverview?.total_revenue || 0) + 
+                        parseRevenue(regularOverview?.total_revenue || 0) + 
+                        parseRevenue(pujaOverview?.total_revenue || 0);
+
+    const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
+
+    const activeServices = (astroOverview?.active_services || 0) + 
+                          (regularOverview?.active_services || 0) + 
+                          (pujaOverview?.active_services || 0);
+
+    return {
+      totalBookings,
+      confirmedBookings,
+      completedBookings,
+      cancelledBookings,
+      pendingSessions,
+      totalRevenue,
+      averageBookingValue,
+      activeServices,
+      // Calculate completion rate
+      completionRate: totalBookings > 0 ? ((completedBookings / totalBookings) * 100).toFixed(1) : '0',
+      // Calculate confirmation rate
+      confirmationRate: totalBookings > 0 ? ((confirmedBookings / totalBookings) * 100).toFixed(1) : '0',
+    };
+  }, [astrologyData, regularData, pujaData]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+              </div>
+              <div className="w-12 h-12 bg-gray-200 rounded-2xl"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const stats = [
+    {
+      title: 'Total Bookings',
+      value: aggregateData.totalBookings,
+      change: '+12% from last month',
+      changeType: 'increase' as const,
+      icon: ChartBarIcon,
+      color: 'bg-gradient-to-br from-blue-500 to-blue-600',
+    },
+    {
+      title: 'Total Revenue',
+      value: `₹${aggregateData.totalRevenue.toLocaleString()}`,
+      change: '+8% from last month',
+      changeType: 'increase' as const,
+      icon: CurrencyRupeeIcon,
+      color: 'bg-gradient-to-br from-green-500 to-green-600',
+    },
+    {
+      title: 'Confirmed Bookings',
+      value: aggregateData.confirmedBookings,
+      change: `${aggregateData.confirmationRate}% confirmation rate`,
+      changeType: 'neutral' as const,
+      icon: CheckCircleIcon,
+      color: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+    },
+    {
+      title: 'Pending Sessions',
+      value: aggregateData.pendingSessions,
+      change: 'Requires attention',
+      changeType: 'neutral' as const,
+      icon: ClockIcon,
+      color: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
+    },
+    {
+      title: 'Completed Sessions',
+      value: aggregateData.completedBookings,
+      change: `${aggregateData.completionRate}% completion rate`,
+      changeType: 'increase' as const,
+      icon: UsersIcon,
+      color: 'bg-gradient-to-br from-purple-500 to-purple-600',
+    },
+    {
+      title: 'Avg Booking Value',
+      value: `₹${Math.round(aggregateData.averageBookingValue)}`,
+      change: '+5% from last month',
+      changeType: 'increase' as const,
+      icon: ArrowTrendingUpIcon,
+      color: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
+    },
+    {
+      title: 'Active Services',
+      value: aggregateData.activeServices,
+      change: 'All services operational',
+      changeType: 'increase' as const,
+      icon: SparklesIcon,
+      color: 'bg-gradient-to-br from-pink-500 to-pink-600',
+    },
+    {
+      title: 'Cancelled Bookings',
+      value: aggregateData.cancelledBookings,
+      change: '-3% from last month',
+      changeType: 'decrease' as const,
+      icon: XCircleIcon,
+      color: 'bg-gradient-to-br from-red-500 to-red-600',
+    },
+  ];
+
+  return (
+    <div className="mb-6 sm:mb-8">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+          Key Metrics Overview
+        </h2>
+        <p className="text-sm sm:text-base text-gray-600">
+          Real-time insights into your booking performance and revenue metrics
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {stats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default AdminDashboardStats;
+        
