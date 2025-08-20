@@ -788,22 +788,73 @@ const EnhancedBookingTable: React.FC<{
   const isAllSelected = data.length > 0 && selectedBookings.length === data.length;
   const isIndeterminate = selectedBookings.length > 0 && selectedBookings.length < data.length;
 
-  // Helper function to get service name
+  // Enhanced helper function to get service name with better fallbacks
   const getServiceName = (item: any) => {
+    // First check for direct service title
     if (item.service?.title) return item.service.title;
     if (item.service_title) return item.service_title;
-    if (activeTab === 'astrology' || item.type === 'astrology') return 'Astrology Consultation';
-    return 'Puja Service';
+    if (item.service_name) return item.service_name;
+    
+    // Check for puja specific fields
+    if (item.puja_name) return item.puja_name;
+    if (item.puja_title) return item.puja_title;
+    
+    // Check service type and provide appropriate default
+    const serviceType = activeTab !== 'all' ? activeTab : item.type;
+    if (serviceType === 'astrology' || item.type === 'astrology') {
+      return 'Astrology Consultation';
+    }
+    
+    // For puja services, provide a more specific default
+    if (serviceType === 'puja' || item.type === 'puja' || activeTab === 'puja') {
+      return item.category_name ? `${item.category_name} Puja` : 'Puja Service';
+    }
+    
+    return 'Service';
   };
 
-  // Helper function to get contact information
+  // Enhanced helper function to get contact information with more fallbacks
   const getContactInfo = (item: any) => {
-    return {
-      name: item.customer_name || item.user_name || item.contact_name || 'Unknown Customer',
-      email: item.contact_email || item.user_email || item.email || 'No email',
-      phone: item.contact_phone || item.user_phone || item.phone || item.contact_number || 'No phone',
-      address: item.address || item.contact_address || item.user_address || 'No address'
-    };
+    // Try multiple possible field names for phone
+    const phone = item.contact_phone || 
+                  item.user_phone || 
+                  item.phone || 
+                  item.contact_number || 
+                  item.phone_number ||
+                  item.mobile ||
+                  item.contact_mobile ||
+                  item.user_mobile ||
+                  item.customer_phone ||
+                  item.customer_mobile ||
+                  'No phone';
+
+    // Try multiple possible field names for name
+    const name = item.customer_name || 
+                 item.user_name || 
+                 item.contact_name ||
+                 item.name ||
+                 item.full_name ||
+                 item.customer ||
+                 item.user ||
+                 'Unknown Customer';
+
+    // Try multiple possible field names for email
+    const email = item.contact_email || 
+                  item.user_email || 
+                  item.email ||
+                  item.customer_email ||
+                  'No email';
+
+    // Try multiple possible field names for address
+    const address = item.address || 
+                    item.contact_address || 
+                    item.user_address ||
+                    item.customer_address ||
+                    item.location ||
+                    item.full_address ||
+                    'No address';
+
+    return { name, email, phone, address };
   };
 
   return (
@@ -877,44 +928,46 @@ const EnhancedBookingTable: React.FC<{
                           <FireIcon className="h-4 w-4 text-orange-500" />
                         )}
                         <span className="text-xs font-medium text-gray-600 capitalize">
-                          {activeTab !== 'all' ? activeTab : item.type} Service
+                          {activeTab !== 'all' ? activeTab : (item.type || 'puja')} Service
                         </span>
                       </div>
                     </div>
                   </td>
 
-                  {/* Customer Info */}
+                  {/* Enhanced Customer Info with better phone display */}
                   <td className="px-3 md:px-6 py-4">
                     <div className="space-y-2">
                       <div className="font-semibold text-gray-900 text-sm">{contact.name}</div>
                       <div className="space-y-1">
                         <div className="flex items-center space-x-1 text-xs text-gray-600">
-                          <EnvelopeIcon className="h-3 w-3" />
-                          <span className="truncate max-w-[150px]">{contact.email}</span>
+                          <EnvelopeIcon className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate max-w-[150px]" title={contact.email}>{contact.email}</span>
                         </div>
                         <div className="flex items-center space-x-1 text-xs text-gray-600">
-                          <PhoneIcon className="h-3 w-3" />
-                          <span>{contact.phone}</span>
+                          <PhoneIcon className="h-3 w-3 flex-shrink-0" />
+                          <span className={contact.phone === 'No phone' ? 'text-red-500 italic' : 'font-medium'}>
+                            {contact.phone}
+                          </span>
                         </div>
                         {contact.address !== 'No address' && (
                           <div className="flex items-center space-x-1 text-xs text-gray-500">
-                            <MapPinIcon className="h-3 w-3" />
-                            <span className="truncate max-w-[150px]">{contact.address}</span>
+                            <MapPinIcon className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate max-w-[150px]" title={contact.address}>{contact.address}</span>
                           </div>
                         )}
                       </div>
                     </div>
                   </td>
 
-                  {/* Service & Amount */}
+                  {/* Enhanced Service & Amount */}
                   <td className="hidden lg:table-cell px-3 md:px-6 py-4">
                     <div className="space-y-1">
-                      <div className="font-semibold text-gray-900 text-sm">{serviceName}</div>
+                      <div className="font-semibold text-gray-900 text-sm" title={serviceName}>{serviceName}</div>
                       <div className="text-lg font-bold text-green-600">
-                        ₹{(item.service?.price || item.total_amount || 0).toLocaleString()}
+                        ₹{(item.service?.price || item.total_amount || item.amount || item.price || 0).toLocaleString()}
                       </div>
                       {item.category_name && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                           {item.category_name}
                         </span>
                       )}
@@ -993,23 +1046,72 @@ const EnhancedBookingCards: React.FC<{
   onSendMeetLink: (booking: any) => void;
 }> = ({ data, activeTab, selectedBookings, onSelectionChange, getStatusColor, getStatusIcon, onUpdateStatus, onViewBooking, onEditBooking, onSendMeetLink }) => {
   
-  // ...existing card selection handlers...
-
-  // Helper functions
+  // Enhanced helper functions with better data mapping
   const getServiceName = (item: any) => {
+    // First check for direct service title
     if (item.service?.title) return item.service.title;
     if (item.service_title) return item.service_title;
-    if (activeTab === 'astrology' || item.type === 'astrology') return 'Astrology Consultation';
-    return 'Puja Service';
+    if (item.service_name) return item.service_name;
+    
+    // Check for puja specific fields
+    if (item.puja_name) return item.puja_name;
+    if (item.puja_title) return item.puja_title;
+    
+    // Check service type and provide appropriate default
+    const serviceType = activeTab !== 'all' ? activeTab : item.type;
+    if (serviceType === 'astrology' || item.type === 'astrology') {
+      return 'Astrology Consultation';
+    }
+    
+    // For puja services, provide a more specific default
+    if (serviceType === 'puja' || item.type === 'puja' || activeTab === 'puja') {
+      return item.category_name ? `${item.category_name} Puja` : 'Puja Service';
+    }
+    
+    return 'Service';
   };
 
   const getContactInfo = (item: any) => {
-    return {
-      name: item.customer_name || item.user_name || item.contact_name || 'Unknown Customer',
-      email: item.contact_email || item.user_email || item.email || 'No email',
-      phone: item.contact_phone || item.user_phone || item.phone || item.contact_number || 'No phone',
-      address: item.address || item.contact_address || item.user_address || 'No address'
-    };
+    // Try multiple possible field names for phone with extensive fallbacks
+    const phone = item.contact_phone || 
+                  item.user_phone || 
+                  item.phone || 
+                  item.contact_number || 
+                  item.phone_number ||
+                  item.mobile ||
+                  item.contact_mobile ||
+                  item.user_mobile ||
+                  item.customer_phone ||
+                  item.customer_mobile ||
+                  'No phone';
+
+    // Try multiple possible field names for name
+    const name = item.customer_name || 
+                 item.user_name || 
+                 item.contact_name ||
+                 item.name ||
+                 item.full_name ||
+                 item.customer ||
+                 item.user ||
+                 'Unknown Customer';
+
+    // Try multiple possible field names for email
+    const email = item.contact_email || 
+                  item.user_email || 
+                  item.email ||
+                  item.customer_email ||
+                  'No email';
+
+    // Try multiple possible field names for address
+    const address = item.address || 
+                    item.contact_address || 
+                    item.user_address ||
+                    item.customer_address ||
+                    item.location ||
+                    item.full_address ||
+                    'No address';
+
+    return { name, email, phone, address };
   };
 
   return (
@@ -1017,7 +1119,7 @@ const EnhancedBookingCards: React.FC<{
       {data.map((item, index) => {
         const itemId = item.id?.toString() || item.astro_book_id?.toString() || item.book_id?.toString() || `item-${index}`;
         const uniqueKey = `${activeTab}-${itemId}-${index}`;
-        const serviceType = activeTab !== 'all' ? activeTab : item.type;
+        const serviceType = activeTab !== 'all' ? activeTab : (item.type || 'puja');
         const isAstrology = serviceType === 'astrology';
         const contact = getContactInfo(item);
         const serviceName = getServiceName(item);
@@ -1096,7 +1198,7 @@ const EnhancedBookingCards: React.FC<{
             </div>
 
             <div className="p-6">
-              {/* Customer Information */}
+              {/* Enhanced Customer Information with better phone display */}
               <div className="mb-6">
                 <div className="flex items-start space-x-4 mb-4">
                   <div className="flex-shrink-0">
@@ -1111,16 +1213,18 @@ const EnhancedBookingCards: React.FC<{
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <EnvelopeIcon className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">{contact.email}</span>
+                        <span className="truncate" title={contact.email}>{contact.email}</span>
                       </div>
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <PhoneIcon className="h-4 w-4 flex-shrink-0" />
-                        <span>{contact.phone}</span>
+                        <span className={contact.phone === 'No phone' ? 'text-red-500 italic' : 'font-medium'}>
+                          {contact.phone}
+                        </span>
                       </div>
                       {contact.address !== 'No address' && (
                         <div className="flex items-center space-x-2 text-sm text-gray-500">
                           <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">{contact.address}</span>
+                          <span className="truncate" title={contact.address}>{contact.address}</span>
                         </div>
                       )}
                     </div>
@@ -1128,13 +1232,13 @@ const EnhancedBookingCards: React.FC<{
                 </div>
               </div>
 
-              {/* Service Details */}
+              {/* Enhanced Service Details */}
               <div className="mb-6">
                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
                       <h4 className="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">Service Details</h4>
-                      <p className="text-lg font-bold text-gray-900 leading-tight mb-2">
+                      <p className="text-lg font-bold text-gray-900 leading-tight mb-2" title={serviceName}>
                         {serviceName}
                       </p>
                       {item.category_name && (
@@ -1145,7 +1249,7 @@ const EnhancedBookingCards: React.FC<{
                     </div>
                     <div className="text-right ml-4">
                       <p className="text-2xl font-bold text-green-600">
-                        ₹{(item.service?.price || item.total_amount || 0).toLocaleString()}
+                        ₹{(item.service?.price || item.total_amount || item.amount || item.price || 0).toLocaleString()}
                       </p>
                       <p className="text-xs text-gray-500 uppercase tracking-wide">Total Amount</p>
                     </div>
