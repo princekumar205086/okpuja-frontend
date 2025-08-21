@@ -561,7 +561,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         set({ loading: true, error: null });
         try {
           let endpoint = '';
-          let payload: any = { status: statusData.status };
+          const payload: any = { status: statusData.status };
           
           // Add reason based on status and type
           if (statusData.reason) {
