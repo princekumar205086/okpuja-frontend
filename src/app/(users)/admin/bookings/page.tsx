@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAdminBookingStore } from '../../../stores/adminBookingStore';
 
@@ -113,7 +113,7 @@ const AdminBookingsPage: React.FC = () => {
   };
 
   // Fetch data functions
-  const fetchCurrentData = async () => {
+  const fetchCurrentData = useCallback(async () => {
     const filterParams = {
       search: filters.search || undefined,
       status: filters.status || undefined,
@@ -141,22 +141,18 @@ const AdminBookingsPage: React.FC = () => {
         ]);
         break;
     }
-  };
+  }, [activeTab, filters, fetchAstrologyBookings, fetchPujaBookings, fetchAstrologyDashboard, fetchPujaDashboard]);
 
   // Effects
   useEffect(() => {
     setCurrentView(activeTab);
     setCurrentPage(1); // Reset pagination when switching tabs
     fetchCurrentData();
-  }, [activeTab]);
+  }, [activeTab, fetchCurrentData, setCurrentView]);
 
   useEffect(() => {
     fetchCurrentData();
-  }, [filters, currentPage]);
-
-  useEffect(() => {
-    fetchCurrentData();
-  }, [filters]);
+  }, [filters, currentPage, fetchCurrentData]);
 
   // Event handlers
   const handleTabChange = (tab: 'astrology' | 'puja') => {
