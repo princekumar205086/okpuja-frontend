@@ -157,11 +157,43 @@ export interface BulkActionRequest {
   params?: { [key: string]: any };
 }
 
+export interface Employee {
+  id: number;
+  email: string;
+  username: string;
+  phone?: string;
+  role: string;
+  account_status: string;
+  is_active: boolean;
+  date_joined: string;
+}
+
+export interface BookingAssignmentData {
+  assigned_to: number;
+  assignment_notes?: string;
+}
+
+export interface StatusChangeData {
+  status: string;
+  reason?: string;
+  cancellation_reason?: string;
+  failure_reason?: string;
+  rejection_reason?: string;
+}
+
+export interface SessionScheduleData {
+  google_meet_link: string;
+  session_notes?: string;
+  preferred_date?: string;
+  preferred_time?: string;
+}
+
 export interface AdminBookingState {
   // Data
   astrologyBookings: AstrologyBooking[];
   regularBookings: RegularBooking[];
   pujaBookings: PujaBooking[];
+  employees: Employee[];
   
   // Dashboard data
   astrologyDashboard: any;
@@ -172,36 +204,60 @@ export interface AdminBookingState {
   loading: boolean;
   error: string | null;
   currentView: 'astrology' | 'regular' | 'puja' | 'all';
+  selectedBookings: number[];
   
   // Actions
   fetchAstrologyBookings: (params?: any) => Promise<void>;
   fetchRegularBookings: (params?: any) => Promise<void>;
   fetchPujaBookings: (params?: any) => Promise<void>;
   fetchAllBookings: () => Promise<void>;
+  fetchEmployees: () => Promise<void>;
   
   // Dashboard Actions
   fetchAstrologyDashboard: () => Promise<void>;
   fetchRegularDashboard: () => Promise<void>;
   fetchPujaDashboard: () => Promise<void>;
   
+  // Status Management
+  updateBookingStatus: (type: 'astrology' | 'regular' | 'puja', id: number, statusData: StatusChangeData) => Promise<boolean>;
+  bulkUpdateStatus: (type: 'astrology' | 'regular' | 'puja', bookingIds: number[], statusData: StatusChangeData) => Promise<boolean>;
+  
+  // Assignment Management
+  assignBooking: (type: 'regular' | 'puja', id: number, assignmentData: BookingAssignmentData) => Promise<boolean>;
+  bulkAssignBookings: (type: 'regular' | 'puja', bookingIds: number[], assignmentData: BookingAssignmentData) => Promise<boolean>;
+  unassignBooking: (type: 'regular' | 'puja', id: number) => Promise<boolean>;
+  
+  // Reschedule Actions
+  rescheduleAstrologyBooking: (id: number, data: { preferred_date: string; preferred_time: string; reason?: string }) => Promise<any>;
+  rescheduleRegularBooking: (id: number, data: { selected_date: string; selected_time: string; reason?: string }) => Promise<any>;
+  reschedulePujaBooking: (id: number, data: { new_date: string; new_time: string; reason?: string }) => Promise<any>;
+  
+  // Astrology Session Management
+  scheduleAstrologySession: (id: number, sessionData: SessionScheduleData) => Promise<boolean>;
+  updateSessionLink: (id: number, googleMeetLink: string, notes?: string) => Promise<boolean>;
+  
   // Bulk Actions
   performBulkAction: (type: 'astrology' | 'regular' | 'puja', request: BulkActionRequest) => Promise<boolean>;
   
   // Individual Actions
   updateAstrologyBooking: (astroBookId: string, data: any) => Promise<boolean>;
-  updateBookingStatus: (type: 'regular' | 'puja', id: number, status: string, reason?: string) => Promise<boolean>;
-  
-  // Reschedule Actions
-  rescheduleAstrologyBooking: (id: number, data: { preferred_date: string; preferred_time: string; reason?: string }) => Promise<any>;
-  rescheduleRegularBooking: (id: number, data: { new_date: string; new_time: string; reason?: string }) => Promise<any>;
-  reschedulePujaBooking: (id: number, data: { new_date: string; new_time: string; reason?: string }) => Promise<any>;
   
   // Reports
   generateReport: (type: 'astrology' | 'regular' | 'puja', params?: any) => Promise<any>;
+  exportBookings: (type: 'astrology' | 'regular' | 'puja', format: 'csv' | 'excel', params?: any) => Promise<boolean>;
+  
+  // Selection Management
+  toggleBookingSelection: (id: number) => void;
+  selectAllBookings: (bookingIds: number[]) => void;
+  clearSelection: () => void;
   
   // Utility
   setCurrentView: (view: 'astrology' | 'regular' | 'puja' | 'all') => void;
   clearError: () => void;
+  
+  // Filters and Search
+  getFilteredBookings: (type: 'astrology' | 'regular' | 'puja', filters: any) => any[];
+  searchBookings: (type: 'astrology' | 'regular' | 'puja', query: string) => any[];
 }
 
 export const useAdminBookingStore = create<AdminBookingState>()(
@@ -211,12 +267,24 @@ export const useAdminBookingStore = create<AdminBookingState>()(
       astrologyBookings: [],
       regularBookings: [],
       pujaBookings: [],
+      employees: [],
       astrologyDashboard: null,
       regularDashboard: null,
       pujaDashboard: null,
       loading: false,
       error: null,
       currentView: 'all',
+      selectedBookings: [],
+
+      // Fetch employees
+      fetchEmployees: async () => {
+        try {
+          const response = await apiClient.get('/accounts/admin/employees/');
+          set({ employees: response.data || [] });
+        } catch (err: any) {
+          console.error('Fetch employees error:', err);
+        }
+      },
 
       // Fetch astrology bookings
       fetchAstrologyBookings: async (params = {}) => {
@@ -309,7 +377,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         }
       },
 
-      // Fetch puja bookings
+      // Fetch puja bookings (same as regular bookings - they come from same API)
       fetchPujaBookings: async (params = {}) => {
         set({ loading: true, error: null });
         try {
@@ -321,10 +389,18 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           if (params.status) queryParams.append('status', params.status);
           if (params.date_from) queryParams.append('date_from', params.date_from);
           if (params.date_to) queryParams.append('date_to', params.date_to);
-          if (params.service_type) queryParams.append('service_type', params.service_type);
-          if (params.category) queryParams.append('category', params.category.toString());
+          if (params.created_from) queryParams.append('created_from', params.created_from);
+          if (params.created_to) queryParams.append('created_to', params.created_to);
+          if (params.has_assignment !== undefined) {
+            queryParams.append('has_assignment', params.has_assignment.toString());
+          }
+          if (params.is_overdue !== undefined) {
+            queryParams.append('is_overdue', params.is_overdue.toString());
+          }
+          if (params.assigned_to) queryParams.append('assigned_to', params.assigned_to.toString());
           
-          const url = `/puja/admin/bookings/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+          // Use the same endpoint as regular bookings since puja services are part of regular bookings
+          const url = `/booking/admin/bookings/${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
           const response = await apiClient.get(url);
           
           set({
@@ -379,11 +455,14 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         }
       },
 
-      // Fetch puja dashboard
+      // Fetch puja dashboard (same as regular dashboard since they use same API)
       fetchPujaDashboard: async () => {
         try {
-          const response = await apiClient.get('/puja/admin/dashboard/');
-          set({ pujaDashboard: response.data });
+          const response = await apiClient.get('/booking/admin/dashboard/');
+          set({ 
+            pujaDashboard: response.data,
+            regularDashboard: response.data // Set both since they're the same data
+          });
         } catch (err: any) {
           console.error('Fetch puja dashboard error:', err);
         }
@@ -477,38 +556,57 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         }
       },
 
-      // Update booking status (for regular and puja bookings)
-      updateBookingStatus: async (type: 'regular' | 'puja', id: number, status: string, reason?: string): Promise<boolean> => {
+      // Status Management
+      updateBookingStatus: async (type: 'astrology' | 'regular' | 'puja', id: number, statusData: StatusChangeData): Promise<boolean> => {
         set({ loading: true, error: null });
         try {
-          const data: any = { status };
-          if (reason) {
-            if (status === 'CANCELLED') {
-              data.cancellation_reason = reason;
-            } else if (status === 'FAILED') {
-              data.failure_reason = reason;
-            } else if (status === 'REJECTED') {
-              data.rejection_reason = reason;
+          let endpoint = '';
+          let payload: any = { status: statusData.status };
+          
+          // Add reason based on status and type
+          if (statusData.reason) {
+            if (statusData.status === 'CANCELLED') {
+              payload.cancellation_reason = statusData.reason;
+            } else if (statusData.status === 'REJECTED') {
+              payload.rejection_reason = statusData.reason;
+            } else if (statusData.status === 'FAILED') {
+              payload.failure_reason = statusData.reason;
             }
           }
           
-          let endpoint = '';
-          if (type === 'regular') {
-            endpoint = `/booking/bookings/${id}/status/`;
-          } else {
-            endpoint = `/puja/admin/bookings/${id}/status/`;
+          // Add any additional status-specific data
+          if (statusData.cancellation_reason) payload.cancellation_reason = statusData.cancellation_reason;
+          if (statusData.failure_reason) payload.failure_reason = statusData.failure_reason;
+          if (statusData.rejection_reason) payload.rejection_reason = statusData.rejection_reason;
+          
+          switch (type) {
+            case 'astrology':
+              endpoint = `/astrology/admin/bookings/${id}/status/`;
+              break;
+            case 'regular':
+              endpoint = `/booking/admin/bookings/${id}/status/`;
+              break;
+            case 'puja':
+              endpoint = `/puja/admin/bookings/${id}/status/`;
+              break;
           }
           
-          await apiClient.post(endpoint, data);
+          await apiClient.patch(endpoint, payload);
           
           // Refresh corresponding bookings
-          if (type === 'regular') {
-            await get().fetchRegularBookings();
-          } else {
-            await get().fetchPujaBookings();
+          switch (type) {
+            case 'astrology':
+              await get().fetchAstrologyBookings();
+              break;
+            case 'regular':
+              await get().fetchRegularBookings();
+              break;
+            case 'puja':
+              await get().fetchPujaBookings();
+              break;
           }
           
-          toast.success('Booking status updated successfully');
+          toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} booking status updated successfully`);
           set({ loading: false });
           return true;
         } catch (err: any) {
@@ -517,15 +615,107 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           
           if (err.response?.data?.detail) {
             errorMessage = err.response.data.detail;
+          } else if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
           }
           
-          set({
-            error: errorMessage,
-            loading: false
-          });
+          set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
           return false;
         }
+      },
+
+      bulkUpdateStatus: async (type: 'astrology' | 'regular' | 'puja', bookingIds: number[], statusData: StatusChangeData): Promise<boolean> => {
+        return await get().performBulkAction(type, {
+          booking_ids: bookingIds,
+          action: 'update_status',
+          params: statusData
+        });
+      },
+
+      // Assignment Management
+      assignBooking: async (type: 'regular' | 'puja', id: number, assignmentData: BookingAssignmentData): Promise<boolean> => {
+        set({ loading: true, error: null });
+        try {
+          let endpoint = '';
+          
+          switch (type) {
+            case 'regular':
+              endpoint = `/booking/admin/bookings/${id}/assign/`;
+              break;
+            case 'puja':
+              endpoint = `/puja/admin/bookings/${id}/assign/`;
+              break;
+          }
+          
+          await apiClient.patch(endpoint, assignmentData);
+          
+          // Refresh corresponding bookings
+          if (type === 'regular') {
+            await get().fetchRegularBookings();
+          } else {
+            await get().fetchPujaBookings();
+          }
+          
+          toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} booking assigned successfully`);
+          set({ loading: false });
+          return true;
+        } catch (err: any) {
+          console.error('Assign booking error:', err);
+          let errorMessage = 'Failed to assign booking';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          }
+          
+          set({ error: errorMessage, loading: false });
+          toast.error(errorMessage);
+          return false;
+        }
+      },
+
+      bulkAssignBookings: async (type: 'regular' | 'puja', bookingIds: number[], assignmentData: BookingAssignmentData): Promise<boolean> => {
+        return await get().performBulkAction(type, {
+          booking_ids: bookingIds,
+          action: 'assign',
+          params: assignmentData
+        });
+      },
+
+      unassignBooking: async (type: 'regular' | 'puja', id: number): Promise<boolean> => {
+        return await get().assignBooking(type, id, { assigned_to: 0 }); // Assuming 0 or null unassigns
+      },
+
+      // Astrology Session Management
+      scheduleAstrologySession: async (id: number, sessionData: SessionScheduleData): Promise<boolean> => {
+        set({ loading: true, error: null });
+        try {
+          await apiClient.patch(`/astrology/admin/bookings/${id}/schedule/`, sessionData);
+          
+          await get().fetchAstrologyBookings();
+          
+          toast.success('Astrology session scheduled successfully');
+          set({ loading: false });
+          return true;
+        } catch (err: any) {
+          console.error('Schedule astrology session error:', err);
+          let errorMessage = 'Failed to schedule astrology session';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          }
+          
+          set({ error: errorMessage, loading: false });
+          toast.error(errorMessage);
+          return false;
+        }
+      },
+
+      updateSessionLink: async (id: number, googleMeetLink: string, notes?: string): Promise<boolean> => {
+        return await get().scheduleAstrologySession(id, {
+          google_meet_link: googleMeetLink,
+          session_notes: notes
+        });
       },
 
       // Generate reports
@@ -578,10 +768,30 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           console.error('Reschedule astrology booking error:', err);
           let errorMessage = 'Failed to reschedule astrology booking';
           
-          if (err.response?.data?.detail) {
-            errorMessage = err.response.data.detail;
-          } else if (err.response?.data?.error) {
-            errorMessage = err.response.data.error;
+          // Handle validation errors
+          if (err.response?.data) {
+            const errorData = err.response.data;
+            
+            // Handle field validation errors like {"reason":["This field may not be blank."]}
+            if (typeof errorData === 'object' && !errorData.detail && !errorData.error) {
+              const validationErrors = [];
+              for (const [field, messages] of Object.entries(errorData)) {
+                if (Array.isArray(messages)) {
+                  validationErrors.push(`${field}: ${messages.join(', ')}`);
+                } else if (typeof messages === 'string') {
+                  validationErrors.push(`${field}: ${messages}`);
+                }
+              }
+              if (validationErrors.length > 0) {
+                errorMessage = validationErrors.join('; ');
+              }
+            } else if (errorData.detail) {
+              errorMessage = errorData.detail;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            }
           }
           
           set({
@@ -593,11 +803,11 @@ export const useAdminBookingStore = create<AdminBookingState>()(
         }
       },
 
-      rescheduleRegularBooking: async (id: number, data: { new_date: string; new_time: string; reason?: string }) => {
+      rescheduleRegularBooking: async (id: number, data: { selected_date: string; selected_time: string; reason?: string }) => {
         try {
           set({ loading: true, error: null });
           
-          const response = await apiClient.post(`/puja/bookings/${id}/reschedule/`, data);
+          const response = await apiClient.post(`/booking/admin/bookings/${id}/reschedule/`, data);
           
           // Refresh regular bookings
           await get().fetchRegularBookings();
@@ -609,10 +819,30 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           console.error('Reschedule regular booking error:', err);
           let errorMessage = 'Failed to reschedule regular booking';
           
-          if (err.response?.data?.detail) {
-            errorMessage = err.response.data.detail;
-          } else if (err.response?.data?.error) {
-            errorMessage = err.response.data.error;
+          // Handle validation errors
+          if (err.response?.data) {
+            const errorData = err.response.data;
+            
+            // Handle field validation errors like {"reason":["This field may not be blank."]}
+            if (typeof errorData === 'object' && !errorData.detail && !errorData.error) {
+              const validationErrors = [];
+              for (const [field, messages] of Object.entries(errorData)) {
+                if (Array.isArray(messages)) {
+                  validationErrors.push(`${field}: ${messages.join(', ')}`);
+                } else if (typeof messages === 'string') {
+                  validationErrors.push(`${field}: ${messages}`);
+                }
+              }
+              if (validationErrors.length > 0) {
+                errorMessage = validationErrors.join('; ');
+              }
+            } else if (errorData.detail) {
+              errorMessage = errorData.detail;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            }
           }
           
           set({
@@ -640,10 +870,30 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           console.error('Reschedule puja booking error:', err);
           let errorMessage = 'Failed to reschedule puja booking';
           
-          if (err.response?.data?.detail) {
-            errorMessage = err.response.data.detail;
-          } else if (err.response?.data?.error) {
-            errorMessage = err.response.data.error;
+          // Handle validation errors
+          if (err.response?.data) {
+            const errorData = err.response.data;
+            
+            // Handle field validation errors like {"reason":["This field may not be blank."]}
+            if (typeof errorData === 'object' && !errorData.detail && !errorData.error) {
+              const validationErrors = [];
+              for (const [field, messages] of Object.entries(errorData)) {
+                if (Array.isArray(messages)) {
+                  validationErrors.push(`${field}: ${messages.join(', ')}`);
+                } else if (typeof messages === 'string') {
+                  validationErrors.push(`${field}: ${messages}`);
+                }
+              }
+              if (validationErrors.length > 0) {
+                errorMessage = validationErrors.join('; ');
+              }
+            } else if (errorData.detail) {
+              errorMessage = errorData.detail;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (typeof errorData === 'string') {
+              errorMessage = errorData;
+            }
           }
           
           set({
@@ -653,6 +903,169 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           toast.error(errorMessage);
           return null;
         }
+      },
+
+      // Export bookings
+      exportBookings: async (type: 'astrology' | 'regular' | 'puja', format: 'csv' | 'excel', params = {}): Promise<boolean> => {
+        try {
+          set({ loading: true, error: null });
+          
+          const queryParams = new URLSearchParams();
+          queryParams.append('format', format);
+          
+          // Add any additional parameters
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              queryParams.append(key, value.toString());
+            }
+          });
+          
+          let endpoint = '';
+          switch (type) {
+            case 'astrology':
+              endpoint = '/astrology/admin/bookings/export/';
+              break;
+            case 'regular':
+              endpoint = '/booking/admin/bookings/export/';
+              break;
+            case 'puja':
+              endpoint = '/puja/admin/bookings/export/';
+              break;
+          }
+          
+          const url = `${endpoint}?${queryParams.toString()}`;
+          const response = await apiClient.get(url, { responseType: 'blob' });
+          
+          // Create download link
+          const blob = new Blob([response.data]);
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `${type}_bookings.${format}`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+          
+          toast.success('Bookings exported successfully');
+          set({ loading: false });
+          return true;
+        } catch (err: any) {
+          console.error('Export bookings error:', err);
+          let errorMessage = 'Failed to export bookings';
+          
+          if (err.response?.data?.detail) {
+            errorMessage = err.response.data.detail;
+          }
+          
+          set({ error: errorMessage, loading: false });
+          toast.error(errorMessage);
+          return false;
+        }
+      },
+
+      // Selection Management
+      toggleBookingSelection: (id: number) => {
+        set((state) => ({
+          selectedBookings: state.selectedBookings.includes(id)
+            ? state.selectedBookings.filter(bookingId => bookingId !== id)
+            : [...state.selectedBookings, id]
+        }));
+      },
+
+      selectAllBookings: (bookingIds: number[]) => {
+        set({ selectedBookings: bookingIds });
+      },
+
+      clearSelection: () => {
+        set({ selectedBookings: [] });
+      },
+
+      // Filters and Search
+      getFilteredBookings: (type: 'astrology' | 'regular' | 'puja', filters: any) => {
+        const state = get();
+        let bookings: any[] = [];
+        
+        switch (type) {
+          case 'astrology':
+            bookings = state.astrologyBookings;
+            break;
+          case 'regular':
+            bookings = state.regularBookings;
+            break;
+          case 'puja':
+            bookings = state.pujaBookings;
+            break;
+        }
+        
+        return bookings.filter(booking => {
+          // Apply filters
+          if (filters.status && booking.status !== filters.status) return false;
+          if (filters.dateFrom && new Date(booking.created_at) < new Date(filters.dateFrom)) return false;
+          if (filters.dateTo && new Date(booking.created_at) > new Date(filters.dateTo)) return false;
+          
+          // Type-specific filters
+          if (type === 'astrology') {
+            if (filters.sessionScheduled !== undefined && booking.is_session_scheduled !== filters.sessionScheduled) return false;
+            if (filters.serviceType && booking.service?.service_type !== filters.serviceType) return false;
+          }
+          
+          if (type === 'regular' || type === 'puja') {
+            if (filters.assigned !== undefined) {
+              const isAssigned = !!booking.assigned_to;
+              if (filters.assigned !== isAssigned) return false;
+            }
+            if (filters.overdue !== undefined && booking.is_overdue !== filters.overdue) return false;
+          }
+          
+          return true;
+        });
+      },
+
+      searchBookings: (type: 'astrology' | 'regular' | 'puja', query: string) => {
+        const state = get();
+        let bookings: any[] = [];
+        
+        switch (type) {
+          case 'astrology':
+            bookings = state.astrologyBookings;
+            break;
+          case 'regular':
+            bookings = state.regularBookings;
+            break;
+          case 'puja':
+            bookings = state.pujaBookings;
+            break;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        
+        return bookings.filter(booking => {
+          // Search in common fields
+          if (booking.id?.toString().includes(lowerQuery)) return true;
+          if (booking.contact_email?.toLowerCase().includes(lowerQuery)) return true;
+          if (booking.contact_phone?.includes(query)) return true;
+          
+          // Type-specific search fields
+          if (type === 'astrology') {
+            if (booking.astro_book_id?.toLowerCase().includes(lowerQuery)) return true;
+            if (booking.service?.title?.toLowerCase().includes(lowerQuery)) return true;
+            if (booking.birth_place?.toLowerCase().includes(lowerQuery)) return true;
+          }
+          
+          if (type === 'regular' || type === 'puja') {
+            if (booking.book_id?.toLowerCase().includes(lowerQuery)) return true;
+            if (booking.user_name?.toLowerCase().includes(lowerQuery)) return true;
+            if (booking.address_full?.toLowerCase().includes(lowerQuery)) return true;
+          }
+          
+          if (type === 'puja') {
+            if (booking.service_title?.toLowerCase().includes(lowerQuery)) return true;
+            if (booking.contact_name?.toLowerCase().includes(lowerQuery)) return true;
+          }
+          
+          return false;
+        });
       },
 
       // Set current view
@@ -667,6 +1080,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
       name: 'admin-booking-storage',
       partialize: (state) => ({
         currentView: state.currentView,
+        selectedBookings: state.selectedBookings,
       }),
     }
   )
