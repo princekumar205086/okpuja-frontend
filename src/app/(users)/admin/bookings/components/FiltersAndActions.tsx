@@ -4,6 +4,7 @@ import {
   FunnelIcon,
   TableCellsIcon,
   Squares2X2Icon,
+  CalendarDaysIcon,
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 
@@ -18,8 +19,8 @@ interface FilterState {
 interface FiltersAndActionsProps {
   filters: FilterState;
   onFilterChange: (newFilters: Partial<FilterState>) => void;
-  viewMode: 'table' | 'card';
-  onViewModeChange: (mode: 'table' | 'card') => void;
+  viewMode: 'table' | 'card' | 'calendar';
+  onViewModeChange: (mode: 'table' | 'card' | 'calendar') => void;
   isLoading: boolean;
 }
 
@@ -93,6 +94,17 @@ const FiltersAndActions: React.FC<FiltersAndActionsProps> = ({
               title="Card View"
             >
               <Squares2X2Icon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onViewModeChange('calendar')}
+              className={`p-1.5 rounded transition-colors ${
+                viewMode === 'calendar'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              title="Calendar View"
+            >
+              <CalendarDaysIcon className="w-4 h-4" />
             </button>
           </div>
 
