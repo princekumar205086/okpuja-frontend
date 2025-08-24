@@ -10,11 +10,13 @@ import {
   ArrowUpTrayIcon,
   Bars3Icon,
   Squares2X2Icon,
+  FolderPlusIcon,
 } from '@heroicons/react/24/outline';
 
 interface GalleryToolbarProps {
   onUpload: () => void;
   onBulkDelete: () => void;
+  onCategoryManage?: () => void;
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
 }
@@ -22,6 +24,7 @@ interface GalleryToolbarProps {
 const GalleryToolbar: React.FC<GalleryToolbarProps> = ({
   onUpload,
   onBulkDelete,
+  onCategoryManage,
   viewMode,
   onViewModeChange,
 }) => {
@@ -85,6 +88,16 @@ const GalleryToolbar: React.FC<GalleryToolbarProps> = ({
               Upload Images
             </Button>
             
+            {onCategoryManage && (
+              <Button
+                onClick={onCategoryManage}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <FolderPlusIcon className="h-4 w-4" />
+                Manage Categories
+              </Button>
+            )}
             {selectedCount > 0 && (
               <Button
                 variant="destructive"

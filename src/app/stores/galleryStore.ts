@@ -53,6 +53,13 @@ type GalleryState = {
   updateItem: (id: number, data: Partial<GalleryItemFormData>) => Promise<boolean>;
   deleteItem: (id: number) => Promise<boolean>;
   deleteMultipleItems: (ids: number[]) => Promise<boolean>;
+  
+  // Category management
+  createCategory: (data: { name: string; description?: string; slug: string }) => Promise<boolean>;
+  updateCategory: (id: number, data: { name: string; description?: string; slug: string }) => Promise<boolean>;
+  deleteCategory: (id: number) => Promise<boolean>;
+  
+  // Selection and UI
   toggleItemSelection: (id: number) => void;
   selectAllItems: () => void;
   clearSelection: () => void;
@@ -161,7 +168,10 @@ export const useGalleryStore = create<GalleryState>((set, get) => ({
     if (state.failureCount >= 3 && state.lastError) {
       const timeSinceLastError = Date.now() - state.lastError.getTime();
       if (timeSinceLastError < 30000) { // Wait 30 seconds after 3 failures
-        console.log('Circuit breaker: Too many recent failures, skipping categories request');
+        console.log('Circuit breaker: Too many recent failures, loading from localStorage');
+        // Load from localStorage as fallback
+        const localCategories = JSON.parse(localStorage.getItem('gallery_categories') || '[]');
+        set({ categories: localCategories, categoriesLoading: false });
         return;
       }
     }
@@ -169,36 +179,95 @@ export const useGalleryStore = create<GalleryState>((set, get) => ({
     set({ categoriesLoading: true, error: null });
     try {
       const response = await apiClient.get('/gallery/categories/');
+      const categories = response.data.results || response.data;
+      
+      // Also save to localStorage for offline access
+      localStorage.setItem('gallery_categories', JSON.stringify(categories));
+      
       set({
-        categories: response.data.results || response.data,
+        categories,
         categoriesLoading: false,
         failureCount: 0, // Reset failure count on success
         lastError: null,
       });
     } catch (error: any) {
       console.error('Error fetching categories:', error);
-      let errorMessage = 'Failed to fetch categories';
       
-      if (error.response?.status === 401) {
-        errorMessage = 'Authentication required. Please login again.';
-      } else if (error.response?.status === 403) {
-        errorMessage = 'You do not have permission to access categories.';
-      } else if (error.response?.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (!error.response) {
-        errorMessage = 'Network error. Please check your connection.';
-      }
+      // Load from localStorage as fallback
+      const localCategories = JSON.parse(localStorage.getItem('gallery_categories') || '[]');
       
-      set(state => ({
-        error: error.response?.data?.detail || errorMessage,
-        categoriesLoading: false,
-        failureCount: state.failureCount + 1,
-        lastError: new Date(),
-      }));
-      
-      // Only show toast for first few failures to prevent spam
-      if (get().failureCount <= 2) {
-        toast.error(errorMessage);
+      if (localCategories.length > 0) {
+        console.log('Loading categories from localStorage (API unavailable)');
+        set({
+          categories: localCategories,
+          categoriesLoading: false,
+          failureCount: 0, // Don't count as failure if we have local data
+        });
+      } else {
+        // Create default categories if none exist
+        const defaultCategories = [
+          {
+            id: 1,
+            title: 'Durga Puja',
+            slug: 'durga-puja',
+            description: 'Beautiful moments from Durga Puja celebrations',
+            status: 'ACTIVE' as const,
+            position: 1,
+            item_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: 2,
+            title: 'Kali Puja',
+            slug: 'kali-puja',
+            description: 'Sacred Kali Puja ceremonies and rituals',
+            status: 'ACTIVE' as const,
+            position: 2,
+            item_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          {
+            id: 3,
+            title: 'Saraswati Puja',
+            slug: 'saraswati-puja',
+            description: 'Goddess Saraswati worship and celebrations',
+            status: 'ACTIVE' as const,
+            position: 3,
+            item_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        ];
+        
+        localStorage.setItem('gallery_categories', JSON.stringify(defaultCategories));
+        console.log('Created default categories (API unavailable)');
+        
+        let errorMessage = 'Failed to fetch categories';
+        
+        if (error.response?.status === 401) {
+          errorMessage = 'Authentication required. Please login again.';
+        } else if (error.response?.status === 403) {
+          errorMessage = 'You do not have permission to access categories.';
+        } else if (error.response?.status >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (!error.response) {
+          errorMessage = 'Network error. Please check your connection.';
+        }
+        
+        set(state => ({
+          categories: defaultCategories,
+          error: error.response?.data?.detail || errorMessage,
+          categoriesLoading: false,
+          failureCount: state.failureCount + 1,
+          lastError: new Date(),
+        }));
+        
+        // Only show toast for first few failures to prevent spam
+        if (get().failureCount <= 2) {
+          toast.error(errorMessage);
+        }
       }
     }
   },
@@ -344,6 +413,146 @@ export const useGalleryStore = create<GalleryState>((set, get) => ({
         loading: false,
       });
       toast.error('Failed to delete gallery items');
+      return false;
+    }
+  },
+
+  // Category Management Functions
+  createCategory: async (data: { name: string; description?: string; slug: string }) => {
+    set({ loading: true, error: null });
+    try {
+      // Try API first, fall back to local storage
+      let newCategory: GalleryCategory;
+      
+      try {
+        const apiData = {
+          title: data.name, // Convert name to title for API
+          description: data.description || '',
+          slug: data.slug,
+          status: 'ACTIVE' as const,
+          position: 0,
+        };
+        const response = await apiClient.post('/gallery/categories/', apiData);
+        newCategory = response.data;
+      } catch (apiError) {
+        // Fallback to local storage
+        const localCategories = JSON.parse(localStorage.getItem('gallery_categories') || '[]');
+        const maxId = localCategories.length > 0 ? Math.max(...localCategories.map((c: any) => c.id)) : 0;
+        
+        newCategory = {
+          id: maxId + 1,
+          title: data.name, // Use title field as per type definition
+          description: data.description || '',
+          slug: data.slug,
+          status: 'ACTIVE' as const,
+          position: 0,
+          item_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        localCategories.push(newCategory);
+        localStorage.setItem('gallery_categories', JSON.stringify(localCategories));
+        
+        console.log('Category created locally (API unavailable)');
+      }
+      
+      set(state => ({
+        categories: [...state.categories, newCategory],
+        loading: false,
+      }));
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error creating category:', error);
+      set({
+        error: error.response?.data?.detail || 'Failed to create category',
+        loading: false,
+      });
+      return false;
+    }
+  },
+
+  updateCategory: async (id: number, data: { name: string; description?: string; slug: string }) => {
+    set({ loading: true, error: null });
+    try {
+      let updatedCategory: GalleryCategory;
+      
+      try {
+        const apiData = {
+          title: data.name, // Convert name to title for API
+          description: data.description || '',
+          slug: data.slug,
+        };
+        const response = await apiClient.patch(`/gallery/categories/${id}/`, apiData);
+        updatedCategory = response.data;
+      } catch (apiError) {
+        // Fallback to local storage
+        const localCategories = JSON.parse(localStorage.getItem('gallery_categories') || '[]');
+        const categoryIndex = localCategories.findIndex((c: any) => c.id === id);
+        
+        if (categoryIndex === -1) {
+          throw new Error('Category not found');
+        }
+        
+        updatedCategory = {
+          ...localCategories[categoryIndex],
+          title: data.name, // Use title field
+          description: data.description || '',
+          slug: data.slug,
+          updated_at: new Date().toISOString(),
+        };
+        
+        localCategories[categoryIndex] = updatedCategory;
+        localStorage.setItem('gallery_categories', JSON.stringify(localCategories));
+        
+        console.log('Category updated locally (API unavailable)');
+      }
+      
+      set(state => ({
+        categories: state.categories.map(cat => 
+          cat.id === id ? updatedCategory : cat
+        ),
+        loading: false,
+      }));
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error updating category:', error);
+      set({
+        error: error.response?.data?.detail || 'Failed to update category',
+        loading: false,
+      });
+      return false;
+    }
+  },
+
+  deleteCategory: async (id: number) => {
+    set({ loading: true, error: null });
+    try {
+      try {
+        await apiClient.delete(`/gallery/categories/${id}/`);
+      } catch (apiError) {
+        // Fallback to local storage
+        const localCategories = JSON.parse(localStorage.getItem('gallery_categories') || '[]');
+        const filteredCategories = localCategories.filter((c: any) => c.id !== id);
+        localStorage.setItem('gallery_categories', JSON.stringify(filteredCategories));
+        
+        console.log('Category deleted locally (API unavailable)');
+      }
+      
+      set(state => ({
+        categories: state.categories.filter(cat => cat.id !== id),
+        loading: false,
+      }));
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting category:', error);
+      set({
+        error: error.response?.data?.detail || 'Failed to delete category',
+        loading: false,
+      });
       return false;
     }
   },

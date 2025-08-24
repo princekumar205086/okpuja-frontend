@@ -15,13 +15,14 @@ import ViewModal from '@/components/admin/gallery/ViewModal';
 import DeleteConfirmModal from '@/components/admin/gallery/DeleteConfirmModal';
 import AuthDebugInfo from '@/components/admin/gallery/AuthDebugInfo';
 import AuthHelper from '@/components/admin/gallery/AuthHelper';
+import CategoryModal from '@/components/admin/gallery/CategoryModal';
 
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/loader';
 
 // Icons
-import { PhotoIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PhotoIcon, ArrowPathIcon, XMarkIcon, FolderPlusIcon } from '@heroicons/react/24/outline';
 
 const GalleryPage: React.FC = () => {
   const { user, initAuth } = useAuthStore();
@@ -45,6 +46,7 @@ const GalleryPage: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [selectedItemForAction, setSelectedItemForAction] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -84,6 +86,10 @@ const GalleryPage: React.FC = () => {
 
   const handleUpload = () => {
     setUploadModalOpen(true);
+  };
+
+  const handleCategoryManage = () => {
+    setCategoryModalOpen(true);
   };
 
   const handleRefresh = () => {
@@ -230,6 +236,7 @@ const GalleryPage: React.FC = () => {
         <GalleryToolbar
           onUpload={handleUpload}
           onBulkDelete={handleBulkDelete}
+          onCategoryManage={handleCategoryManage}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
@@ -276,6 +283,11 @@ const GalleryPage: React.FC = () => {
         title={deleteModalContent.title}
         message={deleteModalContent.message}
         itemCount={deleteModalContent.itemCount}
+      />
+
+      <CategoryModal
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
       />
 
       {/* Auth Debug Info (Development only) */}
