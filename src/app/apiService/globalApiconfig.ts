@@ -16,6 +16,7 @@ const apiClient = axios.create({
 // Flag to prevent multiple refresh attempts
 let isRefreshing = false;
 let failedQueue: any[] = [];
+let logoutRedirectTriggered = false;
 
 // Multi-tab token synchronization
 if (typeof window !== 'undefined') {
@@ -25,13 +26,17 @@ if (typeof window !== 'undefined') {
     if (refresh) {
       localStorage.setItem('refresh', refresh);
     }
+    logoutRedirectTriggered = false; // Reset flag when tokens are updated
   });
 
   window.addEventListener('logout', () => {
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    if (!logoutRedirectTriggered) {
+      logoutRedirectTriggered = true;
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
   });
 }
 
@@ -69,6 +74,11 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
+    // Prevent infinite loops by checking if logout redirect is already triggered
+    if (logoutRedirectTriggered) {
+      return Promise.reject(error);
+    }
+    
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, queue this request
@@ -86,7 +96,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       const refreshToken = localStorage.getItem('refresh');
-      if (refreshToken) {
+      if (refreshToken && !logoutRedirectTriggered) {
         try {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
             refresh: refreshToken,
@@ -117,23 +127,54 @@ apiClient.interceptors.response.use(
         } catch (refreshError: any) {
           console.error('Token refresh failed:', refreshError);
           
-          // Check if it's a network error
-          if (!refreshError.response) {
-            trackLogoutReason('network_error', refreshError);
-          } else if (refreshError.response?.status === 400) {
-            trackLogoutReason('invalid_refresh_token', refreshError.response.data);
-          } else if (refreshError.response?.status === 401) {
-            trackLogoutReason('refresh_token_expired', refreshError.response.data);
-          } else {
-            trackLogoutReason('refresh_failed', refreshError);
-          }
-          
-          debugTokenStatus();
-          
           processQueue(refreshError, null);
           isRefreshing = false;
           
-          // Clear auth data and redirect to login
+          // Prevent multiple logout attempts
+          if (!logoutRedirectTriggered) {
+            logoutRedirectTriggered = true;
+            
+            // Check if it's a network error
+            if (!refreshError.response) {
+              trackLogoutReason('network_error', refreshError);
+            } else if (refreshError.response?.status === 400) {
+              trackLogoutReason('invalid_refresh_token', refreshError.response.data);
+            } else if (refreshError.response?.status === 401) {
+              trackLogoutReason('refresh_token_expired', refreshError.response.data);
+            } else {
+              trackLogoutReason('refresh_failed', refreshError);
+            }
+            
+            debugTokenStatus();
+            
+            // Clear auth data and redirect to login
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+            localStorage.removeItem('user');
+            
+            // Notify other tabs about logout
+            window.dispatchEvent(new CustomEvent('logout'));
+            
+            // Only redirect if we're in the browser and not already redirecting
+            if (typeof window !== 'undefined') {
+              setTimeout(() => {
+                window.location.href = '/login';
+              }, 100); // Small delay to prevent multiple redirects
+            }
+          }
+          
+          return Promise.reject(refreshError);
+        }
+      } else {
+        // No refresh token, redirect to login
+        isRefreshing = false;
+        
+        if (!logoutRedirectTriggered) {
+          logoutRedirectTriggered = true;
+          console.error('No refresh token available for token refresh');
+          trackLogoutReason('no_refresh_token');
+          debugTokenStatus();
+          
           localStorage.removeItem('access');
           localStorage.removeItem('refresh');
           localStorage.removeItem('user');
@@ -141,31 +182,13 @@ apiClient.interceptors.response.use(
           // Notify other tabs about logout
           window.dispatchEvent(new CustomEvent('logout'));
           
-          // Only redirect if we're in the browser
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 100); // Small delay to prevent multiple redirects
           }
-          
-          return Promise.reject(refreshError);
-        }
-      } else {
-        // No refresh token, redirect to login
-        console.error('No refresh token available for token refresh');
-        trackLogoutReason('no_refresh_token');
-        debugTokenStatus();
-        
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
-        localStorage.removeItem('user');
-        
-        // Notify other tabs about logout
-        window.dispatchEvent(new CustomEvent('logout'));
-        
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
         }
         
-        isRefreshing = false;
         return Promise.reject(error);
       }
     }
