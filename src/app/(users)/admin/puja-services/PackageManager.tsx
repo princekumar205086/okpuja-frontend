@@ -673,7 +673,7 @@ const PackageManager: React.FC<PackageManagerProps> = ({ open, onClose, service 
                       placeholder="Describe what's included in this package..."
                       error={!!formErrors.description}
                       helperText={formErrors.description}
-                      maxLength={500}
+                      maxLength={2500}
                     />
                   </Box>
 
