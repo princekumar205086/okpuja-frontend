@@ -226,7 +226,7 @@ export default function ServiceDetailPage() {
     if (encryptedId) {
       loadService();
     }
-  }, [encryptedId, getServiceById, fetchPackages, fetchServices]);
+  }, [encryptedId, getServiceById, fetchPackages, fetchServices]); // Remove services dependency as it causes infinite re-renders
 
   // Restore booking state after login
   useEffect(() => {
