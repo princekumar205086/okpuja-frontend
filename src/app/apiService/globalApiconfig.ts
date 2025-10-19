@@ -69,7 +69,11 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Check if this is a public endpoint that doesn't need authentication
+    const isPublicEndpoint = originalRequest.url?.includes('/puja/services/') && 
+                             originalRequest.method?.toLowerCase() === 'get';
+    
+    if (error.response?.status === 401 && !originalRequest._retry && !isPublicEndpoint) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {

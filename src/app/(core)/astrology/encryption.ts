@@ -14,8 +14,16 @@ export const encryptId = (id: number | string): string => {
 
 export const decryptId = (encryptedId: string): string | null => {
   try {
-    const decrypted = CryptoJS.AES.decrypt(decodeURIComponent(encryptedId), SECRET_KEY);
-    const result = decrypted.toString(CryptoJS.enc.Utf8);
+    // Next.js automatically decodes URL parameters, so we try direct decryption first
+    let decrypted = CryptoJS.AES.decrypt(encryptedId, SECRET_KEY);
+    let result = decrypted.toString(CryptoJS.enc.Utf8);
+    
+    // If direct decryption doesn't work, try with additional URL decoding
+    if (!result) {
+      decrypted = CryptoJS.AES.decrypt(decodeURIComponent(encryptedId), SECRET_KEY);
+      result = decrypted.toString(CryptoJS.enc.Utf8);
+    }
+    
     return result || null;
   } catch (error) {
     console.error('Decryption error:', error);

@@ -67,9 +67,12 @@ export default function ServiceCard({
               {service.title}
             </h3>
             
-            <p className="text-gray-600 text-sm leading-relaxed flex-1 line-clamp-3 mb-4"
-               dangerouslySetInnerHTML={{ __html: service.description }}
-            />
+            <div className="text-gray-600 text-sm leading-relaxed flex-1 mb-4">
+              <div 
+                className="line-clamp-3 prose-card"
+                dangerouslySetInnerHTML={{ __html: service.description }}
+              />
+            </div>
             
             {/* Available Packages */}
             <div className="mb-4">

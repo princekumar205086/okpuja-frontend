@@ -36,6 +36,7 @@ export default function ServiceDetailPage() {
     error,
     getServiceById,
     fetchPackages,
+    fetchServices,
     clearError,
   } = usePujaServiceStore();
 
@@ -52,39 +53,171 @@ export default function ServiceDetailPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // Share functionality
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareTitle = `${service?.title} - Sacred Puja Service`;
+    const shareText = `Check out this amazing puja service: ${service?.title}. Book now for authentic spiritual experience!`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        toast.success('Shared successfully!');
+      } catch (error) {
+        console.error('Error sharing:', error);
+        // Fallback to clipboard copy
+        fallbackShare(shareUrl, shareTitle);
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      fallbackShare(shareUrl, shareTitle);
+    }
+  };
+
+  const fallbackShare = async (url: string, title: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied to clipboard!');
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      // Final fallback - show share modal with options
+      showShareModal(url, title);
+    }
+  };
+
+  const showShareModal = (url: string, title: string) => {
+    const shareOptions = [
+      {
+        name: 'WhatsApp',
+        url: `https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`,
+      },
+      {
+        name: 'Facebook',
+        url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      },
+      {
+        name: 'Twitter',
+        url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+      },
+      {
+        name: 'LinkedIn',
+        url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+      },
+    ];
+
+    // Create a simple share modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+      <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+        <h3 class="text-lg font-semibold mb-4">Share this service</h3>
+        <div class="space-y-3">
+          ${shareOptions.map(option => `
+            <a href="${option.url}" target="_blank" rel="noopener noreferrer" 
+               class="flex items-center p-3 rounded-lg hover:bg-gray-100 transition-colors">
+              <span class="font-medium">${option.name}</span>
+            </a>
+          `).join('')}
+          <button id="copyLinkBtn" class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 transition-colors">
+            <span class="font-medium">Copy Link</span>
+          </button>
+        </div>
+        <button id="closeShareModal" class="mt-4 w-full bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+          Close
+        </button>
+      </div>
+    `;
+
+    // Add event listeners
+    const copyBtn = modal.querySelector('#copyLinkBtn');
+    const closeBtn = modal.querySelector('#closeShareModal');
+    
+    copyBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard!');
+        document.body.removeChild(modal);
+      } catch (error) {
+        console.error('Error copying link:', error);
+        toast.error('Failed to copy link');
+      }
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    });
+
+    document.body.appendChild(modal);
+  };
+
   // Decrypt ID and find service
   useEffect(() => {
     const loadService = async () => {
       setLoading(true);
+      setErrorMessage('');
+      
       try {
         const serviceId = decryptId(encryptedId);
-        if (!serviceId) {
-          router.push('/pujaservice');
+        console.log('Decrypted service ID:', serviceId);
+        
+        if (!serviceId || isNaN(parseInt(serviceId))) {
+          setErrorMessage('Invalid service link');
+          setLoading(false);
           return;
         }
 
-        // Try to get service from store first
-        let foundService = services.find(s => s.id === parseInt(serviceId));
-
-        if (!foundService) {
-          // Fetch from API if not in store
-          foundService = await getServiceById(parseInt(serviceId)) || undefined;
+        // Always try to fetch from API first for fresh data
+        let foundService;
+        try {
+          foundService = await getServiceById(parseInt(serviceId));
+          console.log('Service fetched from API:', foundService);
+        } catch (apiError) {
+          console.log('API fetch failed, checking store:', apiError);
+          // Fallback to store if API fails
+          foundService = services.find(s => s.id === parseInt(serviceId));
         }
 
         if (!foundService) {
-          toast.error('Service not found');
-          router.push('/pujaservice');
+          // If services array is empty (page refresh), try to fetch all services first
+          if (services.length === 0) {
+            console.log('Services array empty, fetching all services...');
+            await fetchServices();
+            // After fetching, try to find the service again
+            foundService = services.find(s => s.id === parseInt(serviceId));
+          }
+        }
+
+        if (!foundService) {
+          setErrorMessage('Service not found');
+          setLoading(false);
           return;
         }
 
         setService(foundService);
+        console.log('Service set:', foundService);
 
         // Fetch packages for this service
-        await fetchPackages(parseInt(serviceId));
+        try {
+          await fetchPackages(parseInt(serviceId));
+          console.log('Packages fetched for service:', serviceId);
+        } catch (packageError) {
+          console.log('Package fetch failed:', packageError);
+          // Don't fail if packages can't be fetched
+        }
 
       } catch (error) {
         console.error('Error loading service:', error);
-        toast.error('Failed to load service details');
+        setErrorMessage('Failed to load service details');
       } finally {
         setLoading(false);
       }
@@ -93,7 +226,7 @@ export default function ServiceDetailPage() {
     if (encryptedId) {
       loadService();
     }
-  }, [encryptedId, services, getServiceById, fetchPackages, router]);
+  }, [encryptedId, getServiceById, fetchPackages, fetchServices]);
 
   // Restore booking state after login
   useEffect(() => {
@@ -313,14 +446,27 @@ export default function ServiceDetailPage() {
     );
   }
 
-  if (!service) {
+  if (!service || errorMessage) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Service Not Found</h1>
-          <p className="text-gray-600 mb-6">The puja service you&apos;re looking for doesn&apos;t exist.</p>
-          <Link href="/pujaservice" className="text-orange-600 hover:text-orange-700">
-            ← Back to Services
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {errorMessage || "Service Not Found"}
+          </h1>
+          <p className="text-gray-600 mb-6">
+            {errorMessage === 'Invalid service link' 
+              ? 'The service link you used is invalid or corrupted.'
+              : errorMessage === 'Service not found'
+              ? 'The puja service you\'re looking for doesn\'t exist or is no longer available.'
+              : 'The puja service you\'re looking for doesn\'t exist.'
+            }
+          </p>
+          <Link 
+            href="/pujaservice" 
+            className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Services
           </Link>
         </div>
       </div>
@@ -346,7 +492,11 @@ export default function ServiceDetailPage() {
               <span className="sm:hidden">Back</span>
             </Link>
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <button className="p-2 sm:p-2.5 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all">
+              <button 
+                onClick={handleShare}
+                className="p-2 sm:p-2.5 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+                title="Share this service"
+              >
                 <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
               <button className="p-2 sm:p-2.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all">

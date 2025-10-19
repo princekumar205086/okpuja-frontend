@@ -59,6 +59,25 @@
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Fix for HTML content in cards */
+.prose-card {
+  line-height: 1.4;
+}
+
+.prose-card p {
+  margin: 0;
+  padding: 0;
+}
+
+.prose-card * {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
 }
 
 /* Smooth scrolling */

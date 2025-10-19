@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import apiClient from "../apiService/globalApiconfig";
+import apiClient, { API_BASE_URL } from "../apiService/globalApiconfig";
+import axios from 'axios';
 import { toast } from "react-hot-toast";
 
 export type ServiceType = 'HOME' | 'TEMPLE' | 'ONLINE';
@@ -207,7 +208,26 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           const { pageSize } = get();
           queryParams.append('page_size', pageSize.toString());
 
-          const response = await apiClient.get<PujaService[] | PujaServiceListResponse>(`/puja/services/?${queryParams}`);
+          // Try authenticated request first (since API endpoints require auth)
+          let response;
+          try {
+            response = await apiClient.get<PujaService[] | PujaServiceListResponse>(`/puja/services/?${queryParams}`);
+          } catch (authError: any) {
+            console.log('Authenticated services fetch failed:', authError?.response?.status);
+            
+            // Try public endpoint as fallback
+            try {
+              response = await axios.get<PujaService[] | PujaServiceListResponse>(`${API_BASE_URL}/puja/public/services/?${queryParams}`, {
+                timeout: 10000,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+            } catch (publicError: any) {
+              console.log('Public services fetch also failed:', publicError?.response?.status);
+              throw authError; // Re-throw the original auth error
+            }
+          }
           
           // Handle different response formats
           let services: PujaService[] = [];
@@ -356,8 +376,45 @@ export const usePujaServiceStore = create<PujaServiceState>()(
 
       getServiceById: async (id: number): Promise<PujaService | null> => {
         try {
-          const response = await apiClient.get<PujaService>(`/puja/services/${id}/`);
-          return response.data;
+          // First check if we already have the service in our store
+          const { services } = get();
+          const existingService = services.find(s => s.id === id);
+          if (existingService) {
+            return existingService;
+          }
+
+          // If store is empty, fetch all services first
+          if (services.length === 0) {
+            await get().fetchServices();
+            const updatedServices = get().services;
+            const foundService = updatedServices.find(s => s.id === id);
+            if (foundService) {
+              return foundService;
+            }
+          }
+
+          // If still not found, try direct API call with auth
+          try {
+            const response = await apiClient.get<PujaService>(`/puja/services/${id}/`);
+            return response.data;
+          } catch (authError: any) {
+            console.log('Authenticated service fetch failed, trying public endpoints');
+            
+            // Try alternative public endpoints if available
+            try {
+              const publicResponse = await axios.get<PujaService>(`${API_BASE_URL}/puja/public/services/${id}/`, {
+                timeout: 10000,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+              return publicResponse.data;
+            } catch (publicError: any) {
+              console.log('Public endpoint also failed:', publicError?.response?.status);
+            }
+          }
+
+          return null;
         } catch (err: any) {
           console.error("Get service by ID error:", err);
           return null;
@@ -433,11 +490,35 @@ export const usePujaServiceStore = create<PujaServiceState>()(
       fetchPackages: async (serviceId) => {
         try {
           const url = serviceId ? `/puja/packages/?puja_service=${serviceId}` : '/puja/packages/';
-          const response = await apiClient.get<{ results: Package[] }>(url);
-          set({ packages: response.data.results || response.data });
+          
+          // Try authenticated request first
+          try {
+            const response = await apiClient.get<{ results: Package[] }>(url);
+            set({ packages: response.data.results || response.data });
+            return;
+          } catch (authError: any) {
+            console.log('Authenticated packages fetch failed, trying public endpoint:', authError?.response?.status);
+            
+            // Try public endpoint as fallback
+            try {
+              const publicResponse = await axios.get<{ results: Package[] }>(`${API_BASE_URL}/puja/public${url}`, {
+                timeout: 10000,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+              set({ packages: publicResponse.data.results || publicResponse.data });
+              return;
+            } catch (publicError: any) {
+              console.log('Public packages fetch also failed:', publicError?.response?.status);
+            }
+          }
+          
+          // If both fail, set empty packages but don't throw error
+          set({ packages: [] });
         } catch (err: any) {
           console.error("Fetch packages error:", err);
-          toast.error("Failed to fetch packages");
+          set({ packages: [] });
         }
       },
 
