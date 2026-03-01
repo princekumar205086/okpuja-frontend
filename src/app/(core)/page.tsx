@@ -11,53 +11,48 @@ import QualifiedPandit from './qualifiedpandit/page'
 
 export default function page() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-x-hidden">
-      {/* Main Content */}
-      <main id="main-content" className="relative">
-        {/* Hero Section */}
-        <section className="relative">
-          <VideoCarousel />
-        </section>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      <main id="main-content">
+        {/* Hero — full-screen video carousel */}
+        <VideoCarousel />
 
-        {/* Service Statistics */}
-        <section className="relative z-10">
+        {/* Trust / Stats bar */}
+        <div className="bg-white border-b border-stone-100">
           <ServiceCard />
-        </section>
+        </div>
 
-        {/* Featured Services */}
-        <section className="relative z-10">
+        {/* Featured Pujas — warm off-white */}
+        <div className="bg-[#fffbf7]">
           <FeaturedPujas />
-        </section>
+        </div>
 
-        {/* Service Range */}
-        <section className="relative z-10">
+        {/* Service Range — pure white */}
+        <div className="bg-white">
           <ServiceRange />
-        </section>
+        </div>
 
-        {/* Process Flow */}
-        <section className="relative z-10">
+        {/* How It Works — warm off-white */}
+        <div className="bg-[#fffbf7]">
           <HowItWorks />
-        </section>
+        </div>
 
-        {/* Upcoming Events */}
-        <section className="relative z-10">
+        {/* Upcoming Events — white */}
+        <div className="bg-white">
           <UpcomingEvents />
-        </section>
+        </div>
 
-        {/* Events Gallery */}
-        <section className="relative z-10">
+        {/* Events Calendar — warm off-white */}
+        <div className="bg-[#fffbf7]">
           <Events />
-        </section>
+        </div>
 
-        {/* Customer Testimonials */}
-        <section className="relative z-10">
+        {/* Testimonials — white */}
+        <div className="bg-white">
           <CustomerReviews />
-        </section>
+        </div>
 
-        {/* Expert Team */}
-        <section className="relative z-10">
-          <QualifiedPandit />
-        </section>
+        {/* Join as Pandit — rich dark background */}
+        <QualifiedPandit />
       </main>
     </div>
   )

@@ -202,15 +202,18 @@ const VideoCarousel: React.FC = () => {
 
   return (
     <div
-      className="relative w-full h-[420px] xs:h-[440px] sm:h-[480px] overflow-hidden bg-gray-900"
+      className="relative w-full min-h-screen h-[100svh] overflow-hidden bg-gray-950"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Loading overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-900 z-30 flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-redOrange border-t-transparent rounded-full animate-spin"></div>
+        <div className="absolute inset-0 bg-gray-950 z-30 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-white/60 text-sm tracking-wide">Loading...</p>
+          </div>
         </div>
       )}
 
@@ -218,17 +221,16 @@ const VideoCarousel: React.FC = () => {
         <div
           key={slide.id}
           ref={(el) => handleSlideWrapperRef(el, index)}
-          className={`absolute inset-0 transition-opacity duration-700 will-change-transform ${
+          className={`absolute inset-0 transition-opacity duration-1000 will-change-transform ${
             currentSlide === index ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          {/* Video with consistent object-fit settings to maintain aspect ratio */}
+          {/* Video */}
           <video
             ref={(el) => handleVideoRef(el, index)}
             className="h-full w-full object-cover"
             preload={
-              index === currentSlide ||
-              index === (currentSlide + 1) % slides.length
+              index === currentSlide || index === (currentSlide + 1) % slides.length
                 ? "auto"
                 : "none"
             }
@@ -238,52 +240,84 @@ const VideoCarousel: React.FC = () => {
             playsInline
             poster="/image/term.jpeg"
           >
-            <source
-              src={slide.videoUrl}
-              type={
-                slide.videoUrl.endsWith("webm") ? "video/webm" : "video/mp4"
-              }
-            />
-            Your browser does not support the video tag.
+            <source src={slide.videoUrl} type={slide.videoUrl.endsWith("webm") ? "video/webm" : "video/mp4"} />
           </video>
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20">
-            {/* Content - centered for all screen sizes */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="max-w-6xl w-full px-4 sm:px-8 md:px-16 lg:px-20 mx-auto">
-                <div className="text-center max-w-3xl mx-auto">
-                  {/* Dynamic heading size based on text length */}
-                  <h1
-                    className={`
-                    font-bold text-cream leading-tight mb-3 sm:mb-4 md:mb-5
-                    ${
-                      slide.headline.length > 40
-                        ? "text-xl sm:text-2xl md:text-3xl lg:text-4xl"
-                        : "text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
-                    }
-                  `}
-                  >
-                    {slide.headline}
-                  </h1>
+          {/* Multi-layer gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
 
-                  <p className="text-sm sm:text-base md:text-lg text-cream mb-6 mx-auto">
-                    {slide.subtext}
-                  </p>
+          {/* Content */}
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
+              <div className="max-w-2xl xl:max-w-3xl">
+                {/* Badge */}
+                <div
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/20 border border-orange-400/40 backdrop-blur-sm mb-6 transition-all duration-700 delay-200 ${
+                    currentSlide === index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                  <span className="text-orange-300 text-xs font-semibold tracking-widest uppercase">
+                    India&apos;s Trusted Puja Platform
+                  </span>
+                </div>
 
-                  {/* Buttons - always in a row for all screen sizes */}
-                  <div className="flex flex-row gap-3 sm:gap-4 justify-center">
-                    <Link href={slide.primaryLink}>
-                      <span className="inline-block text-center rounded-full bg-redOrange text-cream px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-medium hover:bg-orange-600 active:translate-y-0.5 transition-all duration-150 shadow-lg">
-                        {slide.primaryCta}
-                      </span>
-                    </Link>
-                    <Link href={slide.secondaryLink}>
-                      <span className="inline-block text-center rounded-full border-2 border-cream text-cream px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-medium hover:bg-cream/10 active:translate-y-0.5 transition-all duration-150">
-                        {slide.secondaryCta}
-                      </span>
-                    </Link>
-                  </div>
+                {/* Headline */}
+                <h1
+                  className={`font-bold text-white leading-[1.1] tracking-tight mb-5 transition-all duration-700 delay-300 ${
+                    currentSlide === index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                  } text-3xl sm:text-4xl md:text-5xl xl:text-6xl`}
+                >
+                  {slide.headline}
+                </h1>
+
+                {/* Sub-text */}
+                <p
+                  className={`text-white/75 text-base sm:text-lg md:text-xl leading-relaxed mb-8 transition-all duration-700 delay-[400ms] ${
+                    currentSlide === index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  }`}
+                >
+                  {slide.subtext}
+                </p>
+
+                {/* CTA Buttons */}
+                <div
+                  className={`flex flex-wrap gap-3 mb-10 transition-all duration-700 delay-500 ${
+                    currentSlide === index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  }`}
+                >
+                  <Link href={slide.primaryLink}>
+                    <span className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white px-8 py-3.5 rounded-xl text-sm font-semibold tracking-wide shadow-lg shadow-orange-500/30 transition-all duration-200">
+                      {slide.primaryCta}
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </Link>
+                  <Link href={slide.secondaryLink}>
+                    <span className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white px-8 py-3.5 rounded-xl text-sm font-semibold tracking-wide backdrop-blur-sm transition-all duration-200">
+                      {slide.secondaryCta}
+                    </span>
+                  </Link>
+                </div>
+
+                {/* Trust badges */}
+                <div
+                  className={`flex flex-wrap items-center gap-5 transition-all duration-700 delay-[600ms] ${
+                    currentSlide === index ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  }`}
+                >
+                  {[
+                    { icon: "🏆", text: "2,300+ Pujas Completed" },
+                    { icon: "⭐", text: "4.9 / 5 Rating" },
+                    { icon: "🕉️", text: "500+ Verified Pandits" },
+                  ].map((badge, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-base">{badge.icon}</span>
+                      <span className="text-white/65 text-xs font-medium">{badge.text}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -291,99 +325,75 @@ const VideoCarousel: React.FC = () => {
         </div>
       ))}
 
-      {/* Indicators */}
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
+      {/* Slide indicators */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`h-2.5 rounded-full transition-all ${
-              currentSlide === index
-                ? "w-6 md:w-8 bg-redOrange"
-                : "w-2.5 bg-cream/50 hover:bg-cream/70"
+            className={`h-1 rounded-full transition-all duration-300 ${
+              currentSlide === index ? "w-8 bg-orange-400" : "w-2.5 bg-white/35 hover:bg-white/60"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
 
-      {/* Control buttons for mobile: left and right of swipe hint; for desktop: top of right */}
-      {/* Mobile: absolute left and right, Desktop: as before */}
-      <>
-        {/* Mobile pause button (left of center) */}
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="block sm:hidden absolute bottom-10 left-8 z-50 rounded-full bg-black/60 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/80 active:scale-95 shadow-md border border-redOrange/40"
-          aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
-          style={{transform: 'translateY(50%)'}}
-        >
-          {isPlaying ? <FaPause size={20} /> : <FaPlay size={20} />}
-        </button>
-        {/* Mobile volume button (right of center) */}
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="block sm:hidden absolute bottom-10 right-8 z-50 rounded-full bg-black/60 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/80 active:scale-95 shadow-md border border-redOrange/40"
-          aria-label={isMuted ? "Unmute video" : "Mute video"}
-          style={{transform: 'translateY(50%)'}}
-        >
-          {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-        </button>
-        {/* Desktop controls as before */}
-        <div
-          className="hidden sm:flex absolute bottom-6 right-8 space-x-3 z-20"
-        >
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 shadow-md border border-redOrange/40"
-            aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
-          >
-            {isPlaying ? <FaPause size={18} /> : <FaPlay size={18} />}
-          </button>
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 shadow-md border border-redOrange/40"
-            aria-label={isMuted ? "Unmute video" : "Mute video"}
-          >
-            {isMuted ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
-          </button>
-        </div>
-      </>
-
-      {/* Navigation arrows */}
-      <div className="hidden sm:block">
+      {/* Desktop navigation arrows */}
+      <div className="hidden sm:flex absolute top-1/2 -translate-y-1/2 left-5 z-20">
         <button
           onClick={handlePrevSlide}
-          className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 z-20 border border-redOrange/40 shadow-md"
+          className="p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-white hover:bg-black/50 transition-all duration-200"
           aria-label="Previous slide"
         >
-          <BsChevronLeft size={26} />
+          <BsChevronLeft size={22} />
         </button>
+      </div>
+      <div className="hidden sm:flex absolute top-1/2 -translate-y-1/2 right-5 z-20">
         <button
           onClick={handleNextSlide}
-          className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 rounded-full bg-black/40 backdrop-blur-md p-3 text-cream transition-all hover:bg-black/60 active:scale-95 z-20 border border-redOrange/40 shadow-md"
+          className="p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-white hover:bg-black/50 transition-all duration-200"
           aria-label="Next slide"
         >
-          <BsChevronRight size={26} />
+          <BsChevronRight size={22} />
+        </button>
+      </div>
+
+      {/* Playback controls — bottom right */}
+      <div className="absolute bottom-7 right-6 flex items-center gap-2.5 z-20">
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-white hover:bg-black/50 transition-all duration-200"
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <FaPause size={13} /> : <FaPlay size={13} />}
+        </button>
+        <button
+          onClick={() => setIsMuted(!isMuted)}
+          className="p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/15 text-white hover:bg-black/50 transition-all duration-200"
+          aria-label={isMuted ? "Unmute" : "Mute"}
+        >
+          {isMuted ? <FaVolumeMute size={13} /> : <FaVolumeUp size={13} />}
         </button>
       </div>
 
       {/* Mobile swipe hint */}
       {showSwipeHint && (
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 sm:hidden z-40 pointer-events-none animate-pulse w-full flex justify-center">
-          <div
-            className="bg-gradient-to-r from-redOrange/90 via-black/90 to-redOrange/90 backdrop-blur-md text-cream font-semibold rounded-full px-6 py-2 text-base flex items-center shadow-2xl border-2 border-redOrange drop-shadow-lg"
-            style={{
-              textShadow: '0 2px 8px #000, 0 0px 2px #d97706',
-              letterSpacing: '0.02em',
-              maxWidth: '90vw',
-              justifyContent: 'center',
-            }}
-          >
-            <MdSwipe className="mr-2 text-xl" size={20} />
-            <span className="whitespace-nowrap">Swipe to navigate</span>
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 sm:hidden z-40 pointer-events-none">
+          <div className="bg-black/60 backdrop-blur-md text-white/90 text-xs font-medium rounded-full px-5 py-2.5 flex items-center gap-2 border border-white/20">
+            <MdSwipe size={16} />
+            <span>Swipe to navigate</span>
           </div>
         </div>
       )}
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-6 hidden md:flex items-center gap-2 z-20">
+        <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
+          <div className="w-1 h-2 bg-white/60 rounded-full animate-bounce" />
+        </div>
+        <span className="text-white/40 text-xs tracking-widest uppercase">Scroll</span>
+      </div>
     </div>
   );
 };

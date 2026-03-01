@@ -1,2 +1,5 @@
 onlyBuiltDependencies:
+  - '@mui/x-telemetry'
+  - core-js
   - sharp
+  - unrs-resolver

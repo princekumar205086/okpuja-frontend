@@ -80,8 +80,8 @@ const RevenueChart: React.FC = () => {
                     borderRadius: 8,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
-                  formatter={(value: number, name: string) => [
-                    `₹${value.toLocaleString()}`,
+                  formatter={(value: any, name: any) => [
+                    `₹${value?.toLocaleString() || value}`,
                     name === 'puja' ? 'Puja Revenue' : name === 'astrology' ? 'Astrology Revenue' : 'Total Revenue'
                   ]}
                 />

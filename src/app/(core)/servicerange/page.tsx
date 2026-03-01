@@ -1,8 +1,9 @@
-"use client";
-import React, { useState } from "react";
+﻿"use client";
+import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FaSun, FaStar, FaVideo, FaEllipsisH, FaArrowRight } from "react-icons/fa";
+import Link from "next/link";
+import { FaSun, FaStar, FaVideo, FaEllipsisH, FaArrowRight, FaCheckCircle } from "react-icons/fa";
 
 interface ServiceItem {
   title: string;
@@ -10,7 +11,9 @@ interface ServiceItem {
   description: string;
   icon: React.ReactNode;
   features: string[];
-  color: string;
+  href: string;
+  accentColor: string;
+  accentBg: string;
 }
 
 export default function ServiceRange() {
@@ -18,225 +21,176 @@ export default function ServiceRange() {
     {
       title: "Traditional Puja Services",
       image: "/image/puja.jpeg",
-      description: "Authentic rituals performed by certified pandits at your preferred location with complete arrangements",
-      icon: <FaSun className="text-2xl" />,
-      features: ["Certified Pandits", "Complete Arrangements", "All Locations", "Traditional Authentic"],
-      color: "from-orange-500 to-red-500"
+      description: "Authentic rituals performed by certified pandits at your preferred location with complete samagri arrangements.",
+      icon: <FaSun className="text-lg" />,
+      features: ["Verified & certified pandits", "All locations covered", "Samagri included", "Traditional mantras"],
+      href: "/pujaservice",
+      accentColor: "text-orange-600",
+      accentBg: "bg-orange-50 border-orange-200",
     },
     {
       title: "Astrology Consultation",
-      image: "/image/astrology.jpeg", 
-      description: "Personalized astrological guidance and detailed consultations for all your life decisions and concerns",
-      icon: <FaStar className="text-2xl" />,
-      features: ["Birth Chart Analysis", "Future Predictions", "Remedial Solutions", "Life Guidance"],
-      color: "from-purple-500 to-pink-500"
+      image: "/image/astrology.jpeg",
+      description: "Personalized astrological guidance for career, marriage, finance, and all major life decisions.",
+      icon: <FaStar className="text-lg" />,
+      features: ["Birth chart analysis", "Future predictions", "Remedial solutions", "Kundali matching"],
+      href: "/astrology",
+      accentColor: "text-purple-600",
+      accentBg: "bg-purple-50 border-purple-200",
     },
     {
       title: "Live E-Puja Services",
       image: "/image/E-puja.jpeg",
-      description: "Experience divine blessings through high-quality live-streamed ceremonies from sacred temples",
-      icon: <FaVideo className="text-2xl" />,
-      features: ["Live Streaming", "HD Quality", "Sacred Temples", "Interactive Experience"],
-      color: "from-blue-500 to-cyan-500"
+      description: "Experience divine blessings through HD live-streamed ceremonies from sacred temples across India.",
+      icon: <FaVideo className="text-lg" />,
+      features: ["HD live streaming", "Sacred temples", "Real-time participation", "Digital prasad"],
+      href: "/pujaservice",
+      accentColor: "text-blue-600",
+      accentBg: "bg-blue-50 border-blue-200",
     },
     {
       title: "Specialized Services",
       image: "/image/otherservice.jpeg",
-      description: "Comprehensive spiritual services including special ceremonies, consultations and customized rituals",
-      icon: <FaEllipsisH className="text-2xl" />,
-      features: ["Custom Rituals", "Special Ceremonies", "Spiritual Guidance", "Expert Consultation"],
-      color: "from-green-500 to-teal-500"
+      description: "Bespoke spiritual ceremonies, special homas, Vastu consultations, and custom ritual planning.",
+      icon: <FaEllipsisH className="text-lg" />,
+      features: ["Custom rituals", "Vastu consultation", "Corporate pujas", "Group ceremonies"],
+      href: "/pujaservice",
+      accentColor: "text-emerald-600",
+      accentBg: "bg-emerald-50 border-emerald-200",
     },
   ];
 
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   return (
-    <section className="relative bg-gradient-to-br from-orange-50 via-white to-red-50 overflow-hidden">
-      {/* Modern Background Elements */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-orange-400 to-red-400 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full blur-3xl animate-pulse delay-2000"></div>
-      </div>
+    <section className="py-20 lg:py-28">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        {/* Enhanced Header Section */}
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center max-w-4xl mx-auto mb-16 lg:mb-20"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          {/* <motion.div 
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl mb-8 shadow-2xl"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            transition={{ duration: 0.6 }}
-          >
-            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-            </svg>
-          </motion.div> */}
-          
-          <span className="inline-block px-6 py-3 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 text-sm font-semibold rounded-full mb-6 border border-orange-200">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold tracking-widest uppercase mb-5">
             Our Sacred Offerings
           </span>
-          
-          <h2 className="text-3xl sm:text-3xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-8 leading-tight">
-            <span className="text-gray-900">Comprehensive Range of{" "}</span>
-            <span className="relative bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent inline-block">
-              Sacred Services
-              <motion.div 
-                className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
-                initial={{ width: 0 }}
-                whileInView={{ width: "100%" }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.5 }}
-              />
-            </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
+            Comprehensive Range of{" "}
+            <span className="text-orange-600">Sacred Services</span>
           </h2>
-          
-          <p className="text-xl leading-relaxed max-w-3xl mx-auto mb-8 text-gray-600">
-            Transform your spiritual journey with our authentic and comprehensive services. 
-            Experience divine blessings through traditional rituals, expert guidance, and modern convenience.
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
+            Transform your spiritual journey with our authentic and comprehensive services tailored to every occasion and need.
           </p>
         </motion.div>
 
-        {/* Enhanced Service Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-16">
+        {/* Services grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {services.map((service, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group"
             >
-              <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 h-full">
-                {/* Enhanced Image Section */}
-                <div className="relative h-56 overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col sm:flex-row h-full">
+                {/* Image */}
+                <div className="relative sm:w-48 h-52 sm:h-auto flex-shrink-0 overflow-hidden">
                   <Image
                     src={service.image}
                     alt={service.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="192px"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
-                  
-                  {/* Icon Overlay */}
-                  <div className="absolute top-4 left-4">
-                    <div className={`p-3 bg-gradient-to-r ${service.color} rounded-xl shadow-lg text-white`}>
-                      {service.icon}
-                    </div>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
-                  {/* Floating Features */}
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                      <div className="grid grid-cols-2 gap-2">
-                        {service.features.map((feature, idx) => (
-                          <div key={idx} className="text-white text-xs font-medium">
-                            • {feature}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  {/* Icon badge */}
+                  <div className={`absolute top-4 left-4 p-2.5 rounded-xl ${service.accentBg} border backdrop-blur-sm shadow-sm`}>
+                    <span className={service.accentColor}>{service.icon}</span>
                   </div>
                 </div>
 
-                {/* Enhanced Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors duration-300">
-                    {service.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    {service.description}
-                  </p>
-                  
-                  <motion.button
-                    className="inline-flex items-center text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors duration-300"
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
+                {/* Content */}
+                <div className="p-6 flex flex-col justify-between flex-1">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors duration-200">
+                      {service.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 leading-relaxed mb-4">
+                      {service.description}
+                    </p>
+                    <ul className="space-y-1.5 mb-5">
+                      {service.features.map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                          <FaCheckCircle className="text-orange-400 flex-shrink-0" size={12} />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Link
+                    href={service.href}
+                    className={`inline-flex items-center gap-2 text-sm font-semibold ${service.accentColor} hover:opacity-80 transition-opacity duration-200`}
                   >
                     Explore Service
-                    <FaArrowRight className="ml-2 text-xs transition-transform duration-300 group-hover:translate-x-1" />
-                  </motion.button>
+                    <FaArrowRight size={12} className="group-hover:translate-x-1 transition-transform duration-200" />
+                  </Link>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Enhanced Call-to-Action Section */}
+        {/* CTA Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="relative"
+          transition={{ duration: 0.6 }}
+          className="relative bg-gradient-to-r from-orange-600 to-red-600 rounded-3xl overflow-hidden px-8 py-12 sm:px-12 text-center text-white"
         >
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl p-8 sm:p-12 text-center text-white shadow-2xl overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="cta-pattern" width="60" height="60" patternUnits="userSpaceOnUse">
-                    <circle cx="30" cy="30" r="2" fill="currentColor" opacity="0.5"/>
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#cta-pattern)" />
-              </svg>
-            </div>
+          {/* Subtle pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <circle cx="20" cy="20" r="1.5" fill="white" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#dots)" />
+            </svg>
+          </div>
 
-            <div className="relative z-10">
-              <motion.div
-                initial={{ scale: 0.8 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="mb-6"
-              >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl backdrop-blur-sm mb-4">
-                  <FaStar className="text-2xl text-white" />
-                </div>
-              </motion.div>
-              
-              <h3 className="text-3xl sm:text-4xl font-bold mb-4">
-                Ready to Begin Your Spiritual Journey?
-              </h3>
-              
-              <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Book your personalized puja service today and experience the divine connection 
-                with expert pandits and authentic rituals.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+          <div className="relative z-10 max-w-2xl mx-auto">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-3">
+              Ready to Begin Your Spiritual Journey?
+            </h3>
+            <p className="text-white/80 text-base mb-8 leading-relaxed">
+              Book your personalized puja service today and experience the divine connection with expert pandits.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/pujaservice">
+                <motion.span
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 bg-white text-orange-600 font-semibold px-8 py-3.5 rounded-xl shadow-lg transition-all duration-200 hover:bg-orange-50"
                 >
-                  Book Service Now
-                  <FaArrowRight className="ml-3 text-lg" />
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/30 backdrop-blur-sm transition-all duration-300"
+                  Book a Puja Now
+                  <FaArrowRight size={14} />
+                </motion.span>
+              </Link>
+              <Link href="/services">
+                <motion.span
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-semibold px-8 py-3.5 rounded-xl backdrop-blur-sm transition-all duration-200"
                 >
                   Learn More
-                  <svg className="w-5 h-5 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </motion.button>
-              </div>
+                </motion.span>
+              </Link>
             </div>
           </div>
         </motion.div>
@@ -244,3 +198,4 @@ export default function ServiceRange() {
     </section>
   );
 }
+

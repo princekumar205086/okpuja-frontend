@@ -77,7 +77,7 @@ const BookingTrendsChart: React.FC = () => {
                     borderRadius: 8,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
-                  formatter={(value: number) => [`${value.toLocaleString()}`, 'Count']}
+                  formatter={(value: any) => [`${value?.toLocaleString() || value}`, 'Count']}
                 />
               </PieChart>
             </ResponsiveContainer>
