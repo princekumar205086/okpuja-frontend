@@ -10,7 +10,7 @@ const stats = [
     suffix: "+",
     label: "Sacred Pujas & Homas",
     subLabel: "Performed with full tradition",
-    icon: "ðŸ”¥",
+    icon: "🙏",
     accent: "#d97706",
   },
   {
@@ -19,7 +19,7 @@ const stats = [
     suffix: "+",
     label: "Verified Pandits",
     subLabel: "Certified & experienced",
-    icon: "ðŸ™",
+    icon: "",
     accent: "#7c3aed",
   },
   {
@@ -28,7 +28,7 @@ const stats = [
     suffix: "+",
     label: "Spiritual Services",
     subLabel: "Covering every occasion",
-    icon: "âœ¨",
+    icon: "✨",
     accent: "#059669",
   },
 ];
