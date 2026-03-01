@@ -167,7 +167,7 @@ const FeaturedPujas: React.FC = () => {
           <div className="puja-slider-container">
             <Slider ref={sliderRef} {...settings}>
               {pujas.map((puja, index) => (
-                <div key={index} className="px-2 py-1">
+                <div key={index} className="px-2 py-1 h-[350px]">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
