@@ -3,6 +3,21 @@ import { persist } from 'zustand/middleware';
 import apiClient from '../apiService/globalApiconfig';
 import { toast } from 'react-hot-toast';
 
+// Helper function to ensure bookings start with pending status
+const normalizeBookingStatus = (booking: any) => {
+  // If booking doesn't have a status or has an invalid status, set to pending
+  const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
+  if (!booking.status || !validStatuses.includes(booking.status.toUpperCase())) {
+    booking.status = 'PENDING';
+  }
+  return booking;
+};
+
+// Helper function to normalize booking array
+const normalizeBookings = (bookings: any[]) => {
+  return bookings.map(normalizeBookingStatus);
+};
+
 // Types based on Swagger API responses
 export interface AdminUser {
   id: number;
@@ -307,7 +322,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           const response = await apiClient.get(url);
           
           set({
-            astrologyBookings: response.data || [],
+            astrologyBookings: normalizeBookings(response.data || []),
             loading: false,
             error: null
           });
@@ -355,7 +370,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           const response = await apiClient.get(url);
           
           set({
-            regularBookings: response.data || [],
+            regularBookings: normalizeBookings(response.data || []),
             loading: false,
             error: null
           });
@@ -404,7 +419,7 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           const response = await apiClient.get(url);
           
           set({
-            pujaBookings: response.data || [],
+            pujaBookings: normalizeBookings(response.data || []),
             loading: false,
             error: null
           });

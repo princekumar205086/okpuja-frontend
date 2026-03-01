@@ -10,6 +10,8 @@ import TabNavigation from './components/TabNavigation';
 import FiltersAndActions from './components/FiltersAndActions';
 import EnhancedBookingTable from './components/EnhancedBookingTable';
 import EnhancedBookingCards from './components/EnhancedBookingCards';
+import BookingCalendar from './components/BookingCalendar';
+import DailyBookingList from './components/DailyBookingList';
 import Pagination from './components/Pagination';
 import BookingDetailsDrawer from './components/BookingDetailsDrawer';
 import BookingRescheduleDrawer from './components/BookingRescheduleDrawer';
@@ -73,7 +75,7 @@ const AdminBookingsPage: React.FC = () => {
 
   // Local state
   const [activeTab, setActiveTab] = useState<'astrology' | 'puja'>('astrology');
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'card' | 'calendar'>('table');
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: '',
@@ -84,6 +86,7 @@ const AdminBookingsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isRescheduleDrawerOpen, setIsRescheduleDrawerOpen] = useState(false);
   const [isStatusDrawerOpen, setIsStatusDrawerOpen] = useState(false);
@@ -173,8 +176,27 @@ const AdminBookingsPage: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const handleViewModeChange = (mode: 'table' | 'card') => {
+  const handleViewModeChange = (mode: 'table' | 'card' | 'calendar') => {
     setViewMode(mode);
+  };
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const handleCalendarBookingClick = (booking: any) => {
+    setSelectedBooking(booking);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCalendarReschedule = (booking: any) => {
+    setSelectedBooking(booking);
+    setIsRescheduleDrawerOpen(true);
+  };
+
+  const handleCalendarStatusChange = (booking: any) => {
+    setSelectedBooking(booking);
+    setIsStatusDrawerOpen(true);
   };
 
   const handleBookingAction = async (action: string, booking: any) => {
@@ -371,37 +393,65 @@ const AdminBookingsPage: React.FC = () => {
         </div>
 
         {/* Bookings List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          {viewMode === 'table' ? (
-            <EnhancedBookingTable
-              bookings={paginatedBookings}
-              isLoading={loading}
-              onAction={handleBookingAction}
-              getStatusColor={getStatusColor}
-              getStatusIcon={getStatusIcon}
-              serviceType={activeTab === 'astrology' ? 'astrology' : activeTab === 'puja' ? 'puja' : 'regular'}
-            />
-          ) : (
-            <EnhancedBookingCards
-              bookings={paginatedBookings}
-              isLoading={loading}
-              onAction={handleBookingAction}
-              getStatusColor={getStatusColor}
-              getStatusIcon={getStatusIcon}
-              serviceType={activeTab === 'astrology' ? 'astrology' : activeTab === 'puja' ? 'puja' : 'regular'}
-            />
-          )}
-        </div>
+        {viewMode === 'calendar' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Calendar */}
+            <div className="lg:col-span-2">
+              <BookingCalendar
+                bookings={getCurrentBookings()}
+                type={activeTab}
+                onBookingClick={handleCalendarBookingClick}
+                onDateSelect={handleDateSelect}
+              />
+            </div>
+            
+            {/* Daily Booking List */}
+            <div className="lg:col-span-1">
+              <DailyBookingList
+                date={selectedDate}
+                bookings={getCurrentBookings()}
+                type={activeTab}
+                onBookingClick={handleCalendarBookingClick}
+                onReschedule={handleCalendarReschedule}
+                onStatusChange={handleCalendarStatusChange}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              {viewMode === 'table' ? (
+                <EnhancedBookingTable
+                  bookings={paginatedBookings}
+                  isLoading={loading}
+                  onAction={handleBookingAction}
+                  getStatusColor={getStatusColor}
+                  getStatusIcon={getStatusIcon}
+                  serviceType={activeTab === 'astrology' ? 'astrology' : activeTab === 'puja' ? 'puja' : 'regular'}
+                />
+              ) : (
+                <EnhancedBookingCards
+                  bookings={paginatedBookings}
+                  isLoading={loading}
+                  onAction={handleBookingAction}
+                  getStatusColor={getStatusColor}
+                  getStatusIcon={getStatusIcon}
+                  serviceType={activeTab === 'astrology' ? 'astrology' : activeTab === 'puja' ? 'puja' : 'regular'}
+                />
+              )}
+            </div>
 
-        {/* Pagination */}
-        {filteredBookings.length > itemsPerPage && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={filteredBookings.length}
-            itemsPerPage={itemsPerPage}
-          />
+            {/* Pagination */}
+            {filteredBookings.length > itemsPerPage && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={filteredBookings.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
+          </>
         )}
 
         {/* Booking Details Drawer */}
