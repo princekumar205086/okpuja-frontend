@@ -99,11 +99,6 @@ export default function page() {
           <HowItWorks />
         </div>
 
-        {/* Upcoming Events — white */}
-        <div className="bg-white">
-          <UpcomingEvents />
-        </div>
-
         {/* Events Calendar — warm off-white */}
         <div className="bg-[#fffbf7]">
           <Events />
