@@ -122,21 +122,7 @@ const getBookingId = () => {
 
 ### **Corrected API Endpoint Mapping**
 ```typescript
-// API Endpoint Strategy (Based on Backend Analysis)
-const apiEndpoints = {
-  astrology: {
-    reschedule: 'PATCH /api/astrology/bookings/{id}/reschedule/',
-    payload: { preferred_date, preferred_time, reason }
-  },
-  puja: {
-    reschedule: 'POST /api/booking/bookings/{id}/reschedule/', // FIXED!
-    payload: { selected_date, selected_time, reason }         // FIXED!
-  },
-  regular: {
-    reschedule: 'POST /api/booking/bookings/{id}/reschedule/',
-    payload: { selected_date, selected_time, reason }
-  }
-};
+
 ```
 
 ---
