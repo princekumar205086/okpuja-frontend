@@ -499,6 +499,8 @@ export function buildGlobalSchemas() {
 
 /**
  * Build city page schemas
+ * NOTE: LocalBusiness is NOT included here as it's already in the global layout.
+ * Including it here would cause duplicate entities which Google penalizes.
  */
 export function buildCityPageSchemas(
   cityName: string,
@@ -507,10 +509,49 @@ export function buildCityPageSchemas(
   faqs: FAQItem[]
 ) {
   return [
-    buildLocalBusinessSchema({ name: cityName, state: cityState }),
+    // City-specific Service schema (not LocalBusiness to avoid duplicates)
+    buildCityServiceAreaSchema(cityName, cityState),
     buildBreadcrumbSchema(breadcrumbs),
     buildFAQSchema(faqs),
   ];
+}
+
+/**
+ * Build city-specific ServiceArea schema
+ * This provides location context without duplicating LocalBusiness
+ */
+export function buildCityServiceAreaSchema(cityName: string, cityState: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `Puja & Astrology Services in ${cityName}`,
+    description: `Book verified pandits for puja, havan, and astrology services in ${cityName}, ${cityState}. OKPUJA offers trusted puja services with complete samagri.`,
+    url: `${SITE_CONFIG.url}/puja/${cityName.toLowerCase().replace(/\s+/g, '-')}`,
+    provider: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.business.name,
+      url: SITE_CONFIG.url,
+    },
+    areaServed: {
+      '@type': 'City',
+      name: cityName,
+      containedInPlace: {
+        '@type': 'State',
+        name: cityState,
+        containedInPlace: {
+          '@type': 'Country',
+          name: 'India',
+        },
+      },
+    },
+    serviceType: 'Religious Services',
+    category: 'Puja Services',
+    availableChannel: {
+      '@type': 'ServiceChannel',
+      serviceUrl: `${SITE_CONFIG.url}/puja/${cityName.toLowerCase().replace(/\s+/g, '-')}`,
+      servicePhone: SITE_CONFIG.business.telephone,
+    },
+  };
 }
 
 /**

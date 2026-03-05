@@ -58,6 +58,7 @@ export {
   buildEventSchema,
   buildGlobalSchemas,
   buildCityPageSchemas,
+  buildCityServiceAreaSchema,
   buildPujaPageSchemas,
   serializeSchemas,
 } from './schema';

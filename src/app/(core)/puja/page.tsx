@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { INDIA_CITIES, PUJA_SERVICES } from '@/lib/seo/keywords';
 import { SITE_CONFIG } from '@/lib/seo/seoConfig';
 import { SchemaScript } from '@/lib/seo/SchemaScript';
-import { buildLocalBusinessSchema, buildBreadcrumbSchema, buildFAQSchema } from '@/lib/seo/schema';
+import { buildBreadcrumbSchema, buildFAQSchema } from '@/lib/seo/schema';
 
 // ============================================================
 // METADATA
@@ -98,9 +98,8 @@ export default function PujaPage() {
   const lifeEventPujas = PUJA_SERVICES.filter((p) => p.category === 'life-events').slice(0, 8);
   const metroCities = INDIA_CITIES.filter((c) => c.tier === 1).slice(0, 8);
 
-  // Build schemas
+  // Build schemas (LocalBusiness is already in global layout)
   const schemas = [
-    buildLocalBusinessSchema(),
     buildBreadcrumbSchema([
       { name: 'Home', url: '/' },
       { name: 'Puja Services', url: '/puja' },
