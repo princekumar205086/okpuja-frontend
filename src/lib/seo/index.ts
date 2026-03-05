@@ -73,4 +73,20 @@ export type {
 } from './schema';
 
 // City SEO Data
-export { CITY_SEO_DATA, getCityFAQs, getCityPujaContent } from './cityData';
+export { 
+  CITY_SEO_DATA, 
+  getCityFAQs, 
+  getCityPujaContent, 
+  getCityBySlug,
+  getCitiesByState,
+  getCitiesByTier,
+  getAllCitySlugs,
+  getCityKeywords,
+  getCityPageTitles,
+  // Bihar-specific exports
+  BIHAR_PRIORITY_CITIES,
+  getBiharCityData,
+  isBiharPriorityCity,
+  getBiharCityFAQs,
+} from './cityData';
+export type { BiharCityData, CityContent, CityFAQ } from './cityData';

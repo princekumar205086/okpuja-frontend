@@ -1,6 +1,11 @@
 /**
  * OKPUJA - Robots.txt Auto-Generation
  * Next.js Metadata Route: /robots.txt
+ * 
+ * Configuration:
+ * - Allow all crawlers for main content
+ * - Block admin, payment, and user authentication routes
+ * - Specific rules for Googlebot
  */
 
 import type { MetadataRoute } from 'next';
@@ -11,7 +16,19 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/',
+          '/puja',
+          '/puja/',
+          '/pujaservice',
+          '/astrology',
+          '/blog',
+          '/about',
+          '/contactus',
+          '/gallery',
+          '/career',
+          '/events',
+        ],
         disallow: [
           '/api/',
           '/admin/',
@@ -27,16 +44,34 @@ export default function robots(): MetadataRoute.Robots {
           '/reset-password/',
           '/verify-email/',
           '/verify-otp/',
+          '/user/',
+          '/employee/',
+          '/confirmbooking/',
+          '/failedbooking/',
+          '/astro-booking-failed/',
+          '/astro-booking-success/',
         ],
       },
       {
         userAgent: 'Googlebot',
-        allow: '/',
-        disallow: ['/api/', '/admin/'],
+        allow: [
+          '/',
+          '/puja',
+          '/puja/',
+          '/pujaservice',
+          '/astrology',
+          '/blog',
+        ],
+        disallow: ['/api/', '/admin/', '/user/', '/checkout/'],
       },
       {
         userAgent: 'Googlebot-Image',
         allow: '/',
+      },
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: ['/api/', '/admin/', '/user/'],
       },
     ],
     sitemap: `${SITE_CONFIG.url}/sitemap.xml`,

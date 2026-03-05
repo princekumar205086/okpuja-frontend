@@ -139,7 +139,7 @@ export default async function CityPujaPage({
               {popularPujas.map((puja) => (
                 <Link
                   key={puja.slug}
-                  href={`/puja/${puja.slug}`}
+                  href={`/pujaservice`}
                   className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-orange-100"
                 >
                   <h3 className="font-semibold text-gray-900 mb-1">{puja.name}</h3>
@@ -163,7 +163,7 @@ export default async function CityPujaPage({
               {festivalPujas.map((puja) => (
                 <Link
                   key={puja.slug}
-                  href={`/puja/${puja.slug}`}
+                  href={`/pujaservice`}
                   className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-100 hover:border-orange-300 transition-colors"
                 >
                   <h3 className="font-medium text-gray-900">{puja.name}</h3>
@@ -184,7 +184,7 @@ export default async function CityPujaPage({
               {astrologyPujas.map((puja) => (
                 <Link
                   key={puja.slug}
-                  href={`/puja/${puja.slug}`}
+                  href={`/astrology`}
                   className="bg-white rounded-lg p-4 border border-indigo-100 hover:border-indigo-300 transition-colors"
                 >
                   <h3 className="font-medium text-gray-900">{puja.name}</h3>

@@ -128,12 +128,22 @@ export function buildOrganizationSchema() {
 
 /**
  * LocalBusiness Schema - For local SEO dominance
+ * 
+ * IMPORTANT: aggregateRating is NOT included here to prevent Google's
+ * "Review has multiple aggregate ratings" error. Keep aggregateRating
+ * only in Service/Product schemas - ONE per page.
+ * 
+ * @param cityOverride - Optional city override for city-specific pages
+ * @param includeRating - Whether to include aggregateRating (default: false)
  */
-export function buildLocalBusinessSchema(cityOverride?: {
-  name: string;
-  state?: string;
-  postalCode?: string;
-}) {
+export function buildLocalBusinessSchema(
+  cityOverride?: {
+    name: string;
+    state?: string;
+    postalCode?: string;
+  },
+  includeRating: boolean = false
+) {
   const address = cityOverride
     ? {
         '@type': 'PostalAddress',
@@ -151,7 +161,7 @@ export function buildLocalBusinessSchema(cityOverride?: {
         addressCountry: SITE_CONFIG.business.address.addressCountry,
       };
 
-  return {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     '@id': `${SITE_CONFIG.url}/#localbusiness`,
@@ -215,14 +225,20 @@ export function buildLocalBusinessSchema(cityOverride?: {
         },
       ],
     },
-    aggregateRating: {
+  };
+
+  // Only add aggregateRating if explicitly requested (to prevent duplicates)
+  if (includeRating) {
+    schema.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: '4.8',
       reviewCount: '2500',
       bestRating: '5',
       worstRating: '1',
-    },
-  };
+    };
+  }
+
+  return schema;
 }
 
 /**

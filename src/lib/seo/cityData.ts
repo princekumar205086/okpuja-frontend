@@ -206,3 +206,208 @@ export function getCitiesByState(state: string): CityData[] {
 export function getCitiesByTier(tier: number): CityData[] {
   return INDIA_CITIES.filter((city) => city.tier === tier);
 }
+
+// ============================================================
+// BIHAR SPECIAL SEO DATA
+// Enhanced content for primary target market: Purnia, Katihar, Araria, etc.
+// ============================================================
+
+export interface BiharCityData {
+  slug: string;
+  name: string;
+  postalCode: string;
+  landmarks: string[];
+  nearbyAreas: string[];
+  specialContent: string;
+  localKeywords: string[];
+  coordinates: { lat: number; lng: number };
+}
+
+export const BIHAR_PRIORITY_CITIES: BiharCityData[] = [
+  {
+    slug: 'purnia',
+    name: 'Purnia',
+    postalCode: '854301',
+    landmarks: ['Purnia Junction', 'Gulabbagh', 'Bhatta Bazar', 'Ram Ratan Ji Nagar', 'Rambagh', 'Line Bazar'],
+    nearbyAreas: ['Kasba', 'Banmankhi', 'Dagarua', 'Baisi', 'Dhamdaha', 'Rupauli'],
+    specialContent: 'OKPUJA is headquartered in Purnia, Bihar 854301, making it the most trusted puja service provider in the region. Our pandits have deep roots in the local community and understand the traditional Mithila puja vidhi preferred in this region.',
+    localKeywords: [
+      'pandit in purnia bihar',
+      'puja service purnia 854301',
+      'best pandit purnia',
+      'havan booking purnia',
+      'satyanarayan puja purnia',
+      'griha pravesh puja purnia',
+      'pandit near me purnia',
+      'puja booking purnia bihar',
+      'verified pandit purnia',
+      'astrologer in purnia',
+      'kundli making purnia',
+      'mundan ceremony purnia',
+      'wedding pandit purnia',
+      'puja service purnia city',
+      'okpuja purnia',
+      'home puja purnia',
+      'office puja purnia',
+      'pandit ji purnia',
+      'brahmin pandit purnia',
+      'vedic pandit purnia bihar',
+    ],
+    coordinates: { lat: 25.7771, lng: 87.4753 },
+  },
+  {
+    slug: 'katihar',
+    name: 'Katihar',
+    postalCode: '854105',
+    landmarks: ['Katihar Junction', 'Barsoi', 'Manihari', 'Kadwa'],
+    nearbyAreas: ['Barsoi', 'Manihari', 'Kadwa', 'Azamnagar', 'Pranpur', 'Barari'],
+    specialContent: 'Book trusted pandits for puja services in Katihar, Bihar. OKPUJA serves Katihar district with experienced local pandits who perform all rituals according to traditional Bihar customs.',
+    localKeywords: [
+      'pandit in katihar',
+      'puja service katihar',
+      'best pandit katihar bihar',
+      'havan booking katihar',
+      'astrologer katihar',
+      'puja near me katihar',
+      'pandit ji katihar',
+      'wedding pandit katihar',
+      'mundan katihar',
+      'griha pravesh katihar',
+    ],
+    coordinates: { lat: 25.5410, lng: 87.5680 },
+  },
+  {
+    slug: 'araria',
+    name: 'Araria',
+    postalCode: '854311',
+    landmarks: ['Araria Town', 'Forbesganj', 'Kursakatta', 'Jokihat'],
+    nearbyAreas: ['Forbesganj', 'Kursakatta', 'Jokihat', 'Raniganj', 'Palasi', 'Narpatganj'],
+    specialContent: 'Find verified pandits for puja services in Araria, Bihar. Our pandits serve all areas of Araria district including Forbesganj and nearby towns.',
+    localKeywords: [
+      'pandit in araria',
+      'puja service araria bihar',
+      'best pandit araria',
+      'havan araria',
+      'astrologer araria',
+      'puja booking araria',
+      'pandit forbesganj',
+      'wedding pandit araria',
+    ],
+    coordinates: { lat: 26.1498, lng: 87.5140 },
+  },
+  {
+    slug: 'bhagalpur',
+    name: 'Bhagalpur',
+    postalCode: '812001',
+    landmarks: ['Bhagalpur Junction', 'Tilka Manjhi Chowk', 'Sabour', 'Nathnagar'],
+    nearbyAreas: ['Sabour', 'Nathnagar', 'Kahalgaon', 'Sultanganj', 'Naugacchia', 'Goradih'],
+    specialContent: 'Book experienced pandits for puja services in Bhagalpur, Bihar. Known as the Silk City, Bhagalpur has a rich tradition of Hindu rituals that our pandits expertly perform.',
+    localKeywords: [
+      'pandit in bhagalpur',
+      'puja service bhagalpur',
+      'best pandit bhagalpur bihar',
+      'havan bhagalpur',
+      'astrologer bhagalpur',
+      'wedding pandit bhagalpur',
+      'griha pravesh bhagalpur',
+      'puja near me bhagalpur',
+    ],
+    coordinates: { lat: 25.2425, lng: 86.9842 },
+  },
+  {
+    slug: 'madhepura',
+    name: 'Madhepura',
+    postalCode: '852113',
+    landmarks: ['Madhepura Town', 'Singheshwar', 'Shankarpur', 'Bihariganj'],
+    nearbyAreas: ['Singheshwar', 'Bihariganj', 'Murliganj', 'Alamnagar', 'Gamharia', 'Uda Kishunganj'],
+    specialContent: 'Book pandits for puja in Madhepura, Bihar. Our services cover all of Madhepura district including the famous Singheshwar temple area.',
+    localKeywords: [
+      'pandit in madhepura',
+      'puja service madhepura',
+      'pandit near singheshwar',
+      'havan madhepura',
+      'astrologer madhepura',
+      'wedding pandit madhepura',
+    ],
+    coordinates: { lat: 25.9221, lng: 86.7928 },
+  },
+  {
+    slug: 'kishanganj',
+    name: 'Kishanganj',
+    postalCode: '855107',
+    landmarks: ['Kishanganj Town', 'Bahadurganj', 'Thakurganj', 'Pothia'],
+    nearbyAreas: ['Bahadurganj', 'Thakurganj', 'Pothia', 'Kochadhaman', 'Terhagachh', 'Dighalbank'],
+    specialContent: 'Find trusted pandits for puja services in Kishanganj, Bihar. Located at the border of West Bengal and Nepal, our pandits serve the diverse community of Kishanganj.',
+    localKeywords: [
+      'pandit in kishanganj',
+      'puja service kishanganj',
+      'best pandit kishanganj bihar',
+      'havan kishanganj',
+      'astrologer kishanganj',
+      'wedding pandit kishanganj',
+      'puja booking kishanganj',
+    ],
+    coordinates: { lat: 26.0922, lng: 87.9466 },
+  },
+  {
+    slug: 'saharsa',
+    name: 'Saharsa',
+    postalCode: '852201',
+    landmarks: ['Saharsa Town', 'Simri Bakhtiarpur', 'Salkhua', 'Mahishi'],
+    nearbyAreas: ['Simri Bakhtiarpur', 'Salkhua', 'Mahishi', 'Nauhatta', 'Sattar Katiya', 'Bangaon'],
+    specialContent: 'Book verified pandits for puja services in Saharsa, Bihar. Our experienced pandits serve all areas of Saharsa district with authentic Vedic rituals.',
+    localKeywords: [
+      'pandit in saharsa',
+      'puja service saharsa',
+      'best pandit saharsa bihar',
+      'havan saharsa',
+      'astrologer saharsa',
+      'wedding pandit saharsa',
+      'griha pravesh saharsa',
+    ],
+    coordinates: { lat: 25.8748, lng: 86.5964 },
+  },
+];
+
+/**
+ * Get Bihar priority city data by slug
+ */
+export function getBiharCityData(slug: string): BiharCityData | undefined {
+  return BIHAR_PRIORITY_CITIES.find((city) => city.slug === slug);
+}
+
+/**
+ * Check if a city slug is a Bihar priority city
+ */
+export function isBiharPriorityCity(slug: string): boolean {
+  return BIHAR_PRIORITY_CITIES.some((city) => city.slug === slug);
+}
+
+/**
+ * Get enhanced FAQs for Bihar priority cities
+ */
+export function getBiharCityFAQs(cityData: BiharCityData): CityFAQ[] {
+  return [
+    {
+      question: `What is the best puja service in ${cityData.name}, Bihar?`,
+      answer: `OKPUJA is the highest-rated puja service in ${cityData.name}, Bihar ${cityData.postalCode}. We are locally based and offer 100+ puja services with verified pandits. Our services cover ${cityData.nearbyAreas.join(', ')} and surrounding areas.`,
+    },
+    {
+      question: `How to book a pandit in ${cityData.name} ${cityData.postalCode}?`,
+      answer: `Book a pandit in ${cityData.name} easily through OKPUJA. Visit our website, select your puja type, choose your preferred date, and confirm. Our verified pandits will come to your location near ${cityData.landmarks.slice(0, 3).join(', ')} or anywhere in ${cityData.name}.`,
+    },
+    {
+      question: `What areas does OKPUJA serve in ${cityData.name}?`,
+      answer: `OKPUJA serves all areas of ${cityData.name} district including ${cityData.nearbyAreas.join(', ')} and surrounding villages. Our pandits can travel to your location for doorstep puja services.`,
+    },
+    {
+      question: `Is same-day puja booking available in ${cityData.name}?`,
+      answer: `Yes, same-day puja booking is available in ${cityData.name}, ${cityData.postalCode}, subject to pandit availability. For best service, we recommend booking 24 hours in advance.`,
+    },
+    {
+      question: `What is the cost of puja services in ${cityData.name}?`,
+      answer: `Puja prices in ${cityData.name} start from ₹500 and vary based on the type of puja. All prices on OKPUJA are transparent with no hidden charges. Samagri is included with most bookings.`,
+    },
+  ];
+}
+

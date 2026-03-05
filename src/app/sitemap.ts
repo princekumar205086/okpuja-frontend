@@ -4,11 +4,13 @@
  * 
  * Generates comprehensive sitemap covering:
  * - Home page
+ * - Puja main page (/puja)
  * - All puja services (100+)
  * - All city landing pages (200+)
  * - Astrology pages (20+)
  * - Blog pages
  * - Static pages
+ * - Bihar-specific SEO pages (Priority)
  * 
  * Total URLs: 10,000+ (cities × services + static pages)
  */
@@ -18,6 +20,9 @@ import { INDIA_CITIES, PUJA_SERVICES, ASTROLOGY_SERVICES } from '@/lib/seo/keywo
 import { SITE_CONFIG, SITEMAP_PRIORITIES, SITEMAP_FREQUENCIES } from '@/lib/seo/seoConfig';
 
 const BASE_URL = SITE_CONFIG.url;
+
+// Bihar priority cities for special SEO targeting
+const BIHAR_PRIORITY_CITIES = ['purnia', 'katihar', 'araria', 'bhagalpur', 'madhepura', 'kishanganj', 'saharsa', 'patna'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();
@@ -31,6 +36,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: SITEMAP_FREQUENCIES.home as 'daily',
       priority: SITEMAP_PRIORITIES.home,
+    },
+    // Main Puja page
+    {
+      url: `${BASE_URL}/puja`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.95,
     },
     {
       url: `${BASE_URL}/pujaservice`,
@@ -96,13 +108,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // ============================================================
   // CITY LANDING PAGES (200+)
+  // Bihar priority cities get highest priority (0.98)
   // ============================================================
-  const cityPages: MetadataRoute.Sitemap = INDIA_CITIES.map((city) => ({
-    url: `${BASE_URL}/puja/${city.slug}`,
-    lastModified: now,
-    changeFrequency: SITEMAP_FREQUENCIES.city as 'weekly',
-    priority: city.tier === 1 ? 0.95 : city.tier === 2 ? 0.9 : 0.85,
-  }));
+  const cityPages: MetadataRoute.Sitemap = INDIA_CITIES.map((city) => {
+    // Bihar priority cities get highest priority
+    const isBiharPriority = BIHAR_PRIORITY_CITIES.includes(city.slug);
+    const priority = isBiharPriority 
+      ? 0.98 
+      : city.tier === 1 
+        ? 0.95 
+        : city.tier === 2 
+          ? 0.9 
+          : 0.85;
+    
+    return {
+      url: `${BASE_URL}/puja/${city.slug}`,
+      lastModified: now,
+      changeFrequency: isBiharPriority ? 'daily' as const : SITEMAP_FREQUENCIES.city as 'weekly',
+      priority,
+    };
+  });
 
   // ============================================================
   // PUJA SERVICE PAGES (100+)
