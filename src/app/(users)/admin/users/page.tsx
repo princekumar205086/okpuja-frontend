@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box, Typography, Card, CardContent, Chip, TextField, MenuItem,
   Select, FormControl, InputLabel, InputAdornment, IconButton,
@@ -9,26 +9,24 @@ import {
 import {
   Search as SearchIcon, People as PeopleIcon, PersonAdd as PersonAddIcon,
   Block as BlockIcon, CheckCircle as CheckIcon, Edit as EditIcon,
-  Visibility as ViewIcon,
+  Visibility as ViewIcon, Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { mockUsers } from "@/app/lib/mock/adminData";
+import { adminUserApi, type ApiUser } from "@/app/apiService/adminApi";
 import toast from "react-hot-toast";
-
-type User = (typeof mockUsers)[0];
 
 const ROWS_PER_PAGE = 8;
 
 const roleColors: Record<string, "default" | "primary" | "secondary" | "success" | "error" | "warning" | "info"> = {
-  customer: "primary",
-  employee: "secondary",
-  admin: "warning",
+  USER: "primary",
+  EMPLOYEE: "secondary",
+  ADMIN: "warning",
 };
 
 const statusColors: Record<string, "success" | "error" | "warning" | "default"> = {
-  active: "success",
-  inactive: "default",
-  suspended: "error",
+  ACTIVE: "success",
+  INACTIVE: "default",
+  SUSPENDED: "error",
 };
 
 const StatCard = ({ label, value, icon, color }: { label: string; value: number | string; icon: React.ReactNode; color: string }) => (
@@ -46,40 +44,38 @@ const StatCard = ({ label, value, icon, color }: { label: string; value: number 
 );
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<ApiUser[]>([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch("/api/admin/users");
-        if (res.ok) {
-          const data = await res.json();
-          setUsers(data);
-        } else {
-          setUsers(mockUsers);
-        }
-      } catch {
-        setUsers(mockUsers);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await adminUserApi.list();
+      const data = Array.isArray(res.data) ? res.data : (res.data as { results?: ApiUser[] }).results ?? [];
+      setUsers(data);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   const filtered = useMemo(() => {
     return users.filter((u) => {
+      const searchTerm = search.toLowerCase();
       const matchSearch =
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        u.phone.includes(search);
+        u.username.toLowerCase().includes(searchTerm) ||
+        u.email.toLowerCase().includes(searchTerm) ||
+        (u.phone ?? "").includes(search);
       const matchRole = roleFilter === "all" || u.role === roleFilter;
-      const matchStatus = statusFilter === "all" || u.status === statusFilter;
+      const matchStatus = statusFilter === "all" || u.account_status === statusFilter;
       return matchSearch && matchRole && matchStatus;
     });
   }, [users, search, roleFilter, statusFilter]);
@@ -87,18 +83,36 @@ export default function AdminUsersPage() {
   const paginated = filtered.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
   const totalPages = Math.ceil(filtered.length / ROWS_PER_PAGE);
 
-  const stats = useMemo(
-    () => ({
+  const stats = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return {
       total: users.length,
-      active: users.filter((u) => u.status === "active").length,
-      customer: users.filter((u) => u.role === "customer").length,
-      newThisMonth: users.filter((u) => u.joined >= "2025-03-01").length,
-    }),
-    [users]
-  );
+      active: users.filter((u) => u.account_status === "ACTIVE").length,
+      customers: users.filter((u) => u.role === "USER").length,
+      newThisMonth: users.filter((u) => u.date_joined >= monthStart).length,
+    };
+  }, [users]);
 
-  const handleAction = (action: string, userId: number) => {
-    toast.success(`${action} action triggered for user #${userId} (mock)`);
+  const handleToggleStatus = async (user: ApiUser) => {
+    const newStatus = user.account_status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED";
+    try {
+      await adminUserApi.update(user.id, { account_status: newStatus });
+      toast.success(`User ${newStatus === "SUSPENDED" ? "blocked" : "unblocked"}`);
+      fetchUsers();
+    } catch {
+      toast.error("Failed to update user status");
+    }
+  };
+
+  const handleDelete = async (user: ApiUser) => {
+    try {
+      await adminUserApi.delete(user.id);
+      toast.success("User deleted");
+      fetchUsers();
+    } catch {
+      toast.error("Failed to delete user");
+    }
   };
 
   if (loading) {
@@ -128,7 +142,7 @@ export default function AdminUsersPage() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
         <StatCard label="Total Users" value={stats.total} icon={<PeopleIcon />} color="#f59e0b" />
         <StatCard label="Active Users" value={stats.active} icon={<CheckIcon />} color="#10b981" />
-        <StatCard label="Customers" value={stats.customer} icon={<PersonAddIcon />} color="#3b82f6" />
+        <StatCard label="Customers" value={stats.customers} icon={<PersonAddIcon />} color="#3b82f6" />
         <StatCard label="New This Month" value={stats.newThisMonth} icon={<PersonAddIcon />} color="#8b5cf6" />
       </Box>
 
@@ -150,18 +164,18 @@ export default function AdminUsersPage() {
               <InputLabel>Role</InputLabel>
               <Select value={roleFilter} label="Role" onChange={(e: SelectChangeEvent) => { setRoleFilter(e.target.value); setPage(1); }}>
                 <MenuItem value="all">All Roles</MenuItem>
-                <MenuItem value="customer">Customer</MenuItem>
-                <MenuItem value="employee">Employee</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="USER">Customer</MenuItem>
+                <MenuItem value="EMPLOYEE">Employee</MenuItem>
+                <MenuItem value="ADMIN">Admin</MenuItem>
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ minWidth: 130 }}>
               <InputLabel>Status</InputLabel>
               <Select value={statusFilter} label="Status" onChange={(e: SelectChangeEvent) => { setStatusFilter(e.target.value); setPage(1); }}>
                 <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-                <MenuItem value="suspended">Suspended</MenuItem>
+                <MenuItem value="ACTIVE">Active</MenuItem>
+                <MenuItem value="INACTIVE">Inactive</MenuItem>
+                <MenuItem value="SUSPENDED">Suspended</MenuItem>
               </Select>
             </FormControl>
             <Typography variant="body2" color="text.secondary" sx={{ ml: "auto" }}>
@@ -177,7 +191,7 @@ export default function AdminUsersPage() {
           <Table sx={{ minWidth: 700 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: "grey.50" }}>
-                {["#", "User", "Email", "Phone", "Role", "Status", "Joined", "Bookings", "Actions"].map((h) => (
+                {["#", "User", "Email", "Phone", "Role", "Status", "Joined", "Actions"].map((h) => (
                   <TableCell key={h} sx={{ fontWeight: 700, fontSize: "0.82rem", color: "text.secondary", whiteSpace: "nowrap" }}>
                     {h}
                   </TableCell>
@@ -187,7 +201,7 @@ export default function AdminUsersPage() {
             <TableBody>
               {paginated.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No users found matching your filters.
                   </TableCell>
                 </TableRow>
@@ -198,38 +212,32 @@ export default function AdminUsersPage() {
                     <TableCell>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                         <Avatar sx={{ width: 34, height: 34, bgcolor: "#f59e0b22", color: "#d97706", fontSize: "0.85rem", fontWeight: 700 }}>
-                          {user.name.charAt(0)}
+                          {(user.username || user.email).charAt(0).toUpperCase()}
                         </Avatar>
-                        <Typography variant="body2" fontWeight={600}>{user.name}</Typography>
+                        <Typography variant="body2" fontWeight={600}>{user.username || user.email}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell sx={{ fontSize: "0.83rem", color: "text.secondary" }}>{user.email}</TableCell>
-                    <TableCell sx={{ fontSize: "0.83rem", color: "text.secondary", whiteSpace: "nowrap" }}>{user.phone}</TableCell>
+                    <TableCell sx={{ fontSize: "0.83rem", color: "text.secondary", whiteSpace: "nowrap" }}>{user.phone ?? "—"}</TableCell>
                     <TableCell>
-                      <Chip label={user.role} size="small" color={roleColors[user.role] ?? "default"} sx={{ textTransform: "capitalize", fontWeight: 600, fontSize: "0.74rem" }} />
+                      <Chip label={user.role} size="small" color={roleColors[user.role] ?? "default"} sx={{ fontWeight: 600, fontSize: "0.74rem" }} />
                     </TableCell>
                     <TableCell>
-                      <Chip label={user.status} size="small" color={statusColors[user.status] ?? "default"} sx={{ textTransform: "capitalize", fontWeight: 600, fontSize: "0.74rem" }} />
+                      <Chip label={user.account_status} size="small" color={statusColors[user.account_status] ?? "default"} sx={{ fontWeight: 600, fontSize: "0.74rem" }} />
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.83rem", color: "text.secondary", whiteSpace: "nowrap" }}>{user.joined}</TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body2" fontWeight={600}>{user.bookings}</Typography>
+                    <TableCell sx={{ fontSize: "0.83rem", color: "text.secondary", whiteSpace: "nowrap" }}>
+                      {new Date(user.date_joined).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", gap: 0.5 }}>
-                        <Tooltip title="View">
-                          <IconButton size="small" onClick={() => handleAction("View", user.id)} sx={{ color: "#3b82f6" }}>
-                            <ViewIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => handleAction("Edit", user.id)} sx={{ color: "#f59e0b" }}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={user.status === "suspended" ? "Unblock" : "Block"}>
-                          <IconButton size="small" onClick={() => handleAction(user.status === "suspended" ? "Unblock" : "Block", user.id)} sx={{ color: user.status === "suspended" ? "#10b981" : "#ef4444" }}>
+                        <Tooltip title={user.account_status === "SUSPENDED" ? "Unblock" : "Block"}>
+                          <IconButton size="small" onClick={() => handleToggleStatus(user)} sx={{ color: user.account_status === "SUSPENDED" ? "#10b981" : "#ef4444" }}>
                             <BlockIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton size="small" onClick={() => handleDelete(user)} sx={{ color: "#ef4444" }}>
+                            <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       </Box>

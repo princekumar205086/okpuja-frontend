@@ -1,31 +1,42 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  Box, Typography, Card, CardContent, Tabs, Tab,
+  Box, Typography, Card, CardContent, Tabs, Tab, Chip,
 } from "@mui/material";
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import { motion } from "framer-motion";
-import { mockReports } from "@/app/lib/mock/adminData";
-import { TrendingUp, BarChart2, MapPin, Star } from "lucide-react";
+import { TrendingUp, BarChart2, Users, CheckCircle } from "lucide-react";
+import { adminReportApi } from "@/app/apiService/adminApi";
+import toast from "react-hot-toast";
 
-const COLORS = ["#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444", "#06b6d4"];
+const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#6b7280"];
 
-const SectionCard = ({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) => (
-  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-    <Card sx={{ borderRadius: 3, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", overflow: "hidden" }}>
-      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>{title}</Typography>
-        {subtitle && <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>{subtitle}</Typography>}
-        {children}
-      </CardContent>
-    </Card>
-  </motion.div>
-);
+interface RevenueData {
+  total_revenue: number;
+  total_bookings: number;
+  average_booking_value: number;
+  daily_breakdown: Record<string, { revenue: number; bookings: number }>;
+}
 
-const KPICard = ({ label, value, change, icon, color }: { label: string; value: string; change: string; icon: React.ReactNode; color: string }) => (
+interface PerformanceData {
+  total_bookings: number;
+  status_breakdown: Record<string, { count: number; percentage: number; display_name: string }>;
+  completion_rate: number;
+  cancellation_rate: number;
+}
+
+interface AssignmentData {
+  total_bookings: number;
+  assigned_bookings: number;
+  unassigned_bookings: number;
+  assignment_rate: number;
+  employee_performance: { employee_id: number; name: string; email: string; total_assigned: number; completed: number; completion_rate: number }[];
+}
+
+const KPICard = ({ label, value, icon, color }: { label: string; value: string; icon: React.ReactNode; color: string }) => (
   <Card sx={{ borderRadius: 3, border: `1px solid ${color}22`, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
     <CardContent sx={{ p: 2.5 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -35,39 +46,57 @@ const KPICard = ({ label, value, change, icon, color }: { label: string; value: 
         </Box>
         <Box sx={{ bgcolor: `${color}18`, borderRadius: 2, p: 1, color }}>{icon}</Box>
       </Box>
-      <Typography variant="caption" sx={{ color: "#10b981", fontWeight: 600, mt: 1, display: "block" }}>{change} vs last month</Typography>
     </CardContent>
   </Card>
 );
 
 export default function AdminReportsPage() {
-  const [data, setData] = useState(mockReports);
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [revenue, setRevenue] = useState<RevenueData | null>(null);
+  const [performance, setPerformance] = useState<PerformanceData | null>(null);
+  const [assignments, setAssignments] = useState<AssignmentData | null>(null);
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const res = await fetch("/api/admin/reports");
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-        } else {
-          setData(mockReports);
-        }
-      } catch {
-        setData(mockReports);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReports();
+  const fetchReports = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [revRes, perfRes, assignRes] = await Promise.all([
+        adminReportApi.get({ report_type: "revenue" }),
+        adminReportApi.get({ report_type: "performance" }),
+        adminReportApi.get({ report_type: "assignments" }),
+      ]);
+      setRevenue(revRes.data?.data as unknown as RevenueData ?? null);
+      setPerformance(perfRes.data?.data as unknown as PerformanceData ?? null);
+      setAssignments(assignRes.data?.data as unknown as AssignmentData ?? null);
+    } catch (err) {
+      console.error("Failed to fetch reports:", err);
+      toast.error("Failed to load reports");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const totalRevenue = data.monthlyRevenue.reduce((s, m) => s + m.revenue, 0);
-  const totalBookings = data.monthlyRevenue.reduce((s, m) => s + m.bookings, 0);
-  const totalUsers = data.userGrowth[data.userGrowth.length - 1]?.users ?? 0;
-  const topCity = data.bookingsByCity[0]?.city ?? "—";
+  useEffect(() => { fetchReports(); }, [fetchReports]);
+
+  // Transform daily breakdown for chart
+  const dailyChart = revenue?.daily_breakdown
+    ? Object.entries(revenue.daily_breakdown)
+        .map(([date, v]) => ({
+          date,
+          revenue: Number(v.revenue) || 0,
+          bookings: v.bookings || 0,
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date))
+    : [];
+
+  // Transform status breakdown for pie chart
+  const statusChart = performance?.status_breakdown
+    ? Object.entries(performance.status_breakdown).map(([, v]) => ({
+        name: v.display_name,
+        value: v.count,
+        pct: v.percentage,
+      }))
+    : [];
 
   if (loading) {
     return (
@@ -77,7 +106,7 @@ export default function AdminReportsPage() {
     );
   }
 
-  const tabItems = ["Revenue & Bookings", "City-wise Bookings", "Top Services", "User Growth"];
+  const tabItems = ["Revenue & Bookings", "Booking Performance", "Employee Assignments"];
 
   return (
     <Box sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
@@ -93,10 +122,30 @@ export default function AdminReportsPage() {
 
       {/* KPI Cards */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", lg: "repeat(4, 1fr)" }, gap: 2, mb: 3 }}>
-        <KPICard label="Total Revenue" value={`₹${(totalRevenue / 100000).toFixed(1)}L`} change="+19.4%" icon={<TrendingUp size={20} />} color="#10b981" />
-        <KPICard label="Total Bookings" value={String(totalBookings)} change="+17.4%" icon={<BarChart2 size={20} />} color="#3b82f6" />
-        <KPICard label="Total Users" value={String(totalUsers)} change="+14.9%" icon={<Star size={20} />} color="#8b5cf6" />
-        <KPICard label="Top City" value={topCity} change="Most bookings" icon={<MapPin size={20} />} color="#f59e0b" />
+        <KPICard
+          label="Total Revenue"
+          value={revenue ? `₹${Number(revenue.total_revenue).toLocaleString("en-IN")}` : "—"}
+          icon={<TrendingUp size={20} />}
+          color="#10b981"
+        />
+        <KPICard
+          label="Total Bookings"
+          value={revenue ? String(revenue.total_bookings) : "—"}
+          icon={<BarChart2 size={20} />}
+          color="#3b82f6"
+        />
+        <KPICard
+          label="Completion Rate"
+          value={performance ? `${performance.completion_rate.toFixed(1)}%` : "—"}
+          icon={<CheckCircle size={20} />}
+          color="#8b5cf6"
+        />
+        <KPICard
+          label="Assignment Rate"
+          value={assignments ? `${assignments.assignment_rate.toFixed(1)}%` : "—"}
+          icon={<Users size={20} />}
+          color="#f59e0b"
+        />
       </Box>
 
       {/* Chart Tabs */}
@@ -118,117 +167,170 @@ export default function AdminReportsPage() {
           {tab === 0 && (
             <motion.div key="rev" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                Monthly Revenue (₹) &amp; Bookings — last 7 months
+                Daily Revenue &amp; Bookings
               </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <AreaChart data={data.monthlyRevenue} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="bookGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(v: number | undefined, n: string | undefined) => { const val = v ?? 0; const name = n ?? ""; return [name === "revenue" ? `₹${val.toLocaleString("en-IN")}` : val, name === "revenue" ? "Revenue" : "Bookings"] as [string | number, string]; }} />
-                  <Legend />
-                  <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#f59e0b" fill="url(#revGrad)" strokeWidth={2} name="Revenue" />
-                  <Area yAxisId="right" type="monotone" dataKey="bookings" stroke="#3b82f6" fill="url(#bookGrad)" strokeWidth={2} name="Bookings" />
-                </AreaChart>
-              </ResponsiveContainer>
+              {dailyChart.length > 0 ? (
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={dailyChart} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 10 }}
+                      tickFormatter={(d: string) => new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                    />
+                    <YAxis yAxisId="left" tick={{ fontSize: 12 }} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <Tooltip
+                      labelFormatter={((l: any) => new Date(String(l)).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })) as any}
+                      formatter={((v: any, n: any) => [n === "revenue" ? `₹${Number(v ?? 0).toLocaleString("en-IN")}` : (v ?? 0), n === "revenue" ? "Revenue" : "Bookings"]) as any}
+                    />
+                    <Bar yAxisId="left" dataKey="revenue" name="revenue" fill="#f59e0b" radius={[3, 3, 0, 0]} />
+                    <Bar yAxisId="right" dataKey="bookings" name="bookings" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Box sx={{ height: 320, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Typography color="text.secondary">No revenue data for this period</Typography>
+                </Box>
+              )}
+
+              {/* Summary row */}
+              {revenue && (
+                <Box sx={{ display: "flex", gap: 3, mt: 2, flexWrap: "wrap" }}>
+                  {[
+                    { label: "Total Revenue", val: `₹${Number(revenue.total_revenue).toLocaleString("en-IN")}`, color: "#f59e0b" },
+                    { label: "Total Bookings", val: String(revenue.total_bookings), color: "#3b82f6" },
+                    { label: "Avg. Booking Value", val: `₹${Number(revenue.average_booking_value).toLocaleString("en-IN")}`, color: "#10b981" },
+                  ].map((item) => (
+                    <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: item.color }} />
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                        <Typography variant="body2" fontWeight={700}>{item.val}</Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </motion.div>
           )}
 
-          {/* Tab 1: City-wise */}
+          {/* Tab 1: Booking Performance */}
           {tab === 1 && (
-            <motion.div key="city" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.div key="perf" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                Total Bookings by City
+                Booking Status Breakdown
               </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={data.bookingsByCity} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="city" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="bookings" name="Bookings" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+
+              {statusChart.length > 0 ? (
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4, alignItems: "center" }}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={statusChart}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={120}
+                        paddingAngle={2}
+                        dataKey="value"
+                        nameKey="name"
+                        label={((props: any) => `${props.name} (${Number(props.pct ?? 0).toFixed(1)}%)`) as any}
+                      >
+                        {statusChart.map((_, idx) => (
+                          <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={((v: any) => [v ?? 0, "Bookings"]) as any} />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 200 }}>
+                    {statusChart.map((item, idx) => (
+                      <Box key={item.name} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                        <Box sx={{ width: 12, height: 12, borderRadius: 1, bgcolor: COLORS[idx % COLORS.length], flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ flex: 1 }}>{item.name}</Typography>
+                        <Typography variant="body2" fontWeight={700}>{item.value}</Typography>
+                        <Chip label={`${item.pct.toFixed(1)}%`} size="small" sx={{ fontSize: "0.7rem", height: 20, fontWeight: 600 }} />
+                      </Box>
+                    ))}
+                    {performance && (
+                      <Box sx={{ mt: 2, pt: 2, borderTop: "1px solid #f3f4f6" }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Completion: <strong>{performance.completion_rate.toFixed(1)}%</strong> · Cancellation: <strong>{performance.cancellation_rate.toFixed(1)}%</strong>
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              ) : (
+                <Box sx={{ height: 300, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Typography color="text.secondary">No performance data available</Typography>
+                </Box>
+              )}
             </motion.div>
           )}
 
-          {/* Tab 2: Top Services */}
+          {/* Tab 2: Employee Assignments */}
           {tab === 2 && (
-            <motion.div key="svc" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.div key="assign" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                Top Puja Services by Bookings
+                Employee Assignment Performance
               </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={data.topServices} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis dataKey="service" type="category" tick={{ fontSize: 12 }} width={120} />
-                  <Tooltip formatter={(v: number | undefined, n: string | undefined) => { const val = v ?? 0; const name = n ?? ""; return [name === "revenue" ? `₹${val.toLocaleString("en-IN")}` : val, name] as [string | number, string]; }} />
-                  <Legend />
-                  <Bar dataKey="bookings" name="Bookings" fill="#f59e0b" radius={[0, 4, 4, 0]} />
-                  <Bar dataKey="revenue" name="Revenue (₹)" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
 
-          {/* Tab 3: User Growth */}
-          {tab === 3 && (
-            <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-                Cumulative User Registrations — last 7 months
-              </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={data.userGrowth} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="users" name="Total Users" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              {assignments && (
+                <>
+                  <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                    {[
+                      { label: "Total Bookings", val: assignments.total_bookings, color: "#3b82f6" },
+                      { label: "Assigned", val: assignments.assigned_bookings, color: "#10b981" },
+                      { label: "Unassigned", val: assignments.unassigned_bookings, color: "#ef4444" },
+                    ].map((item) => (
+                      <Box key={item.label} sx={{ bgcolor: `${item.color}10`, border: `1px solid ${item.color}30`, borderRadius: 2, px: 2.5, py: 1.5 }}>
+                        <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                        <Typography variant="h6" fontWeight={700} sx={{ color: item.color }}>{item.val}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  {assignments.employee_performance.length > 0 ? (
+                    <Box sx={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <thead>
+                          <tr style={{ borderBottom: "2px solid #f0f0f0" }}>
+                            {["#", "Employee", "Email", "Assigned", "Completed", "Completion Rate"].map((h) => (
+                              <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, fontSize: "0.82rem", color: "#6b7280", whiteSpace: "nowrap" }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {assignments.employee_performance.map((emp, idx) => (
+                            <tr key={emp.employee_id} style={{ borderBottom: "1px solid #f9fafb" }}>
+                              <td style={{ padding: "10px 12px", fontSize: "0.82rem", color: "#9ca3af" }}>{idx + 1}</td>
+                              <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: "0.85rem" }}>{emp.name}</td>
+                              <td style={{ padding: "10px 12px", fontSize: "0.82rem", color: "#6b7280" }}>{emp.email}</td>
+                              <td style={{ padding: "10px 12px", fontWeight: 700 }}>{emp.total_assigned}</td>
+                              <td style={{ padding: "10px 12px", fontWeight: 700, color: "#10b981" }}>{emp.completed}</td>
+                              <td style={{ padding: "10px 12px" }}>
+                                <Chip label={`${emp.completion_rate.toFixed(1)}%`} size="small" color={emp.completion_rate >= 80 ? "success" : emp.completion_rate >= 50 ? "warning" : "error"} sx={{ fontWeight: 700, fontSize: "0.72rem" }} />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </Box>
+                  ) : (
+                    <Typography color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
+                      No employee assignment data available.
+                    </Typography>
+                  )}
+                </>
+              )}
             </motion.div>
           )}
         </CardContent>
       </Card>
-
-      {/* Top Services Summary Table */}
-      <SectionCard title="Top Services Summary" subtitle="Ranking by bookings and revenue">
-        <Box sx={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "2px solid #f0f0f0" }}>
-                {["#", "Service", "Bookings", "Revenue", "Avg Booking Value"].map((h) => (
-                  <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, fontSize: "0.82rem", color: "#6b7280", whiteSpace: "nowrap" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.topServices.map((svc, idx) => (
-                <tr key={svc.service} style={{ borderBottom: "1px solid #f9fafb" }}>
-                  <td style={{ padding: "10px 12px", fontSize: "0.82rem", color: "#9ca3af" }}>{idx + 1}</td>
-                  <td style={{ padding: "10px 12px", fontWeight: 600, fontSize: "0.85rem" }}>{svc.service}</td>
-                  <td style={{ padding: "10px 12px", fontSize: "0.85rem" }}>{svc.bookings}</td>
-                  <td style={{ padding: "10px 12px", fontWeight: 700, fontSize: "0.85rem", color: "#10b981" }}>₹{svc.revenue.toLocaleString("en-IN")}</td>
-                  <td style={{ padding: "10px 12px", fontSize: "0.85rem", color: "#6b7280" }}>₹{Math.round(svc.revenue / svc.bookings).toLocaleString("en-IN")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Box>
-      </SectionCard>
     </Box>
   );
 }
