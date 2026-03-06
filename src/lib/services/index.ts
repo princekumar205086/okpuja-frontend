@@ -1,0 +1,12 @@
+export { authService } from "./auth.service";
+export { pujaService } from "./puja.service";
+export { astrologyService } from "./astrology.service";
+export { bookingService } from "./booking.service";
+export { paymentService } from "./payment.service";
+export { blogService } from "./blog.service";
+export { galleryService } from "./gallery.service";
+export { cmsService } from "./cms.service";
+export { eventService } from "./event.service";
+export { contactService } from "./contact.service";
+export { promoService } from "./promo.service";
+export { adminService } from "./admin.service";
