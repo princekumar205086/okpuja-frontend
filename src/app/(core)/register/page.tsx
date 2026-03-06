@@ -56,6 +56,7 @@ export default function RegisterForm() {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
 
   // Initialize auth and redirect if already logged in
   useEffect(() => {
@@ -138,12 +139,24 @@ export default function RegisterForm() {
     }
 
     setFormErrors(errors);
+    
+    // Show toast for validation errors
+    if (!isValid) {
+      const errorMessages = Object.values(errors).filter(Boolean);
+      if (errorMessages.length > 0) {
+        toast.error(errorMessages[0] as string);
+      }
+    }
+    
     return isValid;
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setRegisterError(null);
     
     if (!validateForm()) return;
 
@@ -193,13 +206,24 @@ export default function RegisterForm() {
           errorMessage = Array.isArray(err.response.data.phone) 
             ? err.response.data.phone[0] 
             : err.response.data.phone;
+        } else if (err.response.data.password) {
+          errorMessage = Array.isArray(err.response.data.password) 
+            ? err.response.data.password[0] 
+            : err.response.data.password;
         } else if (err.response.data.employee_registration_code) {
           errorMessage = Array.isArray(err.response.data.employee_registration_code) 
             ? err.response.data.employee_registration_code[0] 
             : err.response.data.employee_registration_code;
+        } else if (err.response.data.non_field_errors) {
+          errorMessage = Array.isArray(err.response.data.non_field_errors) 
+            ? err.response.data.non_field_errors[0] 
+            : err.response.data.non_field_errors;
         }
+      } else if (err.code === 'NETWORK_ERROR' || !err.response) {
+        errorMessage = "Network error. Please check your connection.";
       }
       
+      setRegisterError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -213,6 +237,11 @@ export default function RegisterForm() {
       ...prev,
       [name]: value
     }));
+
+    // Clear register error when user starts typing
+    if (registerError) {
+      setRegisterError(null);
+    }
 
     // Clear field-specific errors when user starts typing
     if (formErrors[name as keyof FormErrors]) {
@@ -415,6 +444,32 @@ export default function RegisterForm() {
                     Employee
                   </button>
                 </div>
+
+                {/* Error Message */}
+                {registerError && (
+                  <motion.div 
+                    className="mb-2 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-700 text-sm flex items-start justify-between"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">{registerError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRegisterError(null)}
+                      className="ml-4 text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </motion.div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Email Field */}

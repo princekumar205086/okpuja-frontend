@@ -189,29 +189,57 @@ export default function Events() {
           </div>
         </div>
 
-        {/* Slider */}
+        {/* Events Display */}
         <div className="relative">
-          <Slider ref={sliderRef} {...settings} className="events-slider">
-            {loading ? (
-              // Loading state
-              Array.from({ length: 4 }).map((_, index) => (
+          {loading ? (
+            // Loading state - show skeleton cards
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, index) => (
                 <LoadingSlide key={index} />
-              ))
-            ) : error ? (
-              // Error state
-              <ErrorComponent />
-            ) : !Array.isArray(events) || events.length === 0 ? (
-              // Empty state
-              <div className="px-3">
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-12 text-center">
-                  <div className="text-gray-400 mb-4">
-                    <BsCalendar3 className="mx-auto text-4xl" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No events available</h3>
-                  <p className="text-gray-500">Check back soon for new events and celebrations.</p>
+              ))}
+            </div>
+          ) : error ? (
+            // Error state - single centered card
+            <ErrorComponent />
+          ) : !Array.isArray(events) || events.length === 0 ? (
+            // Empty state - beautiful single centered message
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl mx-auto"
+            >
+              <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-dashed border-orange-200 rounded-2xl p-12 text-center">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full flex items-center justify-center">
+                  <BsCalendar3 className="text-orange-500 text-4xl" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">No Upcoming Events</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto leading-relaxed">
+                  We're preparing exciting spiritual events and celebrations for you. 
+                  Subscribe to our newsletter to be the first to know when new events are announced!
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <a
+                    href="/contact"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  >
+                    <FaRegCalendarAlt className="mr-2" />
+                    Request an Event
+                  </a>
+                  <a
+                    href="/puja"
+                    className="inline-flex items-center px-6 py-3 bg-white text-orange-600 font-semibold rounded-xl border-2 border-orange-200 hover:border-orange-300 transition-all duration-300 hover:scale-105"
+                  >
+                    Browse Puja Services
+                    <BsArrowRight className="ml-2" />
+                  </a>
                 </div>
               </div>
-            ) : (
+            </motion.div>
+          ) : (
+            // Events slider when we have events
+            <Slider ref={sliderRef} {...settings} className="events-slider">
+              {
               // Events from API
               events.map((event, index) => (
                 <motion.div
@@ -289,8 +317,9 @@ export default function Events() {
                   </div>
                 </motion.div>
               ))
-            )}
-          </Slider>
+            }
+            </Slider>
+          )}
         </div>
 
         {/* Bottom CTA */}

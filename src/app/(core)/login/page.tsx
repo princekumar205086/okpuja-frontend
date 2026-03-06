@@ -42,6 +42,7 @@ export default function LoginForm() {
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Initialize auth store
   useEffect(() => {
@@ -155,6 +156,15 @@ export default function LoginForm() {
     }
 
     setFormErrors(errors);
+    
+    // Show toast for validation errors
+    if (!isValid) {
+      const errorMessages = Object.values(errors).filter(Boolean);
+      if (errorMessages.length > 0) {
+        toast.error(errorMessages[0] as string);
+      }
+    }
+    
     return isValid;
   };
 
@@ -162,14 +172,29 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear previous errors
+    setLoginError(null);
+    
     if (!validateForm()) return;
 
     try {
-      await login(formState.email, formState.password);
+      const success = await login(formState.email, formState.password);
+      if (!success && error) {
+        setLoginError(error);
+      }
     } catch (err) {
       console.error("Login error:", err);
+      setLoginError("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
+
+  // Sync store error with local state
+  useEffect(() => {
+    if (error) {
+      setLoginError(error);
+    }
+  }, [error]);
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,6 +203,11 @@ export default function LoginForm() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+
+    // Clear login error when user starts typing
+    if (loginError) {
+      setLoginError(null);
+    }
 
     // Clear field-specific errors when user starts typing
     if (formErrors[name as keyof FormErrors]) {
@@ -322,13 +352,28 @@ export default function LoginForm() {
                 </div>
 
                 {/* Error Message */}
-                {error && (
+                {loginError && (
                   <motion.div 
-                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl text-red-700 text-sm flex items-start justify-between"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    {error}
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">{loginError}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setLoginError(null)}
+                      className="ml-4 text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
                   </motion.div>
                 )}
 

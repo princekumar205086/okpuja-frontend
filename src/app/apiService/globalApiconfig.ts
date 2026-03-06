@@ -4,6 +4,21 @@ import { trackLogoutReason, debugTokenStatus } from '../utils/tokenUtils';
 // Base API configuration
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.okpuja.com/api' || 'https://backend.okpuja.com/api';
 
+// Cookie helper functions for middleware compatibility
+const setCookie = (name: string, value: string, days: number = 7) => {
+  if (typeof document !== 'undefined') {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;secure;samesite=lax`;
+  }
+};
+
+const deleteCookie = (name: string) => {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  }
+};
+
 // Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -104,6 +119,12 @@ apiClient.interceptors.response.use(
             localStorage.setItem('refresh', refresh);
           }
           
+          // Also update cookies for middleware
+          setCookie('access', access, 7);
+          if (refresh) {
+            setCookie('refresh', refresh, 30);
+          }
+          
           // Update the authorization header for the original request
           originalRequest.headers.Authorization = `Bearer ${access}`;
           
@@ -142,6 +163,11 @@ apiClient.interceptors.response.use(
           localStorage.removeItem('refresh');
           localStorage.removeItem('user');
           
+          // Clear cookies
+          deleteCookie('access');
+          deleteCookie('refresh');
+          deleteCookie('userRole');
+          
           // Notify other tabs about logout
           window.dispatchEvent(new CustomEvent('logout'));
           
@@ -161,6 +187,11 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('user');
+        
+        // Clear cookies
+        deleteCookie('access');
+        deleteCookie('refresh');
+        deleteCookie('userRole');
         
         // Notify other tabs about logout
         window.dispatchEvent(new CustomEvent('logout'));

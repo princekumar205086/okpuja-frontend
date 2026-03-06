@@ -25,9 +25,21 @@ export function middleware(request: NextRequest) {
   
   // If user is authenticated and trying to access auth routes, redirect to appropriate dashboard
   if (isAuthRoute && accessToken) {
-    // You could decode the token to get user role and redirect accordingly
-    // For now, we'll redirect to a general dashboard
-    const dashboardUrl = new URL('/admin/dashboard', request.url) // Default redirect
+    // Get user role from cookie to redirect to the correct dashboard
+    const userRole = request.cookies.get('userRole')?.value?.toUpperCase()
+    
+    let dashboardUrl: URL
+    switch (userRole) {
+      case 'ADMIN':
+        dashboardUrl = new URL('/admin/dashboard', request.url)
+        break
+      case 'EMPLOYEE':
+        dashboardUrl = new URL('/employee/dashboard', request.url)
+        break
+      default:
+        dashboardUrl = new URL('/user/dashboard', request.url)
+    }
+    
     return NextResponse.redirect(dashboardUrl)
   }
   

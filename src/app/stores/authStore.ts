@@ -3,6 +3,21 @@ import { persist } from "zustand/middleware";
 import apiClient from "../apiService/globalApiconfig";
 import { toast } from "react-hot-toast";
 
+// Cookie helper functions for middleware compatibility
+const setCookie = (name: string, value: string, days: number = 7) => {
+  if (typeof document !== 'undefined') {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;secure;samesite=lax`;
+  }
+};
+
+const deleteCookie = (name: string) => {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  }
+};
+
 export type User = {
   id: number;
   email: string;
@@ -195,6 +210,11 @@ export const useAuthStore = create<AuthState>()(
           localStorage.setItem("refresh", refresh);
           localStorage.setItem("user", JSON.stringify(user));
 
+          // Set cookies for middleware compatibility
+          setCookie("access", access, 7);
+          setCookie("refresh", refresh, 30);
+          setCookie("userRole", role, 7);
+
           // Notify other tabs about token update
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('token-updated', { 
@@ -368,6 +388,11 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
         localStorage.removeItem("user");
+        
+        // Clear cookies
+        deleteCookie("access");
+        deleteCookie("refresh");
+        deleteCookie("userRole");
         
         // Notify other tabs about logout
         if (typeof window !== 'undefined') {
