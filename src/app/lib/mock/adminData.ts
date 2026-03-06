@@ -1,6 +1,64 @@
 // ─── Mock data for admin panel ───────────────────────────────────────────────
 // Used as fallback when backend APIs are unavailable.
 
+export const mockEmployees = [
+  { id: 1, name: "Pt. Ramesh Shastri", email: "ramesh.shastri@okpuja.com", phone: "+91-9871230001", role: "pandit", city: "Purnia", specialization: "Satyanarayan & Griha Pravesh", status: "active", joinDate: "2024-01-10", assignedBookings: 34, completedBookings: 31, rating: 4.8, salary: 25000, availability: "available" },
+  { id: 2, name: "Pt. Suresh Kumar", email: "suresh.kumar@okpuja.com", phone: "+91-9871230002", role: "pandit", city: "Patna", specialization: "Navratri & Festival Pujas", status: "active", joinDate: "2024-02-15", assignedBookings: 28, completedBookings: 26, rating: 4.7, salary: 22000, availability: "busy" },
+  { id: 3, name: "Jyotish Acharya Manoj", email: "manoj.jyotish@okpuja.com", phone: "+91-9871230003", role: "astrologer", city: "Online", specialization: "Vedic Astrology & Kundali", status: "active", joinDate: "2024-03-20", assignedBookings: 56, completedBookings: 54, rating: 4.9, salary: 35000, availability: "available" },
+  { id: 4, name: "Vastu Acharya Rajiv", email: "rajiv.vastu@okpuja.com", phone: "+91-9871230004", role: "astrologer", city: "Bhagalpur", specialization: "Vastu & Numerology", status: "active", joinDate: "2024-04-05", assignedBookings: 22, completedBookings: 20, rating: 4.6, salary: 28000, availability: "available" },
+  { id: 5, name: "Pt. Dinesh Dubey", email: "dinesh.dubey@okpuja.com", phone: "+91-9871230005", role: "pandit", city: "Begusarai", specialization: "Sunderkand & Rudrabhishek", status: "active", joinDate: "2024-05-12", assignedBookings: 19, completedBookings: 18, rating: 4.7, salary: 20000, availability: "busy" },
+  { id: 6, name: "Pt. Ashok Tripathi", email: "ashok.tripathi@okpuja.com", phone: "+91-9871230006", role: "pandit", city: "Darbhanga", specialization: "Vivah & Mundan", status: "inactive", joinDate: "2024-06-01", assignedBookings: 8, completedBookings: 7, rating: 4.3, salary: 18000, availability: "unavailable" },
+  { id: 7, name: "Acharya Vikash Tiwari", email: "vikash.tiwari@okpuja.com", phone: "+91-9871230007", role: "astrologer", city: "Muzaffarpur", specialization: "Tarot & Crystal Healing", status: "active", joinDate: "2024-07-18", assignedBookings: 41, completedBookings: 39, rating: 4.5, salary: 30000, availability: "available" },
+  { id: 8, name: "Pt. Govind Prasad", email: "govind.prasad@okpuja.com", phone: "+91-9871230008", role: "pandit", city: "Samastipur", specialization: "Kali & Durga Puja", status: "active", joinDate: "2024-08-22", assignedBookings: 15, completedBookings: 14, rating: 4.8, salary: 21000, availability: "available" },
+  { id: 9, name: "Pt. Mohan Jha", email: "mohan.jha@okpuja.com", phone: "+91-9871230009", role: "pandit", city: "Sitamarhi", specialization: "Ganesh & Laxmi Puja", status: "pending", joinDate: "2025-02-28", assignedBookings: 0, completedBookings: 0, rating: 0, salary: 18000, availability: "unavailable" },
+  { id: 10, name: "Acharya Sanjeev Mishra", email: "sanjeev.mishra@okpuja.com", phone: "+91-9871230010", role: "astrologer", city: "Online", specialization: "Palmistry & Face Reading", status: "active", joinDate: "2024-09-10", assignedBookings: 33, completedBookings: 32, rating: 4.6, salary: 27000, availability: "busy" },
+  { id: 11, name: "Pt. Ravi Shankar", email: "ravi.shankar@okpuja.com", phone: "+91-9871230011", role: "pandit", city: "Purnia", specialization: "Satyanarayan & Akhand Path", status: "active", joinDate: "2024-10-05", assignedBookings: 12, completedBookings: 11, rating: 4.4, salary: 19000, availability: "available" },
+  { id: 12, name: "Pt. Kailash Sharma", email: "kailash.sharma@okpuja.com", phone: "+91-9871230012", role: "pandit", city: "Patna", specialization: "All Puja Services", status: "pending", joinDate: "2025-03-01", assignedBookings: 0, completedBookings: 0, rating: 0, salary: 20000, availability: "unavailable" },
+];
+
+export const mockBookingsForAssignment = [
+  { id: "BK001", customer: "Rahul Sharma", service: "Satyanarayan Puja", city: "Purnia", date: "2025-03-15", time: "10:00 AM", amount: 2100, status: "unassigned" },
+  { id: "BK002", customer: "Priya Singh", service: "Griha Pravesh Puja", city: "Patna", date: "2025-03-18", time: "09:00 AM", amount: 5100, status: "unassigned" },
+  { id: "BK003", customer: "Meera Joshi", service: "Navratri Special Puja", city: "Bhagalpur", date: "2025-03-20", time: "07:00 AM", amount: 3500, status: "unassigned" },
+  { id: "BK004", customer: "Deepak Gupta", service: "Kali Puja", city: "Darbhanga", date: "2025-03-22", time: "08:00 AM", amount: 4200, status: "unassigned" },
+  { id: "BK005", customer: "Anita Pandey", service: "Rudrabhishek Puja", city: "Muzaffarpur", date: "2025-03-25", time: "06:00 AM", amount: 6000, status: "unassigned" },
+  { id: "BK006", customer: "Manish Roy", service: "Ganesh Puja", city: "Samastipur", date: "2025-03-28", time: "09:00 AM", amount: 1800, status: "unassigned" },
+  { id: "BK007", customer: "Pooja Das", service: "Vivah Puja", city: "Purnia", date: "2025-04-02", time: "10:00 AM", amount: 8500, status: "unassigned" },
+];
+
+export const mockDashboardStats = {
+  totalRevenue: 125000,
+  totalBookings: 517,
+  activeEmployees: 9,
+  pendingBookings: 12,
+  openTickets: 3,
+  completionRate: 94.8,
+  monthlyRevenue: [
+    { month: "Sep", puja: 28000, astrology: 17000 },
+    { month: "Oct", puja: 38000, astrology: 24000 },
+    { month: "Nov", puja: 52000, astrology: 26000 },
+    { month: "Dec", puja: 61000, astrology: 34000 },
+    { month: "Jan", puja: 55000, astrology: 33000 },
+    { month: "Feb", puja: 67000, astrology: 38000 },
+    { month: "Mar", puja: 78000, astrology: 47000 },
+  ],
+  recentBookings: [
+    { id: "BK081", customer: "Vikram Patel", service: "Astrology Consultation", employee: "Jyotish Acharya Manoj", amount: 1500, status: "completed", date: "2025-03-06" },
+    { id: "BK082", customer: "Rahul Sharma", service: "Satyanarayan Puja", employee: "Pt. Ramesh Shastri", amount: 2100, status: "upcoming", date: "2025-03-07" },
+    { id: "BK083", customer: "Priya Singh", service: "Griha Pravesh Puja", employee: null, amount: 5100, status: "pending", date: "2025-03-08" },
+    { id: "BK084", customer: "Deepak Gupta", service: "Kali Puja", employee: null, amount: 4200, status: "pending", date: "2025-03-09" },
+    { id: "BK085", customer: "Anita Pandey", service: "Navratri Puja", employee: "Pt. Suresh Kumar", amount: 3500, status: "confirmed", date: "2025-03-10" },
+  ],
+  recentActivity: [
+    { type: "booking", message: "New booking for Satyanarayan Puja – Rahul Sharma", time: "2 min ago", color: "#3b82f6" },
+    { type: "payment", message: "Payment ₹5,100 received – Priya Singh", time: "15 min ago", color: "#10b981" },
+    { type: "employee", message: "Pt. Mohan Jha submitted registration request", time: "1 hr ago", color: "#f59e0b" },
+    { type: "support", message: "New support ticket opened – TKT007", time: "2 hr ago", color: "#ef4444" },
+    { type: "booking", message: "Booking BK080 marked as completed", time: "3 hr ago", color: "#10b981" },
+    { type: "payment", message: "Refund processed ₹3,100 – Rekha Verma", time: "5 hr ago", color: "#8b5cf6" },
+  ],
+};
+
 export const mockUsers = [
   { id: 1, name: "Rahul Sharma", email: "rahul@gmail.com", phone: "+91-9876543210", role: "customer", status: "active", joined: "2024-10-15", bookings: 5 },
   { id: 2, name: "Priya Singh", email: "priya@gmail.com", phone: "+91-9876543211", role: "customer", status: "active", joined: "2024-11-20", bookings: 3 },
