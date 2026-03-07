@@ -1,18 +1,16 @@
 /**
- * OKPUJA - Sitemap Auto-Generation
+ * OKPUJA - Main Sitemap (Index)
  * Next.js Metadata Route: /sitemap.xml
  * 
- * Generates comprehensive sitemap covering:
- * - Home page
- * - Puja main page (/puja)
- * - All puja services (100+)
- * - All city landing pages (200+)
- * - Astrology pages (20+)
- * - Blog pages
- * - Static pages
- * - Bihar-specific SEO pages (Priority)
+ * Generates comprehensive sitemap covering all page types:
+ * - Static pages (home, about, contact, policies)
+ * - Puja service pages (100+)
+ * - City landing pages (200+)
+ * - Puja × City combos (top 15 pujas × top 50 cities = 750+)
+ * - Astrology services (20+)
+ * - Astrology × City combos
  * 
- * Total URLs: 10,000+ (cities × services + static pages)
+ * Total: 2600+ URLs
  */
 
 import type { MetadataRoute } from 'next';
@@ -21,7 +19,6 @@ import { SITE_CONFIG, SITEMAP_PRIORITIES, SITEMAP_FREQUENCIES } from '@/lib/seo/
 
 const BASE_URL = SITE_CONFIG.url;
 
-// Bihar priority cities for special SEO targeting
 const BIHAR_PRIORITY_CITIES = ['purnia', 'katihar', 'araria', 'bhagalpur', 'madhepura', 'kishanganj', 'saharsa', 'patna'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -37,7 +34,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: SITEMAP_FREQUENCIES.home as 'daily',
       priority: SITEMAP_PRIORITIES.home,
     },
-    // Main Puja page
     {
       url: `${BASE_URL}/puja`,
       lastModified: now,
@@ -107,20 +103,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // ============================================================
-  // CITY LANDING PAGES (200+)
+  // PUJA SERVICE PAGES (100+) - Individual puja landing pages
+  // e.g., /puja/ganesh-puja, /puja/satyanarayan-puja
+  // ============================================================
+  const pujaPages: MetadataRoute.Sitemap = PUJA_SERVICES.map((puja) => ({
+    url: `${BASE_URL}/puja/${puja.slug}`,
+    lastModified: now,
+    changeFrequency: SITEMAP_FREQUENCIES.puja as 'weekly',
+    priority: puja.category === 'popular' ? 0.9 : 0.85,
+  }));
+
+  // ============================================================
+  // CITY LANDING PAGES (200+) - City-specific puja pages
+  // e.g., /puja/delhi, /puja/purnia
   // Bihar priority cities get highest priority (0.98)
   // ============================================================
   const cityPages: MetadataRoute.Sitemap = INDIA_CITIES.map((city) => {
-    // Bihar priority cities get highest priority
     const isBiharPriority = BIHAR_PRIORITY_CITIES.includes(city.slug);
-    const priority = isBiharPriority 
-      ? 0.98 
-      : city.tier === 1 
-        ? 0.95 
-        : city.tier === 2 
-          ? 0.9 
+    const priority = isBiharPriority
+      ? 0.98
+      : city.tier === 1
+        ? 0.95
+        : city.tier === 2
+          ? 0.9
           : 0.85;
-    
+
     return {
       url: `${BASE_URL}/puja/${city.slug}`,
       lastModified: now,
@@ -130,30 +137,35 @@ export default function sitemap(): MetadataRoute.Sitemap {
   });
 
   // ============================================================
-  // PUJA SERVICE PAGES (100+)
-  // ============================================================
-  const pujaPages: MetadataRoute.Sitemap = PUJA_SERVICES.map((puja) => ({
-    url: `${BASE_URL}/puja/${puja.slug}`,
-    lastModified: now,
-    changeFrequency: SITEMAP_FREQUENCIES.puja as 'weekly',
-    priority: puja.category === 'popular' ? 0.85 : 0.8,
-  }));
-
-  // ============================================================
-  // PUJA × CITY COMBINATION PAGES (100 pujas × 200 cities = 20,000)
-  // For sitemap efficiency, include top pujas × top cities
+  // PUJA × CITY COMBINATION PAGES (top pujas × top cities)
+  // e.g., /puja/ganesh-puja/delhi, /puja/satyanarayan-puja/purnia
   // ============================================================
   const topPujas = PUJA_SERVICES.filter((p) => p.category === 'popular').slice(0, 15);
-  const topCities = INDIA_CITIES.filter((c) => c.tier <= 2);
-  
+  const allCities = INDIA_CITIES;
+
   const pujaCityPages: MetadataRoute.Sitemap = [];
   topPujas.forEach((puja) => {
-    topCities.forEach((city) => {
+    allCities.forEach((city) => {
+      const isBiharPriority = BIHAR_PRIORITY_CITIES.includes(city.slug);
+      pujaCityPages.push({
+        url: `${BASE_URL}/puja/${puja.slug}/${city.slug}`,
+        lastModified: now,
+        changeFrequency: isBiharPriority ? 'daily' as const : 'weekly',
+        priority: isBiharPriority ? 0.88 : city.tier <= 1 ? 0.8 : 0.75,
+      });
+    });
+  });
+
+  // Also add non-popular pujas for Bihar priority cities
+  const nonPopularPujas = PUJA_SERVICES.filter((p) => p.category !== 'popular');
+  const biharCities = INDIA_CITIES.filter((c) => BIHAR_PRIORITY_CITIES.includes(c.slug));
+  nonPopularPujas.forEach((puja) => {
+    biharCities.forEach((city) => {
       pujaCityPages.push({
         url: `${BASE_URL}/puja/${puja.slug}/${city.slug}`,
         lastModified: now,
         changeFrequency: 'weekly',
-        priority: 0.75,
+        priority: 0.78,
       });
     });
   });
@@ -172,6 +184,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // ASTROLOGY × CITY COMBINATION PAGES
   // ============================================================
   const topAstroServices = ASTROLOGY_SERVICES.slice(0, 10);
+  const topCities = INDIA_CITIES.filter((c) => c.tier <= 2);
   const astroCityPages: MetadataRoute.Sitemap = [];
   topAstroServices.forEach((service) => {
     topCities.forEach((city) => {
@@ -189,8 +202,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // ============================================================
   return [
     ...staticPages,
-    ...cityPages,
     ...pujaPages,
+    ...cityPages,
     ...pujaCityPages,
     ...astrologyPages,
     ...astroCityPages,

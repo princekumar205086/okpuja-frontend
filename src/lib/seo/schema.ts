@@ -582,6 +582,36 @@ export function buildPujaPageSchemas(
   return schemas;
 }
 
+/**
+ * Build puja + city combo page schemas
+ */
+export function buildPujaCitySchemas(
+  pujaName: string,
+  pujaSlug: string,
+  cityName: string,
+  citySlug: string,
+  state: string,
+  faqs: FAQItem[]
+) {
+  return [
+    buildServiceSchema({
+      name: `${pujaName} in ${cityName}`,
+      description: `Book verified pandit for ${pujaName} in ${cityName}, ${state}. Authentic Vedic rituals with complete samagri at your doorstep.`,
+      url: `${SITE_CONFIG.url}/puja/${pujaSlug}/${citySlug}`,
+      category: 'Puja Service',
+      areaServed: cityName,
+      rating: { value: 4.8, count: 2500 },
+    }),
+    buildBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Puja Services', url: '/puja' },
+      { name: pujaName, url: `/puja/${pujaSlug}` },
+      { name: `${pujaName} in ${cityName}`, url: `/puja/${pujaSlug}/${citySlug}` },
+    ]),
+    buildFAQSchema(faqs),
+  ];
+}
+
 // ============================================================
 // JSON-LD SERIALIZER
 // ============================================================

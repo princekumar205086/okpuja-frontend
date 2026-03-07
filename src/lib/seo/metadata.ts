@@ -423,3 +423,34 @@ export function buildCityAlternates(
   });
   return alternates;
 }
+
+/**
+ * Puja + City combo page metadata generator
+ */
+export function getPujaCityMetadata(
+  pujaName: string,
+  pujaSlug: string,
+  cityName: string,
+  citySlug: string,
+  state?: string
+): Metadata {
+  const stateStr = state ? `, ${state}` : '';
+  return generateSEOMetadata({
+    title: `${pujaName} in ${cityName} | Book Pandit for ${pujaName} in ${cityName}`,
+    description: `Book verified pandit for ${pujaName} in ${cityName}${stateStr}. Authentic ${pujaName} at your home with complete samagri. Trusted by 2500+ customers. Book on OKPUJA.`,
+    path: `/puja/${pujaSlug}/${citySlug}`,
+    city: cityName,
+    service: pujaName,
+    category: 'puja',
+    additionalKeywords: [
+      `${pujaName.toLowerCase()} in ${cityName.toLowerCase()}`,
+      `pandit for ${pujaName.toLowerCase()} ${cityName.toLowerCase()}`,
+      `${pujaName.toLowerCase()} booking ${cityName.toLowerCase()}`,
+      `${pujaName.toLowerCase()} cost ${cityName.toLowerCase()}`,
+      `${pujaName.toLowerCase()} at home ${cityName.toLowerCase()}`,
+      `best pandit ${pujaName.toLowerCase()} ${cityName.toLowerCase()}`,
+      `${pujaName.toLowerCase()} vidhi ${cityName.toLowerCase()}`,
+      `book ${pujaName.toLowerCase()} ${cityName.toLowerCase()}`,
+    ],
+  });
+}

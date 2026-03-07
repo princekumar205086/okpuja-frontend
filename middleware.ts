@@ -5,8 +5,14 @@ import type { NextRequest } from 'next/server'
 const protectedRoutes = ['/admin', '/employee', '/user']
 const authRoutes = ['/login', '/register', '/verify-otp', '/forgot-password']
 
+// Routes that must NEVER be indexed by search engines
+const noIndexPrefixes = ['/api/', '/admin', '/dashboard', '/employee', '/user', '/checkout', '/cart', '/login', '/register', '/verify-otp', '/forgot-password', '/reset-password', '/verify-email', '/confirmbooking', '/failedbooking', '/astro-booking-failed', '/astro-booking-success', '/payment-debug', '/payment-pending', '/test-payment']
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  
+  // Check if this route should be blocked from indexing
+  const shouldNoIndex = noIndexPrefixes.some(prefix => pathname.startsWith(prefix))
   
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
@@ -43,19 +49,25 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(dashboardUrl)
   }
   
-  return NextResponse.next()
+  const response = NextResponse.next()
+  
+  // Add X-Robots-Tag: noindex for non-public routes to prevent Google indexing
+  if (shouldNoIndex) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+  
+  return response
 }
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - public folder assets
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 }

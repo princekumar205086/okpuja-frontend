@@ -32,12 +32,29 @@ const nextConfig: NextConfig = {
       {
         source: '/services',
         destination: '/puja',
-        permanent: true, // 301 redirect
+        permanent: true,
       },
       {
         source: '/astrologers',
         destination: '/astrology',
-        permanent: true, // 301 redirect
+        permanent: true,
+      },
+      // Fix 404 URL variations from Search Console
+      {
+        source: '/puja/shiva-puja',
+        destination: '/puja/shiv-puja',
+        permanent: true,
+      },
+      {
+        source: '/puja/janmashtami-puja',
+        destination: '/puja/krishna-janmashtami-puja',
+        permanent: true,
+      },
+      // pandit-requirements page (was 404)
+      {
+        source: '/pandit-requirements',
+        destination: '/puja',
+        permanent: true,
       },
       // Legacy URL redirects
       {
@@ -114,6 +131,12 @@ const nextConfig: NextConfig = {
         destination: '/pujaservice',
         permanent: true,
       },
+      // Pujaservice path variations from Search Console
+      {
+        source: '/pujaservice/:slug',
+        destination: '/puja/:slug',
+        permanent: true,
+      },
     ];
   },
 
@@ -135,13 +158,52 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self)',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
           },
         ],
       },
-      // Cache static assets
+      // Cache static assets aggressively
       {
         source: '/image/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/astrology_image/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/blog_images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/video/:path*',
         headers: [
           {
             key: 'Cache-Control',

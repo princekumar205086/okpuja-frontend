@@ -41,6 +41,7 @@ export {
   buildCanonicalUrl,
   buildOGImageUrl,
   buildCityAlternates,
+  getPujaCityMetadata,
 } from './metadata';
 export type { SEOMetadataOptions } from './metadata';
 
@@ -60,6 +61,7 @@ export {
   buildCityPageSchemas,
   buildCityServiceAreaSchema,
   buildPujaPageSchemas,
+  buildPujaCitySchemas,
   serializeSchemas,
 } from './schema';
 export type {
@@ -91,3 +93,14 @@ export {
   getBiharCityFAQs,
 } from './cityData';
 export type { BiharCityData, CityContent, CityFAQ } from './cityData';
+
+// Puja Content Generation
+export {
+  getPujaBySlug,
+  getAllPujaSlugs,
+  getPujaContent,
+  getPujaCityContent,
+  getRelatedPujas,
+  getTopCitiesForPuja,
+} from './pujaContent';
+export type { PujaPageContent, PujaCityContent } from './pujaContent';
