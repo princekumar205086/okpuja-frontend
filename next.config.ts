@@ -137,6 +137,25 @@ const nextConfig: NextConfig = {
         destination: '/puja/:slug',
         permanent: true,
       },
+      // /singlepuja?service=xxx → /puja/xxx (old URL format indexed by Google)
+      {
+        source: '/singlepuja',
+        has: [
+          {
+            type: 'query',
+            key: 'service',
+            value: '(?<slug>.*)',
+          },
+        ],
+        destination: '/puja/:slug',
+        permanent: true,
+      },
+      // /singlepuja without query → /pujaservice
+      {
+        source: '/singlepuja',
+        destination: '/pujaservice',
+        permanent: true,
+      },
     ];
   },
 

@@ -62,6 +62,9 @@ export default function robots(): MetadataRoute.Robots {
           '/astro-booking-success/',
           '/*?format=api',
           '/*?format=json',
+          '/*?lang=*',
+          '/singlepuja',
+          '/singlepuja/',
         ],
       },
       {

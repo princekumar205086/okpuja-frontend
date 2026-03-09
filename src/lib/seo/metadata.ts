@@ -84,13 +84,9 @@ export function generateSEOMetadata(options: SEOMetadataOptions): Metadata {
     description: seoDescription,
     keywords: keywords.join(', '),
     
-    // Canonical
+    // Canonical — single canonical, no fake language alternates
     alternates: {
       canonical,
-      languages: {
-        'en-IN': canonical,
-        'hi-IN': `${canonical}?lang=hi`,
-      },
     },
     
     // Robots

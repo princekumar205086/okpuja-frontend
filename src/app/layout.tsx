@@ -52,9 +52,6 @@ export const metadata: Metadata = {
   robots: DEFAULT_ROBOTS,
   alternates: {
     canonical: SITE_CONFIG.url,
-    languages: {
-      'en-IN': SITE_CONFIG.url,
-    },
   },
   openGraph: {
     title: 'OKPUJA | Book Pandit Online in India | Puja & Astrology Services',

@@ -9,8 +9,23 @@ const authRoutes = ['/login', '/register', '/verify-otp', '/forgot-password']
 const noIndexPrefixes = ['/api/', '/admin', '/dashboard', '/employee', '/user', '/checkout', '/cart', '/login', '/register', '/verify-otp', '/forgot-password', '/reset-password', '/verify-email', '/confirmbooking', '/failedbooking', '/astro-booking-failed', '/astro-booking-success', '/payment-debug', '/payment-pending', '/test-payment']
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  
+  const { pathname, searchParams } = request.nextUrl
+  const host = request.headers.get('host') || ''
+
+  // 1. www → non-www 301 redirect
+  if (host.startsWith('www.')) {
+    const newUrl = new URL(request.url)
+    newUrl.host = host.replace('www.', '')
+    return NextResponse.redirect(newUrl, 301)
+  }
+
+  // 2. Strip ?lang= query param (no real i18n support — causes duplicate canonical issues)
+  if (searchParams.has('lang')) {
+    const newUrl = new URL(request.url)
+    newUrl.searchParams.delete('lang')
+    return NextResponse.redirect(newUrl, 301)
+  }
+
   // Check if this route should be blocked from indexing
   const shouldNoIndex = noIndexPrefixes.some(prefix => pathname.startsWith(prefix))
   
