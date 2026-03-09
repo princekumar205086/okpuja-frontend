@@ -78,7 +78,6 @@ export default function BlogPage() {
 
   const handleViewPost = (post: BlogPost) => {
     // You can implement post preview logic here
-    console.log('View post:', post);
   };
 
   const handleClosePostForm = () => {

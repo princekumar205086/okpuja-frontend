@@ -140,8 +140,6 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
           
         } catch (refreshError: any) {
-          console.error('Token refresh failed:', refreshError);
-          
           // Check if it's a network error
           if (!refreshError.response) {
             trackLogoutReason('network_error', refreshError);
@@ -180,7 +178,6 @@ apiClient.interceptors.response.use(
         }
       } else {
         // No refresh token, redirect to login
-        console.error('No refresh token available for token refresh');
         trackLogoutReason('no_refresh_token');
         debugTokenStatus();
         

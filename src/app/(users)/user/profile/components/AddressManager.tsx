@@ -117,7 +117,6 @@ export const AddressManager: React.FC<AddressManagerProps> = ({ className = '' }
         setErrors(prev => ({ ...prev, postal_code: 'Invalid postal code' }));
       }
     } catch (error) {
-      console.error('Error fetching location:', error);
       setErrors(prev => ({ ...prev, postal_code: 'Failed to fetch location details' }));
     } finally {
       setPinCodeLoading(false);
@@ -142,7 +141,6 @@ export const AddressManager: React.FC<AddressManagerProps> = ({ className = '' }
         }));
       }
     } catch (error: any) {
-      console.error('Error getting current location:', error);
       alert(error.message || 'Failed to get current location');
     } finally {
       setLocationLoading(false);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from 'next/navigation';
 import {
   FaClock,
@@ -72,13 +72,9 @@ const PaymentPending = () => {
 
       setLoading(true);
       try {
-        console.log(`Status check #${statusCheckCount + 1} for payment:`, merchantOrderId);
-
         // Method 1: Check by merchant order ID
         if (merchantOrderId) {
           const paymentStatus = await checkPaymentStatus(merchantOrderId);
-          console.log('Payment status response:', paymentStatus);
-          
           if (paymentStatus) {
             setPaymentData(paymentStatus);
             
@@ -101,8 +97,6 @@ const PaymentPending = () => {
         // Method 2: Check by cart ID if available
         if (cartId) {
           const cartPaymentStatus = await checkCartPaymentStatus(cartId);
-          console.log('Cart payment status response:', cartPaymentStatus);
-          
           if (cartPaymentStatus?.success && cartPaymentStatus?.data) {
             const { payment_status, booking_created, booking_id } = cartPaymentStatus.data;
             
@@ -124,7 +118,6 @@ const PaymentPending = () => {
 
         setStatusCheckCount(prev => prev + 1);
       } catch (error) {
-        console.error('Status check error:', error);
         setError('Unable to check payment status');
       } finally {
         setLoading(false);
@@ -156,7 +149,6 @@ const PaymentPending = () => {
 
     setManualVerifyLoading(true);
     try {
-      console.log('Manual verification for cart:', cartId);
       const result = await verifyAndCompletePayment(cartId);
       
       if (result?.success && result?.booking) {
@@ -173,7 +165,6 @@ const PaymentPending = () => {
         toast.error(result?.message || 'Manual verification failed. Please contact support.');
       }
     } catch (error: any) {
-      console.error('Manual verification error:', error);
       toast.error('Verification failed. Please try again or contact support.');
     } finally {
       setManualVerifyLoading(false);
@@ -514,4 +505,12 @@ const PaymentPending = () => {
   );
 };
 
-export default PaymentPending;
+function SuspenseWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>}>
+      <PaymentPending />
+    </Suspense>
+  );
+}
+
+export default SuspenseWrapper;

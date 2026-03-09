@@ -96,7 +96,6 @@ export default function BookingRescheduleModal({
         }, 1000);
       }
     } catch (error) {
-      console.error('Reschedule error:', error);
       toast.error(`Failed to reschedule ${type} booking`);
     } finally {
       setIsSubmitting(false);

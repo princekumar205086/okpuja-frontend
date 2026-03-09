@@ -207,14 +207,12 @@ const CheckoutPage: React.FC = () => {
             await fallbackLocationLookup(latitude, longitude);
           }
         } catch (error) {
-          console.error('Location detection error:', error);
           toast.error('Failed to detect location. Please enter manually.');
         } finally {
           setLocationLoading(false);
         }
       },
       (error) => {
-        console.error('Geolocation error:', error);
         setLocationLoading(false);
         switch (error.code) {
           case error.PERMISSION_DENIED:
@@ -259,7 +257,6 @@ const CheckoutPage: React.FC = () => {
         toast.error('📍 Unable to detect location details. Please enter manually.');
       }
     } catch (error) {
-      console.error('Fallback location error:', error);
       toast.error('📍 Unable to detect location. Please enter manually.');
     }
   };
@@ -316,10 +313,6 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleProceedToPayment = async () => {
-    console.log('handleProceedToPayment called - Payment-First Flow');
-    console.log('Selected address:', selectedAddress);
-    console.log('Cart items:', cartItems);
-    
     if (!selectedAddress) {
       toast.error('Please select a delivery address');
       return;
@@ -343,20 +336,14 @@ const CheckoutPage: React.FC = () => {
       // Step 1: Create checkout session for tracking
       const cartItemIds = cartItems.map(item => item.id);
       const sessionId = createCheckoutSession(cartItemIds, selectedAddress, totalAmount);
-      console.log('Created checkout session:', sessionId);
-
       // Step 2: Process payment for cart (Payment-First Flow)
       // Use the cart_id from the first cart item
       const firstCartItem = cartItems[0];
       
-      console.log('Processing payment for cart_id:', firstCartItem.cart_id);
-      console.log('Selected address_id:', selectedAddress);
       const paymentResponse = await processCartPayment({
         cart_id: firstCartItem.cart_id, // Use cart_id instead of id
         address_id: selectedAddress // NEW: Include selected address_id in payment initiation
       });
-
-      console.log('Payment creation result:', paymentResponse);
 
       if (paymentResponse && paymentResponse.success) {
         // Extract the payment URL and IDs from the new response structure
@@ -366,8 +353,6 @@ const CheckoutPage: React.FC = () => {
         setPaymentUrl(sessionId, payment_order.phonepe_payment_url);
         setPaymentId(sessionId, payment_order.id);
         updateSessionStatus(sessionId, 'PAYMENT_INITIATED');
-        
-        console.log('Redirecting to payment URL:', payment_order.phonepe_payment_url);
         
         // Store callback info in session storage for payment completion tracking
         sessionStorage.setItem('checkout_session_id', sessionId);
@@ -382,14 +367,10 @@ const CheckoutPage: React.FC = () => {
       }
 
     } catch (error: any) {
-      console.error('Checkout error:', error);
-      
       // Enhanced error handling for production payment gateway issues
       let errorMessage = 'Failed to proceed to payment';
       
       if (error.response?.data) {
-        console.error('Error response data:', error.response.data);
-        
         // Handle specific error cases
         if (error.response.data.error) {
           errorMessage = error.response.data.error;
@@ -443,13 +424,6 @@ const CheckoutPage: React.FC = () => {
       });
       
       // Log error for debugging
-      console.error('Payment initiation error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message,
-        code: error.code
-      });
     } finally {
       setProcessingPayment(false);
     }
@@ -542,7 +516,6 @@ const CheckoutPage: React.FC = () => {
 
       toast.success('Pincode details applied');
     } catch (err) {
-      console.error('Pincode lookup error:', err);
       toast.error('Failed to lookup pincode. Please enter city/state manually.');
     } finally {
       setPincodeLoading(false);

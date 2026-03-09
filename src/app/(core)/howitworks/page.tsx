@@ -55,7 +55,7 @@ const HowItWorks = () => {
             How <span className="text-orange-600">OKPUJA</span> Works
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
-            From choosing your puja to experiencing divine blessings â€” our streamlined process makes spiritual bookings effortless.
+            From choosing your puja to experiencing divine blessings 🙏 our streamlined process makes spiritual bookings effortless.
           </p>
         </motion.div>
 

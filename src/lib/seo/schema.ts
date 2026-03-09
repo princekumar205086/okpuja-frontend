@@ -600,7 +600,6 @@ export function buildPujaCitySchemas(
       url: `${SITE_CONFIG.url}/puja/${pujaSlug}/${citySlug}`,
       category: 'Puja Service',
       areaServed: cityName,
-      rating: { value: 4.8, count: 2500 },
     }),
     buildBreadcrumbSchema([
       { name: 'Home', url: '/' },

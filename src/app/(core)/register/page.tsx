@@ -189,8 +189,6 @@ export default function RegisterForm() {
       }, 2000);
       
     } catch (err: any) {
-      console.error("Registration error:", err);
-      
       let errorMessage = "Registration failed. Please try again.";
       
       if (err.response?.data) {

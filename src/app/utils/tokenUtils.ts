@@ -21,7 +21,6 @@ export const getStoredTokens = (): TokenData => {
 
     return { access, refresh, user };
   } catch (error) {
-    console.error('Error getting stored tokens:', error);
     return { access: null, refresh: null, user: null };
   }
 };
@@ -34,7 +33,6 @@ export const isTokenExpired = (token: string): boolean => {
     const currentTime = Date.now() / 1000;
     return payload.exp < currentTime;
   } catch (error) {
-    console.error('Error checking token expiration:', error);
     return true;
   }
 };
@@ -46,7 +44,6 @@ export const getTokenExpirationTime = (token: string): Date | null => {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return new Date(payload.exp * 1000);
   } catch (error) {
-    console.error('Error getting token expiration time:', error);
     return null;
   }
 };
@@ -55,39 +52,17 @@ export const debugTokenStatus = (): void => {
   const tokens = getStoredTokens();
   console.group('🔍 Token Debug Information');
   
-  console.log('📦 Stored Tokens:', {
-    hasAccess: !!tokens.access,
-    hasRefresh: !!tokens.refresh,
-    hasUser: !!tokens.user,
-  });
-
   if (tokens.access) {
     const accessExpired = isTokenExpired(tokens.access);
     const accessExpTime = getTokenExpirationTime(tokens.access);
-    console.log('🔑 Access Token:', {
-      expired: accessExpired,
-      expiresAt: accessExpTime?.toLocaleString(),
-      timeUntilExpiry: accessExpTime ? Math.max(0, accessExpTime.getTime() - Date.now()) / 1000 / 60 : 0 + ' minutes'
-    });
   }
 
   if (tokens.refresh) {
     const refreshExpired = isTokenExpired(tokens.refresh);
     const refreshExpTime = getTokenExpirationTime(tokens.refresh);
-    console.log('🔄 Refresh Token:', {
-      expired: refreshExpired,
-      expiresAt: refreshExpTime?.toLocaleString(),
-      timeUntilExpiry: refreshExpTime ? Math.max(0, refreshExpTime.getTime() - Date.now()) / 1000 / 60 : 0 + ' minutes'
-    });
   }
 
   if (tokens.user) {
-    console.log('👤 User Data:', {
-      id: tokens.user.id,
-      email: tokens.user.email,
-      role: tokens.user.role,
-      accountStatus: tokens.user.account_status,
-    });
   }
 
   console.groupEnd();
@@ -103,7 +78,6 @@ export const clearAllTokens = (): void => {
   // Notify other tabs
   window.dispatchEvent(new CustomEvent('logout'));
   
-  console.log('🧹 All tokens cleared');
 };
 
 // Auto-logout detection utilities
@@ -115,8 +89,6 @@ const logoutReasonTracking = {
 };
 
 export const trackLogoutReason = (reason: string, details?: any): void => {
-  console.warn('🚪 Auto-logout detected:', reason, details);
-  
   switch (reason) {
     case 'refresh_failed':
       logoutReasonTracking.refreshFailureCount++;

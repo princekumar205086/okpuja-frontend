@@ -22,7 +22,6 @@ export const fetchUserBookings = async (): Promise<UserAstrologyBooking[]> => {
     const response = await apiClient.get('/user/astrology/bookings/');
     return response.data.results || response.data;
   } catch (error) {
-    console.error('Error fetching user astrology bookings:', error);
     throw error;
   }
 };
@@ -33,7 +32,6 @@ export const fetchBookingById = async (bookingId: string): Promise<UserAstrology
     const response = await apiClient.get(`/user/astrology/bookings/${bookingId}/`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching booking ${bookingId}:`, error);
     throw error;
   }
 };
@@ -44,7 +42,6 @@ export const cancelBooking = async (bookingId: string): Promise<UserAstrologyBoo
     const response = await apiClient.patch(`/user/astrology/bookings/${bookingId}/cancel/`);
     return response.data;
   } catch (error) {
-    console.error(`Error cancelling booking ${bookingId}:`, error);
     throw error;
   }
 };

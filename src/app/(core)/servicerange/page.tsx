@@ -182,13 +182,13 @@ export default function ServiceRange() {
                   <FaArrowRight size={14} />
                 </motion.span>
               </Link>
-              <Link href="/services">
+              <Link href="/pujaservice">
                 <motion.span
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-semibold px-8 py-3.5 rounded-xl backdrop-blur-sm transition-all duration-200"
                 >
-                  Learn More
+                  Explore All Puja Services
                 </motion.span>
               </Link>
             </div>

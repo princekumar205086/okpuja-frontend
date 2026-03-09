@@ -26,7 +26,6 @@ const APITest: React.FC = () => {
 
     for (const test of tests) {
       try {
-        console.log(`Testing: ${test.name}`);
         const response = await test.request();
         testResults.push({
           name: test.name,
@@ -34,7 +33,6 @@ const APITest: React.FC = () => {
           data: response.data,
           status: response.status,
         });
-        console.log(`✅ ${test.name}:`, response.data);
       } catch (error: any) {
         testResults.push({
           name: test.name,
@@ -42,7 +40,6 @@ const APITest: React.FC = () => {
           error: error.response?.data || error.message,
           status: error.response?.status,
         });
-        console.log(`❌ ${test.name}:`, error);
       }
     }
 

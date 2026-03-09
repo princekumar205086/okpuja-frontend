@@ -94,7 +94,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
         error: null 
       });
     } catch (err: any) {
-      console.error('Fetch bookings error:', err);
       let errorMessage = 'Failed to load bookings';
       
       if (err.response?.status === 401) {
@@ -143,7 +142,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       set({ loading: false });
       return response.data;
     } catch (err: any) {
-      console.error('Create booking error:', err);
       let errorMessage = 'Failed to create booking';
       
       if (err.response?.status === 400) {
@@ -174,7 +172,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       const response = await apiClient.get(`/booking/bookings/${id}/`);
       return response.data;
     } catch (err: any) {
-      console.error('Get booking error:', err);
       return null;
     }
   },
@@ -187,7 +184,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       }
       return null;
     } catch (err: any) {
-      console.error('Get booking by book_id error:', err);
       return null;
     }
   },
@@ -198,7 +194,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       const response = await apiClient.get(`/booking/bookings/by-cart/${cartId}/`);
       return response.data; // Direct response according to Swagger
     } catch (err: any) {
-      console.error('Get booking by cart_id error:', err);
       return null;
     }
   },
@@ -212,7 +207,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       }
       return null;
     } catch (err: any) {
-      console.error('Get latest booking error:', err);
       return null;
     }
   },
@@ -239,7 +233,6 @@ export const useBookingStore = create<BookingState>()((set, get) => ({
       toast.success('Booking status updated successfully!');
       return true;
     } catch (err: any) {
-      console.error('Update booking status error:', err);
       set({ error: 'Failed to update booking status', loading: false });
       toast.error('Failed to update booking status');
       return false;

@@ -70,7 +70,6 @@ const PujaServicesPage: React.FC = () => {
         is_active: filters.is_active,
       });
     } catch (error) {
-      console.error('Failed to load services:', error);
     }
   }, [currentPage, searchTerm, filters, fetchServices]);
 
@@ -95,7 +94,6 @@ const PujaServicesPage: React.FC = () => {
         is_active: newFilters.is_active,
       });
     } catch (error) {
-      console.error('Failed to apply filters:', error);
     }
   };
 
@@ -109,7 +107,6 @@ const PujaServicesPage: React.FC = () => {
         is_active: filters.is_active,
       });
     } catch (error) {
-      console.error('Failed to change page:', error);
     }
   };
 
@@ -147,7 +144,6 @@ const PujaServicesPage: React.FC = () => {
         await loadServices();
       }
     } catch (error) {
-      console.error('Failed to delete service:', error);
     }
   };
 

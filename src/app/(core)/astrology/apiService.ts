@@ -50,7 +50,6 @@ export const astrologyApiService = {
       
       return response.data;
     } catch (error) {
-      console.error('Error fetching astrology services:', error);
       throw error;
     }
   },
@@ -61,7 +60,6 @@ export const astrologyApiService = {
       const response = await apiClient.get<AstrologyService>(`/astrology/services/${id}/`);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching astrology service ${id}:`, error);
       throw error;
     }
   },
@@ -94,7 +92,6 @@ export const astrologyApiService = {
       
       return response.data.data;
     } catch (error) {
-      console.error('Error creating astrology booking with payment:', error);
       throw error;
     }
   },
@@ -110,7 +107,6 @@ export const astrologyApiService = {
       
       return response.data.data.booking;
     } catch (error) {
-      console.error('Error fetching booking details:', error);
       throw error;
     }
   }

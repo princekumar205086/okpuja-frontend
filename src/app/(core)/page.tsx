@@ -1,17 +1,19 @@
 import React from 'react'
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import VideoCarousel from './herosection/page'
 import ServiceCard from './servicecard/page'
 import FeaturedPujas from './featurescard/page'
-import ServiceRange from './servicerange/page'
-import HowItWorks from './howitworks/page'
-import UpcomingEvents from './upcoming/page'
-import Events from './events/page'
-import CustomerReviews from './customerreview/page'
-import QualifiedPandit from './qualifiedpandit/page'
 import { SchemaScript } from '@/lib/seo/SchemaScript'
 import { buildFAQSchema, buildBreadcrumbSchema } from '@/lib/seo/schema'
 import { InternalLinks } from '@/app/components/seo/InternalLinks'
+
+// Lazy-load below-the-fold sections to reduce initial JS bundle
+const ServiceRange = dynamic(() => import('./servicerange/page'))
+const HowItWorks = dynamic(() => import('./howitworks/page'))
+const Events = dynamic(() => import('./events/page'))
+const CustomerReviews = dynamic(() => import('./customerreview/page'))
+const QualifiedPandit = dynamic(() => import('./qualifiedpandit/page'))
 
 export const metadata: Metadata = {
   title: 'Book Pandit Online in India | Puja & Astrology Services',

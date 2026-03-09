@@ -42,14 +42,10 @@ const TokenDiagnostics: React.FC = () => {
   const testRefreshTokenManually = async () => {
     const tokens = getStoredTokens();
     if (!tokens.refresh) {
-      console.error('No refresh token available');
       return;
     }
 
-    console.log('🧪 Testing refresh token manually...');
     const result = await testRefreshEndpoint(tokens.refresh);
-    console.log('Manual refresh test result:', result);
-    
     if (result.success) {
       // Update tokens in localStorage
       if (result.data.access) {
@@ -68,12 +64,10 @@ const TokenDiagnostics: React.FC = () => {
     
     if (tokens.access) {
       const accessValidation = validateTokenFormat(tokens.access);
-      console.log('Access Token:', accessValidation);
     }
     
     if (tokens.refresh) {
       const refreshValidation = validateTokenFormat(tokens.refresh);
-      console.log('Refresh Token:', refreshValidation);
     }
     
     console.groupEnd();

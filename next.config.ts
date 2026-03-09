@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Remove console.log/warn in production builds
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Enable gzip compression
+  compress: true,
+
+  // Power optimizations
+  reactStrictMode: true,
+
   images: {
     remotePatterns: [
       {
@@ -19,8 +29,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "okpuja.com",
+      },
+      {
+        protocol: "https",
+        hostname: "api.okpuja.com",
       }
     ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000,
   },
 
   // ============================================================
@@ -129,12 +145,6 @@ const nextConfig: NextConfig = {
       {
         source: '/all-pujas',
         destination: '/pujaservice',
-        permanent: true,
-      },
-      // Pujaservice path variations from Search Console
-      {
-        source: '/pujaservice/:slug',
-        destination: '/puja/:slug',
         permanent: true,
       },
       // /singlepuja?service=xxx → /puja/xxx (old URL format indexed by Google)

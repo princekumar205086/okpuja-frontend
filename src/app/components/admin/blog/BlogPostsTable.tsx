@@ -195,7 +195,6 @@ const BlogPostsTable: React.FC<BlogPostsTableProps> = ({ onEdit, onAdd, onView }
       }
       setSelectedPosts([]);
     } catch (error) {
-      console.error('Bulk action error:', error);
     } finally {
       setActionLoading(false);
       setBulkActionAnchor(null);

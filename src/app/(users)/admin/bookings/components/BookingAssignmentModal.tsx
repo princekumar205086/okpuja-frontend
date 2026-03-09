@@ -78,7 +78,6 @@ export default function BookingAssignmentModal({
         setAssignmentNotes('');
       }
     } catch (error) {
-      console.error('Assignment error:', error);
     } finally {
       setIsSubmitting(false);
     }

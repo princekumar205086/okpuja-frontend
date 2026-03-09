@@ -14,12 +14,9 @@ const DebugCart: React.FC = () => {
     setResponse(null);
 
     try {
-      console.log('Testing cart API...');
       const result = await apiClient.get('/cart/carts/');
-      console.log('Cart API Response:', result.data);
       setResponse(result.data);
     } catch (err: any) {
-      console.error('Cart API Error:', err);
       setError(err.response?.data?.detail || err.message || 'Unknown error');
     } finally {
       setLoading(false);
@@ -32,12 +29,9 @@ const DebugCart: React.FC = () => {
     setResponse(null);
 
     try {
-      console.log('Testing active cart API...');
       const result = await apiClient.get('/cart/carts/active/');
-      console.log('Active Cart API Response:', result.data);
       setResponse(result.data);
     } catch (err: any) {
-      console.error('Active Cart API Error:', err);
       setError(err.response?.data?.detail || err.message || 'Unknown error');
     } finally {
       setLoading(false);

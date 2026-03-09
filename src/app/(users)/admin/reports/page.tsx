@@ -69,7 +69,6 @@ export default function AdminReportsPage() {
       setPerformance(perfRes.data?.data as unknown as PerformanceData ?? null);
       setAssignments(assignRes.data?.data as unknown as AssignmentData ?? null);
     } catch (err) {
-      console.error("Failed to fetch reports:", err);
       toast.error("Failed to load reports");
     } finally {
       setLoading(false);

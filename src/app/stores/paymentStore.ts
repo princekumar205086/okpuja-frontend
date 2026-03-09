@@ -162,7 +162,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
         error: null 
       });
     } catch (err: any) {
-      console.error('Fetch payments error:', err);
       let errorMessage = 'Failed to load payments';
       
       if (err.response?.status === 401) {
@@ -198,7 +197,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       
       return paymentResponse;
     } catch (err: any) {
-      console.error('Create payment error:', err);
       let errorMessage = 'Failed to create payment';
       
       if (err.response?.status === 400) {
@@ -233,10 +231,7 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
         address_id: paymentData.address_id // NEW: Include address_id in payment initiation
       };
       
-      console.log('Making payment request to /payments/cart/ with data:', requestData);
       const response = await apiClient.post('/payments/cart/', requestData);
-      console.log('Payment API response:', response.data);
-      
       const paymentResponse: PaymentResponse = response.data;
       
       set({ 
@@ -247,7 +242,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       
       return paymentResponse;
     } catch (err: any) {
-      console.error('Process cart payment error:', err);
       let errorMessage = 'Failed to process cart payment';
       
       if (err.response?.status === 400) {
@@ -295,7 +289,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.get(`/payments/status/${merchantOrderId}/`);
       return response.data;
     } catch (err: any) {
-      console.error('Check payment status error:', err);
       return null;
     }
   },
@@ -306,7 +299,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.get(`/payments/cart/status/${cartId}/`);
       return response.data;
     } catch (err: any) {
-      console.error('Check cart payment status error:', err);
       return null;
     }
   },
@@ -319,7 +311,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       });
       return response.data;
     } catch (err: any) {
-      console.error('Verify and complete payment error:', err);
       return null;
     }
   },
@@ -330,7 +321,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.post('/payments/webhook/phonepe/', callbackData);
       return response.data;
     } catch (err: any) {
-      console.error('Handle PhonePe callback error:', err);
       return null;
     }
   },
@@ -343,7 +333,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       });
       return response.data;
     } catch (err: any) {
-      console.error('Verify payment with PhonePe error:', err);
       return null;
     }
   },
@@ -354,7 +343,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.get(`/payments/status/${merchantOrderId}/`);
       return response.data;
     } catch (err: any) {
-      console.error('Check booking status error:', err);
       return null;
     }
   },
@@ -364,7 +352,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.post(`/payments/payments/${paymentId}/create-booking/`);
       return response.data;
     } catch (err: any) {
-      console.error('Create booking from payment error:', err);
       return null;
     }
   },
@@ -375,7 +362,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.post('/payments/test/', testData);
       return response.data;
     } catch (err: any) {
-      console.error('Simulate payment success error:', err);
       return null;
     }
   },
@@ -386,7 +372,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.post(`/payments/payments/${paymentId}/retry-webhook/`);
       return response.data;
     } catch (err: any) {
-      console.error('Retry webhook error:', err);
       return null;
     }
   },
@@ -397,7 +382,6 @@ export const usePaymentStore = create<PaymentState>()((set, get) => ({
       const response = await apiClient.post(`/payments/payments/${paymentId}/check-and-process/`);
       return response.data;
     } catch (err: any) {
-      console.error('Check and process payment error:', err);
       return null;
     }
   },

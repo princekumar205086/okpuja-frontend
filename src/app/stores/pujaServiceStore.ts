@@ -213,8 +213,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           try {
             response = await apiClient.get<PujaService[] | PujaServiceListResponse>(`/puja/services/?${queryParams}`);
           } catch (authError: any) {
-            console.log('Authenticated services fetch failed:', authError?.response?.status);
-            
             // Try public endpoint as fallback
             try {
               response = await axios.get<PujaService[] | PujaServiceListResponse>(`${API_BASE_URL}/puja/public/services/?${queryParams}`, {
@@ -224,7 +222,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
                 },
               });
             } catch (publicError: any) {
-              console.log('Public services fetch also failed:', publicError?.response?.status);
               throw authError; // Re-throw the original auth error
             }
           }
@@ -251,7 +248,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
             loading: false,
           });
         } catch (err: any) {
-          console.error("Fetch services error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to fetch services";
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
@@ -287,7 +283,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Service created successfully!");
           return true;
         } catch (err: any) {
-          console.error("Create service error:", err);
           let errorMessage = "Failed to create service";
           
           if (err.response?.data) {
@@ -335,7 +330,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Service updated successfully!");
           return true;
         } catch (err: any) {
-          console.error("Update service error:", err);
           let errorMessage = "Failed to update service";
           
           if (err.response?.data) {
@@ -366,7 +360,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Service deleted successfully!");
           return true;
         } catch (err: any) {
-          console.error("Delete service error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to delete service";
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
@@ -398,8 +391,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
             const response = await apiClient.get<PujaService>(`/puja/services/${id}/`);
             return response.data;
           } catch (authError: any) {
-            console.log('Authenticated service fetch failed, trying public endpoints');
-            
             // Try alternative public endpoints if available
             try {
               const publicResponse = await axios.get<PujaService>(`${API_BASE_URL}/puja/public/services/${id}/`, {
@@ -410,13 +401,11 @@ export const usePujaServiceStore = create<PujaServiceState>()(
               });
               return publicResponse.data;
             } catch (publicError: any) {
-              console.log('Public endpoint also failed:', publicError?.response?.status);
             }
           }
 
           return null;
         } catch (err: any) {
-          console.error("Get service by ID error:", err);
           return null;
         }
       },
@@ -436,7 +425,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           
           set({ categories });
         } catch (err: any) {
-          console.error("Fetch categories error:", err);
           toast.error("Failed to fetch categories");
         }
       },
@@ -449,7 +437,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Category created successfully!");
           return true;
         } catch (err: any) {
-          console.error("Create category error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to create category";
           toast.error(errorMessage);
           return false;
@@ -464,7 +451,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Category updated successfully!");
           return true;
         } catch (err: any) {
-          console.error("Update category error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to update category";
           toast.error(errorMessage);
           return false;
@@ -479,7 +465,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Category deleted successfully!");
           return true;
         } catch (err: any) {
-          console.error("Delete category error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to delete category";
           toast.error(errorMessage);
           return false;
@@ -497,8 +482,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
             set({ packages: response.data.results || response.data });
             return;
           } catch (authError: any) {
-            console.log('Authenticated packages fetch failed, trying public endpoint:', authError?.response?.status);
-            
             // Try public endpoint as fallback
             try {
               const publicResponse = await axios.get<{ results: Package[] }>(`${API_BASE_URL}/puja/public${url}`, {
@@ -510,14 +493,12 @@ export const usePujaServiceStore = create<PujaServiceState>()(
               set({ packages: publicResponse.data.results || publicResponse.data });
               return;
             } catch (publicError: any) {
-              console.log('Public packages fetch also failed:', publicError?.response?.status);
             }
           }
           
           // If both fail, set empty packages but don't throw error
           set({ packages: [] });
         } catch (err: any) {
-          console.error("Fetch packages error:", err);
           set({ packages: [] });
         }
       },
@@ -531,7 +512,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Package created successfully!");
           return true;
         } catch (err: any) {
-          console.error("Create package error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to create package";
           toast.error(errorMessage);
           return false;
@@ -547,7 +527,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Package updated successfully!");
           return true;
         } catch (err: any) {
-          console.error("Update package error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to update package";
           toast.error(errorMessage);
           return false;
@@ -575,7 +554,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Package deleted successfully!");
           return true;
         } catch (err: any) {
-          console.error("Delete package error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to delete package";
           toast.error(errorMessage);
           return false;
@@ -593,7 +571,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           const response = await apiClient.get<{ results: PujaBooking[] }>(`/puja/bookings/?${queryParams}`);
           set({ bookings: response.data.results || response.data });
         } catch (err: any) {
-          console.error("Fetch bookings error:", err);
           toast.error("Failed to fetch bookings");
         }
       },
@@ -609,7 +586,6 @@ export const usePujaServiceStore = create<PujaServiceState>()(
           toast.success("Booking status updated successfully!");
           return true;
         } catch (err: any) {
-          console.error("Update booking status error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to update booking status";
           toast.error(errorMessage);
           return false;

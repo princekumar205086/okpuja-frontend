@@ -100,7 +100,6 @@ export const useAstrologyBookingStore = create<AstrologyBookingState>()(
             error: null 
           });
         } catch (err: any) {
-          console.error('Fetch astrology bookings error:', err);
           const errorMessage = errorHandlers.fetch(err, false); // Don't show toast automatically
           
           set({ 
@@ -132,7 +131,6 @@ export const useAstrologyBookingStore = create<AstrologyBookingState>()(
           set({ loading: false });
           return null;
         } catch (err: any) {
-          console.error('Get astrology booking confirmation error:', err);
           const errorMessage = errorHandlers.fetch(err, false); // Don't show toast automatically
           
           set({ 
@@ -161,7 +159,6 @@ export const useAstrologyBookingStore = create<AstrologyBookingState>()(
           set({ loading: false });
           return true;
         } catch (err: any) {
-          console.error('Update Google Meet link error:', err);
           const errorMessage = errorHandlers.update(err, false); // Don't show toast automatically
           
           set({ 

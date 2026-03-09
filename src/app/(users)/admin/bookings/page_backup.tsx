@@ -99,7 +99,6 @@ const apiService = {
       const data = await fetchWithAuth('https://api.okpuja.com/api/astrology/admin/dashboard/');
       return data.data;
     } catch (error) {
-      console.error('Error fetching astrology dashboard:', error);
       throw error;
     }
   },
@@ -110,7 +109,6 @@ const apiService = {
       const data = await fetchWithAuth('https://api.okpuja.com/api/booking/admin/dashboard/');
       return data.data;
     } catch (error) {
-      console.error('Error fetching regular dashboard:', error);
       throw error;
     }
   },
@@ -121,7 +119,6 @@ const apiService = {
       const data = await fetchWithAuth('https://api.okpuja.com/api/booking/admin/bookings/');
       return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error('Error fetching regular bookings:', error);
       throw error;
     }
   },
@@ -1044,7 +1041,6 @@ const AdminBookingsPage: React.FC = () => {
       const data = await apiService.fetchAstrologyDashboard();
       setAstrologyDashboard(data);
     } catch (error) {
-      console.error('Error loading astrology data:', error);
       setError('Failed to load astrology data');
     }
   }, []);
@@ -1058,7 +1054,6 @@ const AdminBookingsPage: React.FC = () => {
       setRegularDashboard(dashboardData);
       setAllRegularBookings(bookingsData);
     } catch (error) {
-      console.error('Error loading regular data:', error);
       setError('Failed to load booking data');
     }
   }, []);
@@ -1069,7 +1064,6 @@ const AdminBookingsPage: React.FC = () => {
     try {
       await Promise.all([loadAstrologyData(), loadRegularData()]);
     } catch (error) {
-      console.error('Error loading data:', error);
       setError('Failed to load data');
     } finally {
       setLoading(false);
@@ -1244,7 +1238,6 @@ const AdminBookingsPage: React.FC = () => {
       
       toast.success('Data exported successfully');
     } catch (error) {
-      console.error('Export error:', error);
       toast.error('Failed to export data');
     }
   }, [activeTab, getFilteredData]);

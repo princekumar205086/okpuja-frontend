@@ -80,7 +80,6 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
           }, 500);
         }
       } catch (error) {
-        console.error('Error loading service:', error);
         notFound();
       } finally {
         setLoading(false);
@@ -131,7 +130,6 @@ export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
         toast.error('Failed to initiate payment. Please try again.');
       }
     } catch (error: any) {
-      console.error('Booking failed:', error);
       errorHandlers.booking(error);
     } finally {
       setBookingLoading(false);

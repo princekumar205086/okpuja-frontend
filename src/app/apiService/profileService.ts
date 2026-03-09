@@ -111,7 +111,6 @@ class ProfileService {
       const data = await response.json();
       return data[0]; // API returns array with single object
     } catch (error) {
-      console.error('Error fetching location from pincode:', error);
       throw new Error('Failed to fetch location data');
     }
   }
@@ -150,7 +149,6 @@ class ProfileService {
       );
       return await response.json();
     } catch (error) {
-      console.error('Error in reverse geocoding:', error);
       throw new Error('Failed to get address from coordinates');
     }
   }

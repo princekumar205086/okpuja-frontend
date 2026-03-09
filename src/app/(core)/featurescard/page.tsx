@@ -22,37 +22,37 @@ const pujas: PujaItem[] = [
     pujaName: "Marriage Puja",
     imageSource: "/uploads/marriage puja.jpeg",
     description: "Traditional rituals for a blessed marital journey",
-    duration: "3â€“4 hours",
+    duration: "🕐 2–3hours",
   },
   {
     pujaName: "Teej Puja",
     imageSource: "/uploads/teej puja.jpeg",
     description: "Sacred ceremony honoring Lord Shiva and Goddess Parvati",
-    duration: "1â€“2 hours",
+    duration: "🕐 1–2 hours",
   },
   {
     pujaName: "Griha Pravesh Puja",
     imageSource: "/uploads/Griha Pravesh puja.jpeg",
     description: "Blessing your new home with divine energy",
-    duration: "2â€“3 hours",
+    duration: "🕐 2–3 hours",
   },
   {
     pujaName: "Satyanarayan Puja",
     imageSource: "/uploads/satya narayan puja.jpeg",
     description: "Invoke blessings of Lord Vishnu for prosperity",
-    duration: "2â€“3 hours",
+    duration: "🕐 2–3 hours",
   },
   {
     pujaName: "Maha Ganapati Homa",
     imageSource: "/uploads/Maha ganpati.jpg",
     description: "Powerful ritual to remove obstacles from life",
-    duration: "3â€“4 hours",
+    duration: "🕐 3–4 hours",
   },
   {
     pujaName: "Office / Business Puja",
     imageSource: "/uploads/Office Puja  Business Puja.jpeg",
     description: "Sacred ceremony for business growth and success",
-    duration: "1â€“2 hours",
+    duration: "🕐 1–2 hours",
   },
 ];
 

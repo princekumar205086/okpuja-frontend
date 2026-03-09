@@ -100,7 +100,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         toast.error('Failed to update booking status');
       }
     } catch (error) {
-      console.error('Error updating status:', error);
       toast.error('Failed to update booking status');
     } finally {
       setStatusUpdating(false);
@@ -118,7 +117,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       toast.success('Meeting link sent successfully');
       setMeetLink('');
     } catch (error) {
-      console.error('Error sending meeting link:', error);
       toast.error('Failed to send meeting link');
     }
   };

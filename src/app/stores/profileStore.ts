@@ -62,7 +62,6 @@ export const useProfileStore = create<ProfileState>()(
         } catch (error: any) {
           const errorMessage = error.response?.data?.detail || 'Failed to fetch profile';
           set({ profileError: errorMessage, profileLoading: false });
-          console.error('Error fetching profile:', error);
         }
       },
 
@@ -77,7 +76,6 @@ export const useProfileStore = create<ProfileState>()(
           const errorMessage = error.response?.data?.detail || 'Failed to update profile';
           set({ profileError: errorMessage, profileLoading: false });
           toast.error(errorMessage);
-          console.error('Error updating profile:', error);
           return false;
         }
       },
@@ -99,7 +97,6 @@ export const useProfileStore = create<ProfileState>()(
           const errorMessage = error.response?.data?.detail || 'Failed to update profile picture';
           set({ profileError: errorMessage, profileLoading: false });
           toast.error(errorMessage);
-          console.error('Error updating profile picture:', error);
           return false;
         }
       },
@@ -113,7 +110,6 @@ export const useProfileStore = create<ProfileState>()(
         } catch (error: any) {
           const errorMessage = error.response?.data?.detail || 'Failed to fetch addresses';
           set({ addressesError: errorMessage, addressesLoading: false });
-          console.error('Error fetching addresses:', error);
         }
       },
 
@@ -132,7 +128,6 @@ export const useProfileStore = create<ProfileState>()(
           const errorMessage = error.response?.data?.detail || 'Failed to add address';
           set({ addressesError: errorMessage, addressesLoading: false });
           toast.error(errorMessage);
-          console.error('Error creating address:', error);
           return false;
         }
       },
@@ -155,7 +150,6 @@ export const useProfileStore = create<ProfileState>()(
           const errorMessage = error.response?.data?.detail || 'Failed to update address';
           set({ addressesError: errorMessage, addressesLoading: false });
           toast.error(errorMessage);
-          console.error('Error updating address:', error);
           return false;
         }
       },
@@ -176,7 +170,6 @@ export const useProfileStore = create<ProfileState>()(
           const errorMessage = error.response?.data?.detail || 'Failed to delete address';
           set({ addressesError: errorMessage, addressesLoading: false });
           toast.error(errorMessage);
-          console.error('Error deleting address:', error);
           return false;
         }
       },
@@ -192,7 +185,6 @@ export const useProfileStore = create<ProfileState>()(
           if (error.response?.status !== 404) {
             const errorMessage = error.response?.data?.detail || 'Failed to fetch PAN card';
             set({ panCardError: errorMessage, panCardLoading: false });
-            console.error('Error fetching PAN card:', error);
           } else {
             set({ panCardLoading: false });
           }
@@ -210,7 +202,6 @@ export const useProfileStore = create<ProfileState>()(
           const errorMessage = error.response?.data?.detail || 'Failed to update PAN card';
           set({ panCardError: errorMessage, panCardLoading: false });
           toast.error(errorMessage);
-          console.error('Error updating PAN card:', error);
           return false;
         }
       },

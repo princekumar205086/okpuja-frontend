@@ -60,10 +60,8 @@ const CartPage: React.FC = () => {
   // Load cart items when component mounts and user is available
   useEffect(() => {
     if (user) {
-      console.log('User found, fetching cart items...', user);
       fetchCartItems();
     } else {
-      console.log('No user found');
     }
   }, [user, fetchCartItems]);
 
@@ -158,7 +156,6 @@ const CartPage: React.FC = () => {
   };
 
   if (loading && cartItems.length === 0) {
-    console.log('Loading state - showing spinner');
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center">
         <motion.div
@@ -170,15 +167,6 @@ const CartPage: React.FC = () => {
       </div>
     );
   }
-
-  console.log('Cart render state:', { 
-    user: !!user, 
-    cartItemsLength: cartItems.length, 
-    loading, 
-    error,
-    totalCount,
-    totalAmount 
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 w-full max-w-full overflow-x-hidden">

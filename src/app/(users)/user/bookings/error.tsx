@@ -22,7 +22,6 @@ export class BookingErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Booking page error:', error, errorInfo);
   }
 
   render() {

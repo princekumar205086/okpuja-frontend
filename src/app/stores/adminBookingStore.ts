@@ -297,7 +297,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           const response = await apiClient.get('/accounts/admin/employees/');
           set({ employees: response.data || [] });
         } catch (err: any) {
-          console.error('Fetch employees error:', err);
         }
       },
 
@@ -327,7 +326,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
             error: null
           });
         } catch (err: any) {
-          console.error('Fetch astrology bookings error:', err);
           let errorMessage = 'Failed to load astrology bookings';
           
           if (err.response?.status === 401) {
@@ -375,7 +373,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
             error: null
           });
         } catch (err: any) {
-          console.error('Fetch regular bookings error:', err);
           let errorMessage = 'Failed to load bookings';
           
           if (err.response?.status === 401) {
@@ -424,7 +421,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
             error: null
           });
         } catch (err: any) {
-          console.error('Fetch puja bookings error:', err);
           let errorMessage = 'Failed to load puja bookings';
           
           if (err.response?.status === 401) {
@@ -456,7 +452,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           const response = await apiClient.get('/astrology/admin/dashboard/');
           set({ astrologyDashboard: response.data });
         } catch (err: any) {
-          console.error('Fetch astrology dashboard error:', err);
         }
       },
 
@@ -466,7 +461,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           const response = await apiClient.get('/booking/admin/dashboard/');
           set({ regularDashboard: response.data });
         } catch (err: any) {
-          console.error('Fetch regular dashboard error:', err);
         }
       },
 
@@ -479,7 +473,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
             regularDashboard: response.data // Set both since they're the same data
           });
         } catch (err: any) {
-          console.error('Fetch puja dashboard error:', err);
         }
       },
 
@@ -524,7 +517,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
             throw new Error(response.data.message || 'Bulk action failed');
           }
         } catch (err: any) {
-          console.error('Bulk action error:', err);
           let errorMessage = 'Failed to perform bulk action';
           
           if (err.response?.data?.errors) {
@@ -555,7 +547,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return true;
         } catch (err: any) {
-          console.error('Update astrology booking error:', err);
           let errorMessage = 'Failed to update astrology booking';
           
           if (err.response?.data?.detail) {
@@ -625,7 +616,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return true;
         } catch (err: any) {
-          console.error('Update booking status error:', err);
           let errorMessage = 'Failed to update booking status';
           
           if (err.response?.data?.detail) {
@@ -676,7 +666,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return true;
         } catch (err: any) {
-          console.error('Assign booking error:', err);
           let errorMessage = 'Failed to assign booking';
           
           if (err.response?.data?.detail) {
@@ -713,7 +702,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return true;
         } catch (err: any) {
-          console.error('Schedule astrology session error:', err);
           let errorMessage = 'Failed to schedule astrology session';
           
           if (err.response?.data?.detail) {
@@ -760,7 +748,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           
           return response.data;
         } catch (err: any) {
-          console.error('Generate report error:', err);
           toast.error('Failed to generate report');
           return null;
         }
@@ -780,7 +767,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return response.data;
         } catch (err: any) {
-          console.error('Reschedule astrology booking error:', err);
           let errorMessage = 'Failed to reschedule astrology booking';
           
           // Handle validation errors
@@ -831,7 +817,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return response.data;
         } catch (err: any) {
-          console.error('Reschedule regular booking error:', err);
           let errorMessage = 'Failed to reschedule regular booking';
           
           // Handle validation errors
@@ -882,7 +867,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return response.data;
         } catch (err: any) {
-          console.error('Reschedule puja booking error:', err);
           let errorMessage = 'Failed to reschedule puja booking';
           
           // Handle validation errors
@@ -966,7 +950,6 @@ export const useAdminBookingStore = create<AdminBookingState>()(
           set({ loading: false });
           return true;
         } catch (err: any) {
-          console.error('Export bookings error:', err);
           let errorMessage = 'Failed to export bookings';
           
           if (err.response?.data?.detail) {

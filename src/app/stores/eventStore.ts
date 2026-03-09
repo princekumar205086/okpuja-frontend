@@ -121,7 +121,6 @@ export const useEventStore = create<EventState>()(
           });
 
         } catch (err: any) {
-          console.error("Fetch events error:", err);
           let errorMessage = "Failed to fetch events. Please try again.";
           
           if (err.response?.status === 401) {
@@ -181,7 +180,6 @@ export const useEventStore = create<EventState>()(
           return newEvent;
 
         } catch (err: any) {
-          console.error("Create event error:", err);
           let errorMessage = "Failed to create event. Please try again.";
           
           if (err.response?.data) {
@@ -241,7 +239,6 @@ export const useEventStore = create<EventState>()(
           return updatedEvent;
 
         } catch (err: any) {
-          console.error("Update event error:", err);
           let errorMessage = "Failed to update event. Please try again.";
           
           if (err.response?.data) {
@@ -281,7 +278,6 @@ export const useEventStore = create<EventState>()(
           return true;
 
         } catch (err: any) {
-          console.error("Delete event error:", err);
           let errorMessage = "Failed to delete event. Please try again.";
           
           if (err.response?.status === 404) {
@@ -312,7 +308,6 @@ export const useEventStore = create<EventState>()(
           return event;
 
         } catch (err: any) {
-          console.error("Get event error:", err);
           let errorMessage = "Failed to fetch event details.";
           
           if (err.response?.status === 404) {

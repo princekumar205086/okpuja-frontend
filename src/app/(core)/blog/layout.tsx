@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import './blog.css';
 
 export const metadata: Metadata = {
   title: 'Puja Guides, Astrology Tips & Spiritual Blog',

@@ -63,7 +63,6 @@ const EmailVerification = () => {
         setVerificationStatus("expired");
       }
     } catch (error) {
-      console.error("Error verifying email:", error);
       setVerificationStatus("expired");
     }
   };
@@ -75,7 +74,6 @@ const EmailVerification = () => {
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate an API call
       setShowToast(true);
     } catch (error) {
-      console.error("Error resending email:", error);
     } finally {
       setIsResending(false);
     }

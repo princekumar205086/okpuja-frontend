@@ -62,7 +62,6 @@ export const usePublicEventStore = create<PublicEventState>()(
           });
 
         } catch (err: any) {
-          console.error("Fetch events error:", err);
           let errorMessage = "Failed to fetch events. Please try again.";
           
           if (err.response?.status >= 500) {
@@ -93,7 +92,6 @@ export const usePublicEventStore = create<PublicEventState>()(
           });
 
         } catch (err: any) {
-          console.error("Fetch upcoming events error:", err);
           let errorMessage = "Failed to fetch upcoming events.";
           
           if (err.response?.status >= 500) {
@@ -123,7 +121,6 @@ export const usePublicEventStore = create<PublicEventState>()(
           });
 
         } catch (err: any) {
-          console.error("Fetch featured events error:", err);
           const errorMessage = "Failed to fetch featured events.";
           
           set({ 
@@ -147,7 +144,6 @@ export const usePublicEventStore = create<PublicEventState>()(
           });
 
         } catch (err: any) {
-          console.error("Fetch current month events error:", err);
           const errorMessage = "Failed to fetch current month events.";
           
           set({ 
@@ -168,7 +164,6 @@ export const usePublicEventStore = create<PublicEventState>()(
           });
 
         } catch (err: any) {
-          console.error("Fetch today's events error:", err);
           set({
             todaysEvents: []
           });
@@ -189,7 +184,6 @@ export const usePublicEventStore = create<PublicEventState>()(
           return event;
 
         } catch (err: any) {
-          console.error("Get event error:", err);
           let errorMessage = "Failed to fetch event details.";
           
           if (err.response?.status === 404) {

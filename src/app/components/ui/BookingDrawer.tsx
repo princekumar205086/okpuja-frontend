@@ -123,7 +123,6 @@ export const BookingDrawer: React.FC<BookingDrawerProps> = ({
         toast.error('Failed to update status');
       }
     } catch (error) {
-      console.error('Error updating status:', error);
       toast.error('Failed to update status');
     } finally {
       setStatusUpdating(false);
@@ -141,7 +140,6 @@ export const BookingDrawer: React.FC<BookingDrawerProps> = ({
       toast.success('Meeting link sent successfully');
       setMeetLink('');
     } catch (error) {
-      console.error('Error sending meeting link:', error);
       toast.error('Failed to send meeting link');
     }
   };
@@ -159,7 +157,6 @@ export const BookingDrawer: React.FC<BookingDrawerProps> = ({
       setNewDate('');
       setNewTime('');
     } catch (error) {
-      console.error('Error rescheduling:', error);
       toast.error('Failed to reschedule booking');
     }
   };

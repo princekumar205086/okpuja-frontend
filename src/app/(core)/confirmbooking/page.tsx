@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from 'next/navigation';
 import {
   FaCheckCircle,
@@ -76,18 +76,10 @@ const BookingSuccess = () => {
   useEffect(() => {
     // Prevent multiple API calls if we already have booking details or have attempted fetch
     if (bookingDetails || hasAttemptedFetch) {
-      console.log('Skipping fetch - already have data or attempted:', { 
-        hasBookingDetails: !!bookingDetails, 
-        hasAttemptedFetch 
-      });
       return;
     }
 
     const fetchBookingData = async () => {
-      console.log('🚀 Starting booking data fetch...');
-      console.log('URL search params:', window.location.search);
-      console.log('bookingId:', bookingId, 'cartId:', cartId, 'bookId:', bookId);
-
       // Mark that we've attempted to fetch
       setHasAttemptedFetch(true);
       setLoading(true);
@@ -95,11 +87,9 @@ const BookingSuccess = () => {
 
       // PRIORITY 1: Direct booking ID fetch (NEW FORMAT: booking_id=BK-DAFB33E3)
       if (bookingId) {
-        console.log('✅ Priority 1: Fetching by booking_id:', bookingId);
         try {
           const booking = await getBookingByBookId(bookingId);
           if (booking) {
-            console.log('🎉 Booking found by booking_id:', booking);
             setBookingDetails(booking);
             
             // Process astrology booking details if this is an astrology service
@@ -107,7 +97,6 @@ const BookingSuccess = () => {
               try {
                 await processAstrologyBookingAfterPayment(booking.id);
               } catch (error) {
-                console.error('Error processing astrology booking details:', error);
                 // Don't fail the whole process for this
               }
             }
@@ -117,7 +106,6 @@ const BookingSuccess = () => {
             return; // Success!
           }
         } catch (error) {
-          console.error('Error fetching booking by booking_id:', error);
           setError(`Unable to find booking with ID: ${bookingId}`);
           setLoading(false);
           return;
@@ -126,11 +114,9 @@ const BookingSuccess = () => {
 
       // PRIORITY 2: Cart ID fetch (for payment completion flow)
       if (cartId) {
-        console.log('✅ Priority 2: Checking cart-based booking...');
         try {
           const booking = await getBookingByCartId(cartId);
           if (booking) {
-            console.log('🎉 Booking found by cart_id:', booking);
             setBookingDetails(booking);
             
             // Process astrology booking details if this is an astrology service
@@ -138,7 +124,6 @@ const BookingSuccess = () => {
               try {
                 await processAstrologyBookingAfterPayment(booking.id);
               } catch (error) {
-                console.error('Error processing astrology booking details:', error);
                 // Don't fail the whole process for this
               }
             }
@@ -147,25 +132,18 @@ const BookingSuccess = () => {
             setLoading(false);
             return; // Success!
           } else {
-            console.log('No booking found for cart_id, checking payment status...');
           }
         } catch (error) {
-          console.error('Error fetching booking by cart_id:', error);
         }
 
         // If no booking found for cart_id, check payment status for auto-completion
-        console.log('⏳ Checking payment status for automatic completion...');
         try {
           const paymentStatus = await checkCartPaymentStatus(cartId);
-          console.log('Payment status response:', paymentStatus);
-
           if (paymentStatus?.success && paymentStatus?.data) {
             const { payment_status, booking_created, booking_id } = paymentStatus.data;
 
             if (payment_status === 'SUCCESS' && booking_created) {
               // Payment completed and booking created automatically
-              console.log('🎊 Payment completed automatically with booking!');
-              
               // Try to get the booking details again
               try {
                 const booking = await getBookingByCartId(cartId);
@@ -177,7 +155,6 @@ const BookingSuccess = () => {
                     try {
                       await processAstrologyBookingAfterPayment(booking.id);
                     } catch (error) {
-                      console.error('Error processing astrology booking details:', error);
                       // Don't fail the whole process for this
                     }
                   }
@@ -187,10 +164,8 @@ const BookingSuccess = () => {
                   return;
                 }
               } catch (bookingError) {
-                console.log('Booking created but fetching details failed, will retry...');
               }
             } else if (payment_status === 'SUCCESS' && !booking_created) {
-              console.log('💰 Payment completed, booking creation in progress...');
               setError('Payment successful! Our system is automatically creating your booking...');
               
               if (retryCount < 3) {
@@ -202,7 +177,6 @@ const BookingSuccess = () => {
                 return;
               }
             } else if (payment_status === 'INITIATED') {
-              console.log('🔄 Payment being processed by automatic system...');
               setError('Payment received! Our automated system is verifying and completing your booking...');
               
               if (retryCount < 8) {
@@ -226,7 +200,6 @@ const BookingSuccess = () => {
             }
           }
         } catch (paymentError) {
-          console.error('Error checking payment status:', paymentError);
           setError('Unable to check payment status. Our background system may still be processing.');
           
           if (retryCount < 3) {
@@ -244,11 +217,9 @@ const BookingSuccess = () => {
 
       // PRIORITY 3: Legacy book_id fetch (OLD FORMAT)
       if (bookId) {
-        console.log('✅ Priority 3: Fetching by legacy book_id:', bookId);
         try {
           const booking = await getBookingByBookId(bookId);
           if (booking) {
-            console.log('🎉 Booking found by legacy book_id:', booking);
             setBookingDetails(booking);
             
             // Process astrology booking details if this is an astrology service
@@ -256,7 +227,6 @@ const BookingSuccess = () => {
               try {
                 await processAstrologyBookingAfterPayment(booking.id);
               } catch (error) {
-                console.error('Error processing astrology booking details:', error);
                 // Don't fail the whole process for this
               }
             }
@@ -266,16 +236,13 @@ const BookingSuccess = () => {
             return; // Success!
           }
         } catch (error) {
-          console.error('Error fetching booking by legacy book_id:', error);
         }
       }
 
       // PRIORITY 4: Final fallback - try latest booking
-      console.log('🔍 Priority 4: Trying latest booking as fallback...');
       try {
         const latestBooking = await getLatestBooking();
         if (latestBooking) {
-          console.log('Found latest booking:', latestBooking);
           setBookingDetails(latestBooking);
           
           // Process astrology booking details if this is an astrology service
@@ -283,7 +250,6 @@ const BookingSuccess = () => {
             try {
               await processAstrologyBookingAfterPayment(latestBooking.id);
             } catch (error) {
-              console.error('Error processing astrology booking details:', error);
               // Don't fail the whole process for this
             }
           }
@@ -293,7 +259,6 @@ const BookingSuccess = () => {
           return;
         }
       } catch (latestError) {
-        console.error('Error getting latest booking:', latestError);
       }
 
       // If we reach here, no booking was found
@@ -348,7 +313,6 @@ const BookingSuccess = () => {
       const result = await verifyAndCompletePayment(cartId);
       
       if (result?.success && result?.booking) {
-        console.log('✅ Manual verification successful, payment completed automatically:', result);
         setBookingDetails(result.booking);
         toast.success('Payment verified and completed automatically by our system!');
         setError('');
@@ -361,7 +325,6 @@ const BookingSuccess = () => {
         setError(`Manual verification completed: ${result?.message || 'Our automatic background system will continue processing your payment.'}`);
       }
     } catch (error: any) {
-      console.error('Manual verification error:', error);
       setError(`Manual verification failed: ${error.message || 'Network error'}. Don't worry - our automatic background system is still processing your payment.`);
     } finally {
       setLoading(false);
@@ -380,8 +343,8 @@ const BookingSuccess = () => {
     if (navigator.share) {
       navigator
         .share(shareData)
-        .then(() => console.log("Successfully shared"))
-        .catch((error) => console.log("Error sharing", error));
+        .then(() => {})
+        .catch(() => {});
     } else {
       // Fallback for browsers that don't support Web Share API
       const shareText = shareData.text + '\n' + shareData.url;
@@ -892,4 +855,12 @@ const BookingSuccess = () => {
   );
 };
 
-export default BookingSuccess;
+function SuspenseWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>}>
+      <BookingSuccess />
+    </Suspense>
+  );
+}
+
+export default SuspenseWrapper;

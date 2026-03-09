@@ -52,7 +52,6 @@ const MeetingLinkModal: React.FC<MeetingLinkModalProps> = ({ booking, onClose, o
       await onSubmit(booking.astro_book_id || '', meetingLink, meetingDateTime);
       onClose();
     } catch (error) {
-      console.error('Failed to send meeting link:', error);
     } finally {
       setIsSubmitting(false);
     }

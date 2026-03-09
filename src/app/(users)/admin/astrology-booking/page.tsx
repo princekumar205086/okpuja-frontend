@@ -89,7 +89,6 @@ const AstrologyBookingManagementPage = () => {
       setBookings(data);
       setFilteredBookings(data);
     } catch (err) {
-      console.error('Failed to fetch bookings:', err);
       setError('Failed to load bookings. Please try again later.');
     } finally {
       setIsLoading(false);
@@ -127,7 +126,6 @@ const AstrologyBookingManagementPage = () => {
       }
       
     } catch (error) {
-      console.error('Failed to update booking status:', error);
       setError('Failed to update booking status. Please try again.');
     }
   };
@@ -167,7 +165,6 @@ const AstrologyBookingManagementPage = () => {
       
       setShowMeetingModal(false);
     } catch (error) {
-      console.error('Failed to send meeting link:', error);
       setError('Failed to send meeting link. Please try again.');
     }
   };
@@ -191,7 +188,6 @@ const AstrologyBookingManagementPage = () => {
       }
       
     } catch (error) {
-      console.error('Failed to update notes:', error);
       setError('Failed to update notes. Please try again.');
     }
   };

@@ -76,7 +76,6 @@ const UserAstrologyBookingPage = () => {
       setBookings(data);
       setFilteredBookings(data);
     } catch (err) {
-      console.error('Failed to fetch bookings:', err);
       setError('Failed to load your bookings. Please try again later.');
     } finally {
       setIsLoading(false);
@@ -115,7 +114,6 @@ const UserAstrologyBookingPage = () => {
       
       setShowCancelDialog(false);
     } catch (error) {
-      console.error('Failed to cancel booking:', error);
       setError('Failed to cancel booking. Please try again or contact support.');
     } finally {
       setIsCancelling(false);

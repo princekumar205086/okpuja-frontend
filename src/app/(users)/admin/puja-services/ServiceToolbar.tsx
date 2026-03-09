@@ -72,7 +72,6 @@ const ServiceToolbar: React.FC<ServiceToolbarProps> = ({
       exportServicesToExcel(services);
       toast.success('Services exported successfully');
     } catch (error) {
-      console.error('Export error:', error);
       toast.error('Failed to export services');
     }
     handleExportMenuClose();

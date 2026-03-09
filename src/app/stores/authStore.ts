@@ -144,7 +144,6 @@ export const useAuthStore = create<AuthState>()(
             });
           }
         } catch (err) {
-          console.error("Error initializing auth:", err);
           // Clear any invalid data in storage
           localStorage.removeItem("access");
           localStorage.removeItem("refresh");
@@ -235,7 +234,6 @@ export const useAuthStore = create<AuthState>()(
           return true;
 
         } catch (err: any) {
-          console.error("Login error:", err, err.response?.data);
           let errorMessage = "Login failed. Please try again.";
           
           if (err.response?.status === 401 || err.response?.status === 400) {
@@ -259,7 +257,6 @@ export const useAuthStore = create<AuthState>()(
           toast.success("Registration successful! Please check your email for verification.");
           set({ loading: false });
         } catch (err: any) {
-          console.error("Registration error:", err);
           let errorMessage = "Registration failed. Please try again.";
           
           if (err.response?.data) {
@@ -315,7 +312,6 @@ export const useAuthStore = create<AuthState>()(
           return true;
 
         } catch (err: any) {
-          console.error("OTP verification error:", err);
           let errorMessage = "OTP verification failed. Please try again.";
           
           if (err.response?.status === 400) {
@@ -344,7 +340,6 @@ export const useAuthStore = create<AuthState>()(
           return true;
 
         } catch (err: any) {
-          console.error("Resend OTP error:", err);
           let errorMessage = "Failed to resend OTP. Please try again.";
           
           if (err.response?.status === 404) {
@@ -371,7 +366,6 @@ export const useAuthStore = create<AuthState>()(
             toast.success("Logged out successfully from server");
           }
         } catch (err) {
-          console.error("Logout error:", err);
           // Continue with local logout even if server logout fails
         }
 
@@ -445,7 +439,6 @@ export const useAuthStore = create<AuthState>()(
           
           return true;
         } catch (err) {
-          console.error("Token refresh failed:", err);
           // Clear auth state
           set({
             user: null,

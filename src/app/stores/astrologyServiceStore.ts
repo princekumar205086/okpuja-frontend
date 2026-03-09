@@ -229,7 +229,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
             loading: false,
           });
         } catch (err: any) {
-          console.error("Fetch astrology services error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to fetch astrology services";
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
@@ -269,7 +268,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
           toast.success("Astrology service created successfully!");
           return true;
         } catch (err: any) {
-          console.error("Create astrology service error:", err);
           let errorMessage = "Failed to create astrology service";
           
           if (err.response?.data) {
@@ -323,7 +321,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
           toast.success("Astrology service updated successfully!");
           return true;
         } catch (err: any) {
-          console.error("Update astrology service error:", err);
           let errorMessage = "Failed to update astrology service";
           
           if (err.response?.data) {
@@ -356,7 +353,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
           toast.success("Astrology service deleted successfully!");
           return true;
         } catch (err: any) {
-          console.error("Delete astrology service error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to delete astrology service";
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
@@ -369,7 +365,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
           const response = await apiClient.get<AstrologyService>(`/astrology/services/${id}/`);
           return response.data;
         } catch (err: any) {
-          console.error("Get astrology service error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to fetch astrology service";
           toast.error(errorMessage);
           return null;
@@ -396,7 +391,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
           toast.success("Service image updated successfully!");
           return true;
         } catch (err: any) {
-          console.error("Update service image error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to update service image";
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);
@@ -429,7 +423,6 @@ export const useAstrologyServiceStore = create<AstrologyServiceState>()(
           toast.success(`Service ${service.is_active ? 'deactivated' : 'activated'} successfully!`);
           return true;
         } catch (err: any) {
-          console.error("Toggle service status error:", err);
           const errorMessage = err.response?.data?.detail || "Failed to update service status";
           set({ error: errorMessage, loading: false });
           toast.error(errorMessage);

@@ -49,7 +49,6 @@ export const fetchAstrologyBookings = async (): Promise<AdminAstrologyBooking[]>
     const response = await apiClient.get('/admin/astrology/bookings/');
     return response.data.results || response.data;
   } catch (error) {
-    console.error('Error fetching astrology bookings:', error);
     throw error;
   }
 };
@@ -63,7 +62,6 @@ export const updateBookingStatus = async (
     const response = await apiClient.patch(`/admin/astrology/bookings/${bookingId}/`, { status });
     return response.data;
   } catch (error) {
-    console.error(`Error updating booking ${bookingId} status:`, error);
     throw error;
   }
 };
@@ -86,7 +84,6 @@ export const sendMeetingLink = async (
     const response = await apiClient.patch(`/admin/astrology/bookings/${bookingId}/update-meeting/`, data);
     return response.data;
   } catch (error) {
-    console.error(`Error sending meeting link for booking ${bookingId}:`, error);
     throw error;
   }
 };
@@ -100,7 +97,6 @@ export const updateAdminNotes = async (
     const response = await apiClient.patch(`/admin/astrology/bookings/${bookingId}/`, { admin_notes: notes });
     return response.data;
   } catch (error) {
-    console.error(`Error updating notes for booking ${bookingId}:`, error);
     throw error;
   }
 };

@@ -207,7 +207,6 @@ export const exportServicesToExcel = (services: PujaService[], filename: string 
     
     return true;
   } catch (error) {
-    console.error('Export error:', error);
     return false;
   }
 };

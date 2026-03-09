@@ -50,7 +50,6 @@ export const useBookingFilters = (
           await fetchAllBookings();
       }
     } catch (error) {
-      console.error('Error refreshing data:', error);
     }
   }, [activeTab, filters, fetchAstrologyBookings, fetchRegularBookings, fetchPujaBookings, fetchAllBookings]);
 

@@ -131,7 +131,6 @@ export const useUserPromoStore = create<UserPromoState>((set, get) => ({
         loading: false,
       });
     } catch (error: any) {
-      console.error('Error fetching user promo codes:', error);
       set({ 
         error: 'Failed to fetch promo codes',
         loading: false 
@@ -145,7 +144,6 @@ export const useUserPromoStore = create<UserPromoState>((set, get) => ({
       const response = await apiClient.get('/promo/user/promos/history/');
       set({ promoHistory: response.data.results || response.data });
     } catch (error: any) {
-      console.error('Error fetching promo history:', error);
       toast.error('Failed to fetch promo history');
     }
   },
@@ -175,7 +173,6 @@ export const useUserPromoStore = create<UserPromoState>((set, get) => ({
       
       set({ stats });
     } catch (error: any) {
-      console.error('Error calculating user stats:', error);
     }
   },
 
@@ -207,7 +204,6 @@ export const useUserPromoStore = create<UserPromoState>((set, get) => ({
         };
       }
     } catch (error: any) {
-      console.error('Error validating promo code:', error);
       const errorMessage = error.response?.data?.message || 'Failed to validate promo code';
       set({ error: errorMessage, validatingCode: false });
       toast.error(errorMessage);
@@ -240,7 +236,6 @@ export const useUserPromoStore = create<UserPromoState>((set, get) => ({
       await navigator.clipboard.writeText(code);
       toast.success('Promo code copied to clipboard!');
     } catch (error) {
-      console.error('Failed to copy promo code:', error);
       toast.error('Failed to copy promo code');
     }
   },

@@ -37,7 +37,6 @@ export const useBookingHandlers = (
 
       toast.success(`Meeting link sent to ${booking.customer_name || booking.user_name}`);
     } catch (error) {
-      console.error('Error sending meeting link:', error);
       toast.error('Failed to send meeting link');
     }
   }, []);
@@ -77,7 +76,6 @@ export const useBookingHandlers = (
       }
       return false;
     } catch (error) {
-      console.error('Error rescheduling booking:', error);
       toast.error('Failed to reschedule booking');
       return false;
     }
@@ -89,7 +87,6 @@ export const useBookingHandlers = (
       toast.success('Status updated successfully');
       return true;
     } catch (error) {
-      console.error('Error updating status:', error);
       toast.error('Failed to update status');
       return false;
     }

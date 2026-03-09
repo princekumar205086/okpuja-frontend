@@ -86,7 +86,6 @@ export default function StatusChangeModal({
         setReason('');
       }
     } catch (error) {
-      console.error('Status change error:', error);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from 'next/navigation';
 import {
   FaTimesCircle,
@@ -86,14 +86,12 @@ const BookingFailed = () => {
         else if (paymentId) {
           // For backward compatibility, we'll try to find payment info
           // This might not work with the new API structure
-          console.warn('Using legacy payment_id without merchant_order_id');
           // You might want to implement a migration strategy here
         }
 
         // Restore cart items (in case they were cleared prematurely)
         await fetchCartItems();
       } catch (error) {
-        console.error('Error checking failure status:', error);
         setError('Failed to load details');
       } finally {
         setLoading(false);
@@ -195,7 +193,6 @@ const BookingFailed = () => {
           return;
         }
       } catch (error) {
-        console.error('Retry failed:', error);
         toast.error('Retry failed. Please try a new payment.');
       }
       setRetrying(false);
@@ -518,4 +515,12 @@ const BookingFailed = () => {
   );
 };
 
-export default BookingFailed;
+function SuspenseWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>}>
+      <BookingFailed />
+    </Suspense>
+  );
+}
+
+export default SuspenseWrapper;

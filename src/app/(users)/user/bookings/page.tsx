@@ -185,8 +185,6 @@ const BookingsPage: React.FC = () => {
       
       // For now, just show a success message without making the API call
       // TODO: Implement actual API call when backend is ready
-      console.log('Cancel booking:', { booking, reason, requestRefund });
-      
       toast.success(requestRefund 
         ? 'Booking cancelled and refund requested successfully!' 
         : 'Booking cancelled successfully!');
@@ -197,7 +195,6 @@ const BookingsPage: React.FC = () => {
       // Refresh bookings to show updated status
       handleRefresh();
     } catch (error: any) {
-      console.error('Cancellation error:', error);
       toast.error('Failed to cancel booking');
     } finally {
       setIsLoading(false);

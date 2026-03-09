@@ -2,14 +2,9 @@ import axios from 'axios';
 
 // Test refresh token endpoint
 export const testRefreshEndpoint = async (refreshToken: string) => {
-  console.log('🧪 Testing refresh token endpoint...');
-  
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.okpuja.com/api';
   
   try {
-    console.log('📤 Sending request to:', `${API_BASE_URL}/auth/refresh/`);
-    console.log('📤 With refresh token:', refreshToken.substring(0, 50) + '...');
-    
     const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
       refresh: refreshToken,
     }, {
@@ -19,9 +14,6 @@ export const testRefreshEndpoint = async (refreshToken: string) => {
       timeout: 10000,
     });
     
-    console.log('✅ Refresh successful!');
-    console.log('📥 Response data:', response.data);
-    
     return {
       success: true,
       data: response.data,
@@ -29,14 +21,6 @@ export const testRefreshEndpoint = async (refreshToken: string) => {
     };
     
   } catch (error: any) {
-    console.error('❌ Refresh failed!');
-    console.error('Error details:', {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-    });
-    
     return {
       success: false,
       error: {
@@ -73,8 +57,6 @@ export const validateTokenFormat = (token: string) => {
 
 // Test login endpoint
 export const testLoginEndpoint = async (email: string, password: string) => {
-  console.log('🧪 Testing login endpoint...');
-  
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.okpuja.com/api';
   
   try {
@@ -88,26 +70,12 @@ export const testLoginEndpoint = async (email: string, password: string) => {
       timeout: 10000,
     });
     
-    console.log('✅ Login successful!');
-    console.log('📥 Response data:', {
-      ...response.data,
-      access: response.data.access?.substring(0, 50) + '...',
-      refresh: response.data.refresh?.substring(0, 50) + '...',
-    });
-    
     return {
       success: true,
       data: response.data,
     };
     
   } catch (error: any) {
-    console.error('❌ Login failed!');
-    console.error('Error details:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
-    
     return {
       success: false,
       error: {

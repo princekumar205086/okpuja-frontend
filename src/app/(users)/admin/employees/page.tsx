@@ -61,7 +61,6 @@ export default function EmployeesPage() {
       // Show unassigned bookings
       setBookings(bookData.filter((b) => !b.assigned_to));
     } catch (err) {
-      console.error("Failed to fetch employees:", err);
       setSnack({ open: true, msg: "Failed to load employee data", severity: "error" });
     } finally {
       setLoading(false);

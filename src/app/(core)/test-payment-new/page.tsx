@@ -25,14 +25,11 @@ const TestPaymentNew = () => {
     setLoading(true);
     try {
       const firstCartItem = cartItems[0];
-      console.log('Testing payment with cart_id:', firstCartItem.cart_id);
-      
       const result = await processCartPayment({
         cart_id: firstCartItem.cart_id,
         address_id: 1 // Test address_id - you may need to use a valid address_id from your backend
       });
       
-      console.log('Payment result:', result);
     setTestResults((prev: TestResults) => ({
       ...prev,
       payment_creation: result
@@ -46,7 +43,6 @@ const TestPaymentNew = () => {
         toast.error('Payment creation failed');
       }
     } catch (error) {
-      console.error('Test error:', error);
       toast.error('Test failed');
     } finally {
       setLoading(false);
@@ -63,7 +59,6 @@ const TestPaymentNew = () => {
     setLoading(true);
     try {
       const result = await checkPaymentStatus(merchantOrderId);
-      console.log('Payment status result:', result);
       setTestResults(prev => ({
         ...prev,
         payment_status: result
@@ -75,7 +70,6 @@ const TestPaymentNew = () => {
         toast.error('Failed to get payment status');
       }
     } catch (error) {
-      console.error('Status check error:', error);
       toast.error('Status check failed');
     } finally {
       setLoading(false);
@@ -92,7 +86,6 @@ const TestPaymentNew = () => {
     try {
       const firstCartItem = cartItems[0];
       const result = await checkCartPaymentStatus(firstCartItem.cart_id);
-      console.log('Cart payment status result:', result);
       setTestResults(prev => ({
         ...prev,
         cart_status: result
@@ -104,7 +97,6 @@ const TestPaymentNew = () => {
         toast.error('Failed to get cart payment status');
       }
     } catch (error) {
-      console.error('Cart status check error:', error);
       toast.error('Cart status check failed');
     } finally {
       setLoading(false);
@@ -117,7 +109,6 @@ const TestPaymentNew = () => {
       await fetchCartItems();
       toast.success('Cart refreshed');
     } catch (error) {
-      console.error('Cart refresh error:', error);
       toast.error('Failed to refresh cart');
     } finally {
       setLoading(false);

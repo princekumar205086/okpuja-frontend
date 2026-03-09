@@ -7,7 +7,6 @@ export const encryptId = (id: number | string): string => {
     const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
     return encodeURIComponent(encrypted);
   } catch (error) {
-    console.error('Encryption error:', error);
     return id.toString();
   }
 };
@@ -15,7 +14,6 @@ export const encryptId = (id: number | string): string => {
 export const decryptId = (encryptedId: string): string | null => {
   try {
     if (!encryptedId) {
-      console.error('No encrypted ID provided');
       return null;
     }
 
@@ -25,11 +23,9 @@ export const decryptId = (encryptedId: string): string | null => {
       const result = decrypted.toString(CryptoJS.enc.Utf8);
       
       if (result && result.trim() !== '') {
-        console.log('Direct decryption successful:', result);
         return result;
       }
     } catch (directError) {
-      console.log('Direct decryption failed, trying with URL decode');
     }
 
     // If direct decryption fails, try with URL decoding
@@ -39,11 +35,9 @@ export const decryptId = (encryptedId: string): string | null => {
       const result = decrypted.toString(CryptoJS.enc.Utf8);
       
       if (result && result.trim() !== '') {
-        console.log('URL decode decryption successful:', result);
         return result;
       }
     } catch (urlDecodeError) {
-      console.log('URL decode decryption also failed');
     }
 
     // If both methods fail, try replacing URL-safe characters
@@ -53,17 +47,13 @@ export const decryptId = (encryptedId: string): string | null => {
       const result = decrypted.toString(CryptoJS.enc.Utf8);
       
       if (result && result.trim() !== '') {
-        console.log('Sanitized decryption successful:', result);
         return result;
       }
     } catch (sanitizeError) {
-      console.log('Sanitized decryption also failed');
     }
 
-    console.error('All decryption methods failed for:', encryptedId);
     return null;
   } catch (error) {
-    console.error('General decryption error:', error);
     return null;
   }
 };

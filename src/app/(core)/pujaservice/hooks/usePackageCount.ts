@@ -32,7 +32,6 @@ export const usePackageCount = (services: Array<{ id: number }>) => {
               }))
             };
           } catch (error) {
-            console.error(`Failed to fetch packages for service ${service.id}:`, error);
             return {
               serviceId: service.id,
               count: 0,
@@ -53,7 +52,6 @@ export const usePackageCount = (services: Array<{ id: number }>) => {
         
         setPackageCounts(countsMap);
       } catch (error) {
-        console.error('Failed to fetch package counts:', error);
       } finally {
         setLoading(false);
       }

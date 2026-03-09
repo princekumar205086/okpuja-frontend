@@ -188,7 +188,6 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
         loading: false
       });
     } catch (error: any) {
-      console.error('Fetch posts error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch posts',
         loading: false,
@@ -206,7 +205,6 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const results = data.results || data || [];
       set({ categories: results, loading: false });
     } catch (error: any) {
-      console.error('Fetch categories error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch categories',
         loading: false,
@@ -224,7 +222,6 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const results = data.results || data || [];
       set({ tags: results, loading: false });
     } catch (error: any) {
-      console.error('Fetch tags error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch tags',
         loading: false,
@@ -242,7 +239,6 @@ export const useBlogStore = create<BlogStore>((set, get) => ({
       const results = data.results || data || [];
       set({ comments: results, loading: false });
     } catch (error: any) {
-      console.error('Fetch comments error:', error);
       set({ 
         error: error.response?.data?.message || 'Failed to fetch comments',
         loading: false,

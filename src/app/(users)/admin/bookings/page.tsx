@@ -201,8 +201,6 @@ const AdminBookingsPage: React.FC = () => {
 
   const handleBookingAction = async (action: string, booking: any) => {
     try {
-      console.log(`🔄 Performing action: ${action} on booking:`, booking);
-      
       switch (action) {
         case 'view':
           setSelectedBooking(booking);
@@ -256,10 +254,8 @@ const AdminBookingsPage: React.FC = () => {
           toast.success('Meet link sent successfully');
           break;
         default:
-          console.log(`Unknown action: ${action}`);
       }
     } catch (error) {
-      console.error(`❌ Action ${action} failed:`, error);
       toast.error(`Failed to ${action} booking`);
     }
   };

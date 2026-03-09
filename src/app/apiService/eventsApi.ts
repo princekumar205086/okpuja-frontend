@@ -75,7 +75,6 @@ class EventsAPI {
         results: response.data.results || []
       };
     } catch (error) {
-      console.error('Error fetching events:', error);
       return { count: 0, next: null, previous: null, results: [] };
     }
   }
@@ -93,7 +92,6 @@ class EventsAPI {
       
       // Check if response.data exists and has results
       if (!response.data) {
-        console.error('No data in API response');
         return [];
       }
 
@@ -101,7 +99,6 @@ class EventsAPI {
       const events = response.data.results || response.data;
       
       if (!Array.isArray(events)) {
-        console.error('API response is not an array:', events);
         return [];
       }
 
@@ -115,7 +112,6 @@ class EventsAPI {
         return eventDate >= today;
       });
     } catch (error) {
-      console.error('Error fetching upcoming events:', error);
       return [];
     }
   }
@@ -140,13 +136,11 @@ class EventsAPI {
       const events = response.data.results || response.data;
       
       if (!Array.isArray(events)) {
-        console.error('Featured events response is not an array:', events);
         return [];
       }
 
       return events;
     } catch (error) {
-      console.error('Error fetching featured events:', error);
       return [];
     }
   }
@@ -162,7 +156,6 @@ class EventsAPI {
 
       return response.data;
     } catch (error) {
-      console.error(`Error fetching event ${id}:`, error);
       throw error; // Re-throw to let the store handle it
     }
   }
@@ -187,13 +180,11 @@ class EventsAPI {
       const events = response.data.results || response.data;
       
       if (!Array.isArray(events)) {
-        console.error('Date range events response is not an array:', events);
         return [];
       }
 
       return events;
     } catch (error) {
-      console.error('Error fetching events by date range:', error);
       return [];
     }
   }
@@ -219,13 +210,11 @@ class EventsAPI {
       const events = response.data.results || response.data;
       
       if (!Array.isArray(events)) {
-        console.error('Today events response is not an array:', events);
         return [];
       }
 
       return events;
     } catch (error) {
-      console.error('Error fetching today events:', error);
       return [];
     }
   }

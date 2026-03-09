@@ -58,7 +58,6 @@ export default function AdminUsersPage() {
       const data = Array.isArray(res.data) ? res.data : (res.data as { results?: ApiUser[] }).results ?? [];
       setUsers(data);
     } catch (err) {
-      console.error("Failed to fetch users:", err);
       toast.error("Failed to load users");
     } finally {
       setLoading(false);

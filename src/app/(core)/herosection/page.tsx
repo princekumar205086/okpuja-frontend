@@ -43,7 +43,7 @@ const VideoCarousel: React.FC = () => {
       primaryCta: "Book Now",
       primaryLink: "/pujaservice",
       secondaryCta: "Explore Services",
-      secondaryLink: "/services",
+      secondaryLink: "/pujaservice",
       accentColor: "orange",
     },
     {
@@ -55,7 +55,7 @@ const VideoCarousel: React.FC = () => {
       primaryCta: "Consult Now",
       primaryLink: "/astrology",
       secondaryCta: "View Astrologers",
-      secondaryLink: "/astrologers",
+      secondaryLink: "/astrology",
       accentColor: "purple",
     },
   ];
@@ -161,9 +161,9 @@ const VideoCarousel: React.FC = () => {
   };
 
   const trustBadges = [
-    { icon: "ðŸ†", text: "2,300+ Pujas" },
-    { icon: "â­", text: "4.9 Rating" },
-    { icon: "ðŸ•‰ï¸", text: "500+ Pandits" },
+    { icon: "🙏", text: "2,300+ Pujas" },
+    { icon: "⭐", text: "4.9 Rating" },
+    { icon: "🙇", text: "500+ Pandits" },
   ];
 
   return (
@@ -197,7 +197,7 @@ const VideoCarousel: React.FC = () => {
           <video
             ref={(el) => { videoRefs.current[index] = el; }}
             className="absolute inset-0 h-full w-full object-cover"
-            preload={index === currentSlide || index === (currentSlide + 1) % slides.length ? "auto" : "none"}
+            preload={index === currentSlide ? "auto" : "none"}
             src={slide.videoUrl}
             autoPlay={index === currentSlide}
             loop

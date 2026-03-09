@@ -116,7 +116,6 @@ const StatusChangeDrawer: React.FC<StatusChangeDrawerProps> = ({
         setReason('');
       }
     } catch (error) {
-      console.error('Status update error:', error);
       // Error is already handled in the store
     }
   };

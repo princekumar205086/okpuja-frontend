@@ -76,7 +76,6 @@ export default function LoginForm() {
             return;
           }
         } catch (error) {
-          console.error('Error parsing booking state:', error);
         }
       }
       
@@ -88,7 +87,6 @@ export default function LoginForm() {
             return;
           }
         } catch (error) {
-          console.error('Error parsing cart state:', error);
         }
       }
       
@@ -183,7 +181,6 @@ export default function LoginForm() {
         setLoginError(error);
       }
     } catch (err) {
-      console.error("Login error:", err);
       setLoginError("An unexpected error occurred. Please try again.");
       toast.error("An unexpected error occurred. Please try again.");
     }

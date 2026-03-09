@@ -33,7 +33,6 @@ export const astrologyBookingApiService = {
       const response = await apiClient.post<AstrologyBookingDetails>('/astrology/booking-details/', data);
       return response.data;
     } catch (error: any) {
-      console.error('Error creating astrology booking details:', error);
       errorHandlers.booking(error);
       return null;
     }
@@ -45,7 +44,6 @@ export const astrologyBookingApiService = {
       const response = await apiClient.get<AstrologyBookingDetails>(`/astrology/booking-details/${bookingId}/`);
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching astrology booking details:', error);
       return null;
     }
   },
@@ -56,7 +54,6 @@ export const astrologyBookingApiService = {
       const response = await apiClient.patch<AstrologyBookingDetails>(`/astrology/booking-details/${bookingId}/`, data);
       return response.data;
     } catch (error: any) {
-      console.error('Error updating astrology booking details:', error);
       errorHandlers.update(error);
       return null;
     }
@@ -69,7 +66,6 @@ export const processAstrologyBookingAfterPayment = async (bookingId: number): Pr
     // Get stored astrology details from session storage
     const storedDetails = sessionStorage.getItem('astrology_booking_details');
     if (!storedDetails) {
-      console.log('No astrology booking details found in session storage');
       return true; // Not an error, just no additional details to save
     }
 
@@ -92,7 +88,6 @@ export const processAstrologyBookingAfterPayment = async (bookingId: number): Pr
     
     return false;
   } catch (error) {
-    console.error('Error processing astrology booking after payment:', error);
     return false;
   }
 };

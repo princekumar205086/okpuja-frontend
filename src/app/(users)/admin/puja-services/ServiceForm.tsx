@@ -94,9 +94,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
   // Fetch categories on mount and when drawer opens
   useEffect(() => {
     if (open) {
-      console.log('Form opened, categories length:', categories.length);
       if (categories.length === 0) {
-        console.log('Fetching categories...');
         fetchCategories();
       }
     }
@@ -104,7 +102,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ open, onClose, service, mode 
 
   // Log categories when they change
   useEffect(() => {
-    console.log('Categories updated:', categories);
   }, [categories]);
 
   const handleInputChange = (field: string, value: any) => {

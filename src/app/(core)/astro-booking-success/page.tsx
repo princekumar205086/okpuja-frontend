@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Confetti } from '@/components/ui/confetti';
 import Link from 'next/link';
@@ -51,6 +51,14 @@ interface BookingDetails {
 }
 
 export default function AstroBookingSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>}>
+      <AstroBookingSuccessContent />
+    </Suspense>
+  );
+}
+
+function AstroBookingSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
@@ -119,7 +127,6 @@ export default function AstroBookingSuccessPage() {
           }
         }
       } catch (err) {
-        console.error('Error fetching booking details:', err);
         toast.dismiss();
         toast.error('Error loading booking details');
         setError('An error occurred while loading your booking details. Please contact customer support.');

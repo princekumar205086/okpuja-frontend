@@ -7,7 +7,6 @@ export const encryptId = (id: number | string): string => {
     const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
     return encodeURIComponent(encrypted);
   } catch (error) {
-    console.error('Encryption error:', error);
     return id.toString();
   }
 };
@@ -26,7 +25,6 @@ export const decryptId = (encryptedId: string): string | null => {
     
     return result || null;
   } catch (error) {
-    console.error('Decryption error:', error);
     return null;
   }
 };

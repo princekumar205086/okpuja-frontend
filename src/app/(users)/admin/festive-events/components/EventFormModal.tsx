@@ -218,7 +218,6 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
         toast.success(`Event ${mode === 'create' ? 'created' : 'updated'} successfully!`);
       }
     } catch (error) {
-      console.error('Form submission error:', error);
     }
   };
 

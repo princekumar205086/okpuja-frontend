@@ -74,20 +74,17 @@ const BookingRescheduleDrawer: React.FC<BookingRescheduleDrawerProps> = ({
     if (type === 'puja') {
       // If book_id has format like "BK-CC2FF2A4", extract the ID from the booking data
       const numericId = booking.id || booking.booking_id;
-      console.log('Puja booking ID extraction:', { booking, numericId, type });
       return numericId;
     }
     
     // For astrology bookings
     if (type === 'astrology') {
       const astrologyId = booking.id || booking.astro_book_id;
-      console.log('Astrology booking ID extraction:', { booking, astrologyId, type });
       return astrologyId;
     }
     
     // For regular bookings
     const regularId = booking.id || booking.book_id;
-    console.log('Regular booking ID extraction:', { booking, regularId, type });
     return regularId;
   };
 
@@ -161,13 +158,6 @@ const BookingRescheduleDrawer: React.FC<BookingRescheduleDrawerProps> = ({
       return;
     }
 
-    console.log('Submitting reschedule:', {
-      type,
-      bookingId,
-      formData,
-      booking
-    });
-
     try {
       let success = false;
 
@@ -209,7 +199,6 @@ const BookingRescheduleDrawer: React.FC<BookingRescheduleDrawerProps> = ({
         setValidationErrors({ date: '', time: '', reason: '' });
       }
     } catch (error) {
-      console.error('Reschedule error:', error);
       // Error is already handled in the store with proper backend messages
     }
   };

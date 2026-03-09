@@ -40,7 +40,6 @@ const TestPaymentPage: React.FC = () => {
         setResults({ error: 'Failed to fetch payment status' });
       }
     } catch (error) {
-      console.error('Error checking payment:', error);
       toast.error('Failed to check payment status');
       setResults({ error: 'Failed to fetch payment status' });
     } finally {
@@ -66,12 +65,10 @@ const TestPaymentPage: React.FC = () => {
           handleTestPayment();
         }, 1000);
         
-        console.log('Simulation result:', result);
       } else {
         toast.error('Failed to simulate payment success');
       }
     } catch (error) {
-      console.error('Error simulating payment:', error);
       toast.error('Failed to simulate payment success');
     } finally {
       setSimulating(false);
@@ -90,7 +87,6 @@ const TestPaymentPage: React.FC = () => {
       toast.success('For manual testing: You need to manually update payment status in Django admin or database');
       toast.success(`Payment ID: ${paymentId} - Change status from PENDING to SUCCESS`);
     } catch (error) {
-      console.error('Error:', error);
       toast.error('Error occurred');
     }
   };

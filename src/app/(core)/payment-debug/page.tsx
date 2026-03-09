@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -35,7 +35,6 @@ const PaymentDebugPage = () => {
     try {
       const token = localStorage.getItem('access');
       if (!token) {
-        console.log('No access token found');
         return;
       }
 
@@ -50,10 +49,8 @@ const PaymentDebugPage = () => {
         const data = await response.json();
         setLatestPayment(data);
       } else {
-        console.log('Failed to fetch latest payment:', response.status);
       }
     } catch (error) {
-      console.error('Error fetching latest payment:', error);
     }
   };
 
@@ -61,7 +58,6 @@ const PaymentDebugPage = () => {
     try {
       const token = localStorage.getItem('access');
       if (!token) {
-        console.log('No access token found');
         return;
       }
 
@@ -76,10 +72,8 @@ const PaymentDebugPage = () => {
         const data = await response.json();
         setRecentBookings(data.results || data || []);
       } else {
-        console.log('Failed to fetch bookings:', response.status);
       }
     } catch (error) {
-      console.error('Error fetching bookings:', error);
     }
   };
 
@@ -235,4 +229,12 @@ const PaymentDebugPage = () => {
   );
 };
 
-export default PaymentDebugPage;
+function SuspenseWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>}>
+      <PaymentDebugPage />
+    </Suspense>
+  );
+}
+
+export default SuspenseWrapper;

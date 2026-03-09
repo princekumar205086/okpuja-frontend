@@ -198,7 +198,6 @@ export const useCartStore = create<CartState>()(
           }
           
         } catch (err: any) {
-          console.error('Fetch cart error:', err);
           let errorMessage = 'Failed to load cart items';
           
           if (err.response?.status === 401) {
@@ -248,7 +247,6 @@ export const useCartStore = create<CartState>()(
           return true;
           
         } catch (err: any) {
-          console.error('Add to cart error:', err);
           let errorMessage = 'Failed to add item to cart';
           
           if (err.response?.status === 400) {
@@ -289,7 +287,6 @@ export const useCartStore = create<CartState>()(
           return true;
           
         } catch (err: any) {
-          console.error('Update cart error:', err);
           let errorMessage = 'Failed to update cart item';
           
           if (err.response?.status === 400) {
@@ -327,7 +324,6 @@ export const useCartStore = create<CartState>()(
           return true;
           
         } catch (err: any) {
-          console.error('Remove from cart error:', err);
           let errorMessage = 'Failed to remove item from cart';
           
           if (err.response?.status === 400) {
@@ -390,7 +386,6 @@ export const useCartStore = create<CartState>()(
             await apiClient.post('/cart/carts/clear_converted/');
           } catch (clearError) {
             // If bulk clear fails, fallback to individual deletion
-            console.warn('Bulk clear failed, falling back to individual deletion');
             const deletePromises = items.map(item => 
               apiClient.delete(`/cart/carts/${item.id}/`)
             );
@@ -414,7 +409,6 @@ export const useCartStore = create<CartState>()(
           return true;
           
         } catch (err: any) {
-          console.error('Clear cart error:', err);
           let errorMessage = 'Failed to clear cart';
           
           if (err.response?.data?.error) {
@@ -453,7 +447,6 @@ export const useCartStore = create<CartState>()(
           return true;
           
         } catch (err: any) {
-          console.error('Apply promo error:', err);
           let errorMessage = 'Failed to apply promo code';
           
           if (err.response?.status === 400) {
@@ -488,7 +481,6 @@ export const useCartStore = create<CartState>()(
           return true;
           
         } catch (err: any) {
-          console.error('Remove promo error:', err);
           set({ error: 'Failed to remove promo code', loading: false });
           toast.error('Failed to remove promo code');
           return false;
@@ -520,7 +512,6 @@ export const useCartStore = create<CartState>()(
           const response = await apiClient.get(`/cart/carts/${cartId}/deletion_status/`);
           return response.data;
         } catch (err: any) {
-          console.error('Check deletion status error:', err);
           return null;
         }
       },
@@ -534,7 +525,6 @@ export const useCartStore = create<CartState>()(
           await get().fetchCartItems();
           return true;
         } catch (err: any) {
-          console.error('Cleanup old payments error:', err);
           let errorMessage = 'Failed to cleanup old payments';
           
           if (err.response?.data?.error) {
@@ -562,7 +552,6 @@ export const useCartStore = create<CartState>()(
           
           return false;
         } catch (err: any) {
-          console.error('Check payment status error:', err);
           return false;
         }
       },
@@ -582,7 +571,6 @@ export const useCartStore = create<CartState>()(
           
           return false;
         } catch (err: any) {
-          console.error('Create booking from payment error:', err);
           let errorMessage = 'Failed to create booking from payment';
           
           if (err.response?.data?.detail) {

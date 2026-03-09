@@ -45,7 +45,7 @@ const QualifiedPandit = () => {
           alt="Qualified Pandits background"
           fill
           className="object-cover object-center"
-          priority
+          loading="lazy"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-orange-900/95 via-red-900/85 to-orange-900/95" />
@@ -157,13 +157,13 @@ const QualifiedPandit = () => {
                     <FaArrowRight className="ml-3 text-lg group-hover:translate-x-1 transition-transform duration-300" />
                   </motion.div>
                 </Link>
-                <Link href="/pandit-requirements">
+                <Link href="/career">
                   <motion.div
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                     className="group inline-flex items-center px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/30 backdrop-blur-sm transition-all duration-300"
                   >
-                    Learn More
+                    View Pandit Requirements
                     <FaInfoCircle className="ml-3 text-lg group-hover:rotate-12 transition-transform duration-300" />
                   </motion.div>
                 </Link>

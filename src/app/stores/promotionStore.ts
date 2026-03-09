@@ -130,7 +130,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
         loading: false,
       });
     } catch (error: any) {
-      console.error('Error fetching promo codes:', error);
       set({ 
         error: 'Failed to fetch promo codes',
         loading: false 
@@ -144,7 +143,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       const response = await apiClient.get('/promo/admin/promos/stats/');
       set({ stats: response.data });
     } catch (error: any) {
-      console.error('Error fetching promo stats:', error);
       toast.error('Failed to fetch promo statistics');
     }
   },
@@ -164,7 +162,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       get().fetchPromoStats(); // Refresh stats
       return true;
     } catch (error: any) {
-      console.error('Error creating promo code:', error);
       const errorMessage = error.response?.data?.detail || 'Failed to create promo code';
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
@@ -191,7 +188,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       toast.success('Promo code updated successfully!');
       return true;
     } catch (error: any) {
-      console.error('Error updating promo code:', error);
       const errorMessage = error.response?.data?.detail || 'Failed to update promo code';
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
@@ -217,7 +213,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       get().fetchPromoStats(); // Refresh stats
       return true;
     } catch (error: any) {
-      console.error('Error deleting promo code:', error);
       const errorMessage = error.response?.data?.detail || 'Failed to delete promo code';
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
@@ -235,7 +230,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       get().fetchPromoStats(); // Refresh stats
       return true;
     } catch (error: any) {
-      console.error('Error bulk creating promo codes:', error);
       const errorMessage = error.response?.data?.detail || 'Failed to create bulk promo codes';
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);
@@ -281,7 +275,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       
       toast.success('Promo codes exported successfully!');
     } catch (error: any) {
-      console.error('Error exporting promo codes:', error);
       toast.error('Failed to export promo codes');
     }
   },
@@ -298,7 +291,6 @@ export const usePromotionStore = create<PromotionState>((set, get) => ({
       toast.success('Promo codes sent via email successfully!');
       return true;
     } catch (error: any) {
-      console.error('Error sending promo emails:', error);
       const errorMessage = error.response?.data?.detail || 'Failed to send promo emails';
       set({ error: errorMessage, loading: false });
       toast.error(errorMessage);

@@ -58,7 +58,6 @@ export const useAddressStore = create<AddressState>()(
             error: null 
           });
         } catch (err: any) {
-          console.error('Fetch addresses error:', err);
           let errorMessage = 'Failed to load addresses';
           
           if (err.response?.status === 401) {
@@ -83,7 +82,6 @@ export const useAddressStore = create<AddressState>()(
           toast.success('Address created successfully!');
           return true;
         } catch (err: any) {
-          console.error('Create address error:', err);
           let errorMessage = 'Failed to create address';
           
           if (err.response?.status === 400) {
@@ -115,7 +113,6 @@ export const useAddressStore = create<AddressState>()(
           toast.success('Address updated successfully!');
           return true;
         } catch (err: any) {
-          console.error('Update address error:', err);
           set({ error: 'Failed to update address', loading: false });
           toast.error('Failed to update address');
           return false;
@@ -133,7 +130,6 @@ export const useAddressStore = create<AddressState>()(
           toast.success('Address deleted successfully!');
           return true;
         } catch (err: any) {
-          console.error('Delete address error:', err);
           set({ error: 'Failed to delete address', loading: false });
           toast.error('Failed to delete address');
           return false;

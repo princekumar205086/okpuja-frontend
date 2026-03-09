@@ -1,0 +1,27 @@
+{
+  "name": "OKPUJA - Book Pandit Online",
+  "short_name": "OKPUJA",
+  "description": "Book verified pandits for puja, havan, and astrology consultation across India. 100+ services, 200+ cities.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-IN",
+  "categories": ["lifestyle", "social"],
+  "icons": [
+    {
+      "src": "/image/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/image/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

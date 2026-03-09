@@ -40,7 +40,6 @@ export default function AstrologyServicePage() {
         const fetchedServices = await astrologyApiService.fetchActiveServices();
         setServices(fetchedServices);
       } catch (err) {
-        console.error('Error loading astrology services:', err);
         setError('Failed to load astrology services. Please try again later.');
       } finally {
         setLoading(false);

@@ -32,7 +32,6 @@ export const useDashboardData = () => {
           fetchAstrologyBookings(),
         ]);
       } catch (err) {
-        console.error('Error loading dashboard data:', err);
         setError('Failed to load dashboard data');
       } finally {
         setLoading(false);
@@ -188,7 +187,6 @@ export const useDashboardData = () => {
       setRecentActivities(activities.slice(0, 6));
 
     } catch (err) {
-      console.error('Error processing bookings data:', err);
       setError('Failed to process dashboard data');
     }
   }, [bookings, astrologyBookings]);
@@ -207,7 +205,6 @@ export const useDashboardData = () => {
         fetchAstrologyBookings(),
       ]);
     } catch (err) {
-      console.error('Error refreshing dashboard data:', err);
       setError('Failed to refresh data');
     }
   };

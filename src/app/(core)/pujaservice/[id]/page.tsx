@@ -68,7 +68,6 @@ export default function ServiceDetailPage() {
         });
         toast.success('Shared successfully!');
       } catch (error) {
-        console.error('Error sharing:', error);
         // Fallback to clipboard copy
         fallbackShare(shareUrl, shareTitle);
       }
@@ -83,7 +82,6 @@ export default function ServiceDetailPage() {
       await navigator.clipboard.writeText(url);
       toast.success('Link copied to clipboard!');
     } catch (error) {
-      console.error('Error copying to clipboard:', error);
       // Final fallback - show share modal with options
       showShareModal(url, title);
     }
@@ -142,7 +140,6 @@ export default function ServiceDetailPage() {
         toast.success('Link copied to clipboard!');
         document.body.removeChild(modal);
       } catch (error) {
-        console.error('Error copying link:', error);
         toast.error('Failed to copy link');
       }
     });
@@ -168,8 +165,6 @@ export default function ServiceDetailPage() {
       
       try {
         const serviceId = decryptId(encryptedId);
-        console.log('Decrypted service ID:', serviceId);
-        
         if (!serviceId || isNaN(parseInt(serviceId))) {
           setErrorMessage('Invalid service link');
           setLoading(false);
@@ -180,9 +175,7 @@ export default function ServiceDetailPage() {
         let foundService;
         try {
           foundService = await getServiceById(parseInt(serviceId));
-          console.log('Service fetched from API:', foundService);
         } catch (apiError) {
-          console.log('API fetch failed, checking store:', apiError);
           // Fallback to store if API fails
           foundService = services.find(s => s.id === parseInt(serviceId));
         }
@@ -190,7 +183,6 @@ export default function ServiceDetailPage() {
         if (!foundService) {
           // If services array is empty (page refresh), try to fetch all services first
           if (services.length === 0) {
-            console.log('Services array empty, fetching all services...');
             await fetchServices();
             // After fetching, try to find the service again
             foundService = services.find(s => s.id === parseInt(serviceId));
@@ -204,19 +196,14 @@ export default function ServiceDetailPage() {
         }
 
         setService(foundService);
-        console.log('Service set:', foundService);
-
         // Fetch packages for this service
         try {
           await fetchPackages(parseInt(serviceId));
-          console.log('Packages fetched for service:', serviceId);
         } catch (packageError) {
-          console.log('Package fetch failed:', packageError);
           // Don't fail if packages can't be fetched
         }
 
       } catch (error) {
-        console.error('Error loading service:', error);
         setErrorMessage('Failed to load service details');
       } finally {
         setLoading(false);
@@ -254,7 +241,6 @@ export default function ServiceDetailPage() {
             toast.success('Welcome back! Your booking details have been restored.');
           }
         } catch (error) {
-          console.error('Error restoring booking state:', error);
         }
       }
 
@@ -276,7 +262,6 @@ export default function ServiceDetailPage() {
             toast.success('Welcome back! Your cart selection has been restored.');
           }
         } catch (error) {
-          console.error('Error restoring cart state:', error);
         }
       }
     }
@@ -378,7 +363,6 @@ export default function ServiceDetailPage() {
           setErrorMessage('Failed to add item to cart. Please try again.');
         }
       } catch (err) {
-        console.error('Error adding to cart during booking:', err);
         setErrorMessage('Failed to add item to cart. Please try again.');
       }
     };
@@ -429,7 +413,6 @@ export default function ServiceDetailPage() {
         // router.push('/cart');
       }
     } catch (error) {
-      console.error('Error adding to cart:', error);
       setErrorMessage("Failed to add item to cart. Please try again.");
     }
   };

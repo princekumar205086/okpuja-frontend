@@ -27,7 +27,6 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
       return result;
     }
   } catch (error) {
-    console.error('Failed to copy text: ', error);
     return false;
   }
 };

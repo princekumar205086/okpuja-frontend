@@ -93,13 +93,6 @@ export function handleApiError(
   }
   
   // Log error for debugging
-  console.error('API Error:', {
-    message: errorMessage,
-    status: error.response?.status,
-    data: error.response?.data,
-    originalError: error
-  });
-  
   return errorMessage;
 }
 

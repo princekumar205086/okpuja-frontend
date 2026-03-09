@@ -47,7 +47,6 @@ export default function PujaservicePage() {
           fetchServices({ page: 1 })
         ]);
       } catch (error) {
-        console.error('Failed to load initial data:', error);
       }
     };
 
@@ -71,7 +70,6 @@ export default function PujaservicePage() {
             is_active: true, // Only show active services to public
           });
         } catch (error) {
-          console.error('Failed to load services:', error);
         }
       };
 
@@ -96,7 +94,6 @@ export default function PujaservicePage() {
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error('Failed to change page:', error);
     }
   };
 

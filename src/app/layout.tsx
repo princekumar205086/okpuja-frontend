@@ -99,9 +99,10 @@ export const metadata: Metadata = {
   category: 'Religion, Spirituality, Astrology',
   manifest: '/site.webmanifest',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/image/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/image/icon-192x192.png',
   },
 };
 
