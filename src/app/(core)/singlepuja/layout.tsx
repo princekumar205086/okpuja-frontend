@@ -22,8 +22,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Book Puja Online | Pandit for Puja Service | OKPUJA',
     description: 'Book this puja online with verified pandits on OKPUJA.',
-    url: 'https://okpuja.com/singlepuja',
+    url: 'https://okpuja.com/pujaservice',
     type: 'website',
+  },
+  alternates: {
+    canonical: 'https://okpuja.com/pujaservice',
   },
 };
 

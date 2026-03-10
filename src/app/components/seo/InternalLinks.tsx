@@ -48,7 +48,7 @@ export function InternalLinks({
               {topPujas.map((puja) => (
                 <Link
                   key={puja.slug}
-                  href={`/singlepuja?service=${puja.slug}`}
+                  href={`/puja/${puja.slug}`}
                   className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
                     currentPath.includes(puja.slug)
                       ? 'bg-orange-100 border-orange-300 text-orange-700'
@@ -183,7 +183,7 @@ export function RelatedPujas({
       {related.map((puja) => (
         <Link
           key={puja.slug}
-          href={`/singlepuja?service=${puja.slug}`}
+          href={`/puja/${puja.slug}`}
           className="block text-sm text-gray-600 hover:text-orange-600 py-1 border-b border-gray-100"
         >
           {puja.name} <span className="text-gray-400">({puja.hindi})</span>

@@ -384,10 +384,13 @@ export function getGalleryMetadata(): Metadata {
 
 /**
  * Build canonical URL from path
+ * Always uses production HTTPS domain, strips ports and dev URLs
  */
 export function buildCanonicalUrl(path: string): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${SITE_CONFIG.url}${cleanPath}`;
+  // Always use production URL - never include ports or dev domains
+  const url = `${SITE_CONFIG.url}${cleanPath}`;
+  return url.replace(/:\d{4,5}/, '');
 }
 
 /**

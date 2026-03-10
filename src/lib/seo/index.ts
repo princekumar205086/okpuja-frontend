@@ -52,6 +52,7 @@ export {
   buildWebSiteSchema,
   buildServiceSchema,
   buildProductSchema,
+  buildProductSchemaFromService,
   buildFAQSchema,
   buildBreadcrumbSchema,
   buildArticleSchema,

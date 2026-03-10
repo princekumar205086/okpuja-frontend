@@ -3,8 +3,8 @@
  * Next.js Metadata Route: /robots.txt
  * 
  * Blocks all API, admin, auth, payment, and internal routes.
+ * Blocks development port URLs to prevent Google indexing.
  * Allows all public content routes.
- * Includes rules for backend API subdomain (api.okpuja.com).
  */
 
 import type { MetadataRoute } from 'next';

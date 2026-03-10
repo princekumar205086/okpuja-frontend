@@ -150,7 +150,7 @@ export const demoAstrologyServices: AstrologyService[] = [
 
 export const servicePaginationResponse = {
   count: 25,
-  next: "http://127.0.0.1:8000/api/astrology/services/?page=2",
+  next: "/api/astrology/services/?page=2",
   previous: null,
   results: demoAstrologyServices.slice(0, 10)
 };
@@ -171,8 +171,8 @@ export const mockApiResponses = {
     const endIndex = startIndex + pageSize;
     return {
       count: demoAstrologyServices.length,
-      next: endIndex < demoAstrologyServices.length ? `http://127.0.0.1:8000/api/astrology/services/?page=${page + 1}` : null,
-      previous: page > 1 ? `http://127.0.0.1:8000/api/astrology/services/?page=${page - 1}` : null,
+      next: endIndex < demoAstrologyServices.length ? `/api/astrology/services/?page=${page + 1}` : null,
+      previous: page > 1 ? `/api/astrology/services/?page=${page - 1}` : null,
       results: demoAstrologyServices.slice(startIndex, endIndex)
     };
   },

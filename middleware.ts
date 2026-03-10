@@ -8,14 +8,35 @@ const authRoutes = ['/login', '/register', '/verify-otp', '/forgot-password']
 // Routes that must NEVER be indexed by search engines
 const noIndexPrefixes = ['/api/', '/admin', '/dashboard', '/employee', '/user', '/checkout', '/cart', '/login', '/register', '/verify-otp', '/forgot-password', '/reset-password', '/verify-email', '/confirmbooking', '/failedbooking', '/astro-booking-failed', '/astro-booking-success', '/payment-debug', '/payment-pending', '/test-payment']
 
+// Development ports that should never be publicly accessible
+const DEV_PORTS = [':3000', ':8000', ':5173', ':4200', ':3001', ':8080']
+
+const PRODUCTION_ORIGIN = 'https://okpuja.com'
+
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const host = request.headers.get('host') || ''
+
+  // 0. Block development port URLs — redirect to production
+  const hasDevPort = DEV_PORTS.some(port => host.includes(port))
+  if (hasDevPort && process.env.NODE_ENV === 'production') {
+    return NextResponse.redirect(
+      new URL(`${PRODUCTION_ORIGIN}${pathname}${request.nextUrl.search}`),
+      301
+    )
+  }
 
   // 1. www → non-www 301 redirect
   if (host.startsWith('www.')) {
     const newUrl = new URL(request.url)
     newUrl.host = host.replace('www.', '')
+    return NextResponse.redirect(newUrl, 301)
+  }
+
+  // 1b. Enforce HTTPS in production
+  if (process.env.NODE_ENV === 'production' && request.nextUrl.protocol === 'http:') {
+    const newUrl = new URL(request.url)
+    newUrl.protocol = 'https:'
     return NextResponse.redirect(newUrl, 301)
   }
 
