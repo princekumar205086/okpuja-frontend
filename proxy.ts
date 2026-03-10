@@ -8,90 +8,85 @@ const authRoutes = ['/login', '/register', '/verify-otp', '/forgot-password']
 // Routes that must NEVER be indexed by search engines
 const noIndexPrefixes = ['/api/', '/admin', '/dashboard', '/employee', '/user', '/checkout', '/cart', '/login', '/register', '/verify-otp', '/forgot-password', '/reset-password', '/verify-email', '/confirmbooking', '/failedbooking', '/astro-booking-failed', '/astro-booking-success', '/payment-debug', '/payment-pending', '/test-payment']
 
-// Development ports that should never be publicly accessible
-const DEV_PORTS = [':3000', ':8000', ':5173', ':4200', ':3001', ':8080']
+/**
+ * Resolve the real external origin — handles reverse proxy / load-balancer headers.
+ * Falls back to the production domain when running in production.
+ */
+function getExternalOrigin(request: NextRequest): string {
+  const proto =
+    request.headers.get('x-forwarded-proto') ||
+    (process.env.NODE_ENV === 'production' ? 'https' : 'http')
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'okpuja.com'
+  return `${proto}://${host}`
+}
 
-const PRODUCTION_ORIGIN = 'https://okpuja.com'
-
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const host = request.headers.get('host') || ''
 
-  // 0. Block development port URLs — redirect to production
-  const hasDevPort = DEV_PORTS.some(port => host.includes(port))
-  if (hasDevPort && process.env.NODE_ENV === 'production') {
-    return NextResponse.redirect(
-      new URL(`${PRODUCTION_ORIGIN}${pathname}${request.nextUrl.search}`),
-      301
-    )
-  }
-
-  // 1. www → non-www 301 redirect
+  // 1. www → non-www 301 redirect (use resolved origin, not request.url)
   if (host.startsWith('www.')) {
-    const newUrl = new URL(request.url)
-    newUrl.host = host.replace('www.', '')
-    return NextResponse.redirect(newUrl, 301)
-  }
-
-  // 1b. Enforce HTTPS in production
-  if (process.env.NODE_ENV === 'production' && request.nextUrl.protocol === 'http:') {
-    const newUrl = new URL(request.url)
-    newUrl.protocol = 'https:'
-    return NextResponse.redirect(newUrl, 301)
+    const origin = getExternalOrigin(request).replace('://www.', '://')
+    return NextResponse.redirect(new URL(`${origin}${pathname}${request.nextUrl.search}`), 301)
   }
 
   // 2. Strip ?lang= query param (no real i18n support — causes duplicate canonical issues)
   if (searchParams.has('lang')) {
-    const newUrl = new URL(request.url)
-    newUrl.searchParams.delete('lang')
-    return NextResponse.redirect(newUrl, 301)
+    const origin = getExternalOrigin(request)
+    const url = new URL(`${origin}${pathname}`)
+    // Copy all params except lang
+    searchParams.forEach((v, k) => {
+      if (k !== 'lang') url.searchParams.set(k, v)
+    })
+    return NextResponse.redirect(url, 301)
   }
 
   // Check if this route should be blocked from indexing
   const shouldNoIndex = noIndexPrefixes.some(prefix => pathname.startsWith(prefix))
-  
+
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
-  
+
   // Get auth tokens from cookies or headers
-  const accessToken = request.cookies.get('access')?.value || 
-                      request.headers.get('authorization')?.replace('Bearer ', '')
-  
+  const accessToken = request.cookies.get('access')?.value ||
+    request.headers.get('authorization')?.replace('Bearer ', '')
+
   // If it's a protected route and no access token, redirect to login
   if (isProtectedRoute && !accessToken) {
-    const loginUrl = new URL('/login', request.url)
+    const origin = getExternalOrigin(request)
+    const loginUrl = new URL(`${origin}/login`)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
-  
+
   // If user is authenticated and trying to access auth routes, redirect to appropriate dashboard
   if (isAuthRoute && accessToken) {
-    // Get user role from cookie to redirect to the correct dashboard
     const userRole = request.cookies.get('userRole')?.value?.toUpperCase()
-    
-    let dashboardUrl: URL
+    const origin = getExternalOrigin(request)
+
+    let dashboardPath: string
     switch (userRole) {
       case 'ADMIN':
-        dashboardUrl = new URL('/admin/dashboard', request.url)
+        dashboardPath = '/admin/dashboard'
         break
       case 'EMPLOYEE':
-        dashboardUrl = new URL('/employee/dashboard', request.url)
+        dashboardPath = '/employee/dashboard'
         break
       default:
-        dashboardUrl = new URL('/user/dashboard', request.url)
+        dashboardPath = '/user/dashboard'
     }
-    
-    return NextResponse.redirect(dashboardUrl)
+
+    return NextResponse.redirect(new URL(`${origin}${dashboardPath}`))
   }
-  
+
   const response = NextResponse.next()
-  
+
   // Add X-Robots-Tag: noindex for non-public routes to prevent Google indexing
   if (shouldNoIndex) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   }
-  
+
   return response
 }
 

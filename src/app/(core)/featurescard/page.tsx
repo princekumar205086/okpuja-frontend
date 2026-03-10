@@ -1,5 +1,5 @@
 ﻿"use client";
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Slider from "react-slick";
 import type { Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -9,55 +9,89 @@ import Image from "next/image";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { motion } from "framer-motion";
 import { FiClock, FiArrowRight } from "react-icons/fi";
+import { usePujaServices } from "@/hooks/api/usePujaServices";
 
 interface PujaItem {
   pujaName: string;
+  slug: string;
   imageSource: string;
   description: string;
   duration: string;
+  price?: string;
 }
 
-const pujas: PujaItem[] = [
+// Fallback data shown while API loads or if it fails
+const fallbackPujas: PujaItem[] = [
   {
     pujaName: "Marriage Puja",
+    slug: "marriage-puja",
     imageSource: "/uploads/marriage puja.jpeg",
     description: "Traditional rituals for a blessed marital journey",
-    duration: "🕐 2–3hours",
+    duration: "2–3 hours",
   },
   {
     pujaName: "Teej Puja",
+    slug: "teej-puja",
     imageSource: "/uploads/teej puja.jpeg",
     description: "Sacred ceremony honoring Lord Shiva and Goddess Parvati",
-    duration: "🕐 1–2 hours",
+    duration: "1–2 hours",
   },
   {
     pujaName: "Griha Pravesh Puja",
+    slug: "griha-pravesh-puja",
     imageSource: "/uploads/Griha Pravesh puja.jpeg",
     description: "Blessing your new home with divine energy",
-    duration: "🕐 2–3 hours",
+    duration: "2–3 hours",
   },
   {
     pujaName: "Satyanarayan Puja",
+    slug: "satyanarayan-puja",
     imageSource: "/uploads/satya narayan puja.jpeg",
     description: "Invoke blessings of Lord Vishnu for prosperity",
-    duration: "🕐 2–3 hours",
+    duration: "2–3 hours",
   },
   {
     pujaName: "Maha Ganapati Homa",
+    slug: "maha-ganapati-homa",
     imageSource: "/uploads/Maha ganpati.jpg",
     description: "Powerful ritual to remove obstacles from life",
-    duration: "🕐 3–4 hours",
+    duration: "3–4 hours",
   },
   {
     pujaName: "Office / Business Puja",
+    slug: "office-business-puja",
     imageSource: "/uploads/Office Puja  Business Puja.jpeg",
     description: "Sacred ceremony for business growth and success",
-    duration: "🕐 1–2 hours",
+    duration: "1–2 hours",
   },
 ];
 
 const FeaturedPujas: React.FC = () => {
   const sliderRef = useRef<Slider | null>(null);
+  const { services, loading, fetch: fetchServices } = usePujaServices();
+  const [pujas, setPujas] = useState<PujaItem[]>(fallbackPujas);
+
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
+
+  // Map API data to display format when services load
+  useEffect(() => {
+    if (services.length > 0) {
+      const apiPujas: PujaItem[] = services
+        .filter((s) => s.is_active)
+        .slice(0, 8)
+        .map((s) => ({
+          pujaName: s.name,
+          slug: s.slug,
+          imageSource: s.image || "/uploads/satya narayan puja.jpeg",
+          description: s.description,
+          duration: s.duration || "1–2 hours",
+          price: s.price,
+        }));
+      if (apiPujas.length > 0) setPujas(apiPujas);
+    }
+  }, [services]);
 
   const settings: Settings = {
     dots: true,
@@ -120,9 +154,23 @@ const FeaturedPujas: React.FC = () => {
 
         {/* Slider */}
         <div className="pb-10">
+          {loading && pujas === fallbackPujas ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
+                  <div className="h-52 bg-gray-200" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-100 rounded w-full" />
+                    <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
           <Slider ref={sliderRef} {...settings}>
             {pujas.map((puja, index) => (
-              <div key={index} className="px-3">
+              <div key={puja.slug || index} className="px-3">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -146,6 +194,13 @@ const FeaturedPujas: React.FC = () => {
                       <FiClock size={12} className="text-orange-500" />
                       {puja.duration}
                     </div>
+
+                    {/* Price badge */}
+                    {puja.price && (
+                      <div className="absolute top-3 right-3 bg-orange-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                        ₹{puja.price}
+                      </div>
+                    )}
                   </div>
 
                   {/* Content */}
@@ -157,7 +212,7 @@ const FeaturedPujas: React.FC = () => {
                       {puja.description}
                     </p>
                     <Link
-                      href={`/pujaservice/${puja.pujaName.toLowerCase().replace(/\s+/g, "-")}`}
+                      href={`/puja/${puja.slug}`}
                       className="inline-flex items-center gap-1.5 text-orange-600 hover:text-orange-700 font-semibold text-sm group/link"
                     >
                       Book Now
@@ -168,6 +223,7 @@ const FeaturedPujas: React.FC = () => {
               </div>
             ))}
           </Slider>
+          )}
         </div>
 
         {/* CTA */}

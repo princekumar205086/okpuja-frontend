@@ -44,29 +44,6 @@ const nextConfig: NextConfig = {
   // ============================================================
   async redirects() {
     return [
-      // Block development port URLs - redirect to production
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'okpuja.com:3000',
-          },
-        ],
-        destination: 'https://okpuja.com/:path*',
-        permanent: true,
-      },
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'okpuja.com:8000',
-          },
-        ],
-        destination: 'https://okpuja.com/:path*',
-        permanent: true,
-      },
       // Fix broken URLs reported in Google Search Console
       {
         source: '/services',
