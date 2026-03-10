@@ -11,6 +11,8 @@ import { motion } from "framer-motion";
 import { FiClock, FiArrowRight } from "react-icons/fi";
 import { usePujaServices } from "@/hooks/api/usePujaServices";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.okpuja.com";
+
 interface PujaItem {
   pujaName: string;
   slug: string;
@@ -18,6 +20,33 @@ interface PujaItem {
   description: string;
   duration: string;
   price?: string;
+}
+
+/** Strip HTML tags and decode entities to plain text */
+function stripHtml(html: string): string {
+  if (!html) return "";
+  // Remove HTML tags
+  const text = html.replace(/<[^>]*>/g, "");
+  // Decode common HTML entities
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
+
+/** Resolve API image URL — handles relative paths, full URLs, and missing images */
+function resolveImageUrl(image: string | undefined | null): string {
+  if (!image) return "/uploads/satya narayan puja.jpeg";
+  // Already a full URL (https:// or http://)
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  // Relative path starting with / — prefix with API base
+  if (image.startsWith("/")) return `${API_BASE}${image}`;
+  // Relative path without / — prefix with API base + /
+  return `${API_BASE}/${image}`;
 }
 
 // Fallback data shown while API loads or if it fails
@@ -84,8 +113,8 @@ const FeaturedPujas: React.FC = () => {
         .map((s) => ({
           pujaName: s.name,
           slug: s.slug,
-          imageSource: s.image || "/uploads/satya narayan puja.jpeg",
-          description: s.description,
+          imageSource: resolveImageUrl(s.image),
+          description: stripHtml(s.description),
           duration: s.duration || "1–2 hours",
           price: s.price,
         }));
@@ -182,7 +211,7 @@ const FeaturedPujas: React.FC = () => {
                   <div className="relative h-52 overflow-hidden">
                     <Image
                       src={puja.imageSource}
-                      alt={puja.pujaName}
+                      alt={puja.pujaName || "Puja Image"}
                       fill
                       sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
